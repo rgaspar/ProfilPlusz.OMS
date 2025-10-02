@@ -3,6 +3,14 @@
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Deployment environment (dev, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
       acr_name:
         description: 'ACR name (e.g., profilpluszomsacr)'
         required: true
@@ -16,8 +24,9 @@ on:
 jobs:
   setup-acr:
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     steps:
-      - name: Show keys
+      - name: Test AZURE_CREDENTIALS values
         run: |
           echo "$AZURE_CREDENTIALS" | jq 'keys' || echo "Secret not available or not valid JSON"
         env:
