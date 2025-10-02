@@ -1,9 +1,5 @@
 ﻿name: Setup Azure Container Registry (ACR)
 
-description: >
-  Ez a pipeline automatikusan létrehozza az Azure Container Registry-t (ACR),
-  engedélyezi az admin user-t, és kiírja a szükséges secretek értékeit, amelyeket a GitHub-on kell beállítani.
-
 on:
   workflow_dispatch:
     inputs:
@@ -55,4 +51,3 @@ jobs:
           echo "ACR_PASSWORD=${{ steps.acrcreds.outputs.ACR_PASSWORD }}"
           echo "---"
           echo "Másold be ezeket a secreteket a GitHub repository Settings > Secrets and variables > Actions szekcióba!"
-
