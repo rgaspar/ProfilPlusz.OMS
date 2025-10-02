@@ -17,7 +17,7 @@ jobs:
   setup-acr:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug: Show AZURE_CREDENTIALS keys
+      - name: Show keys
         run: |
           echo "$AZURE_CREDENTIALS" | jq 'keys' || echo "Secret not available or not valid JSON"
         env:
