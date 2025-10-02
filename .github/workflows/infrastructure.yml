@@ -54,13 +54,24 @@ jobs:
       - name: Allow Azure services to access SQL
         run: az sql server firewall-rule create --resource-group $RESOURCE_GROUP --server $SQL_SERVER_NAME --name AllowAzure --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
-      - name: Create App Service Plan
-        run: az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku B1
+      - name: Azure Container Registry login
+        run: |
+          echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
 
-      - name: Create Web App
+      - name: Build and push Docker image to ACR
+        run: |
+          IMAGE_NAME=${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.sha }}
+          docker build -t $IMAGE_NAME ./Presentation/ASPNET
+          docker push $IMAGE_NAME
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Create App Service Plan
+        run: az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku B1 --is-linux
+
+      - name: Create Web App (custom container from ACR)
         id: deploywebapp
         run: |
-          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --runtime "DOTNETCORE:9.0"
+          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name $IMAGE_NAME --docker-registry-server-url https://${{ secrets.ACR_LOGIN_SERVER }} --docker-registry-server-user ${{ secrets.ACR_USERNAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
           echo "webapp_url=https://$WEBAPP_NAME.azurewebsites.net" >> $GITHUB_OUTPUT
 
       - name: Set connection string
@@ -74,9 +85,10 @@ jobs:
         run: |
           echo "---"
           echo "Becsült havi költség (West Europe, 2025. október):"
-          echo "- App Service Plan (B1, Windows): kb. 13–15 USD/hó"
+          echo "- App Service Plan (B1, Linux, Docker): kb. 10–12 USD/hó"
           echo "- SQL Database (Basic): kb. 5 USD/hó"
-          echo "- Összesen: kb. 18–20 USD/hó"
+          echo "- Azure Container Registry (Standard): kb. 5 USD/hó"
+          echo "- Összesen: kb. 20–22 USD/hó"
           echo "---"
 
   cleanup:
