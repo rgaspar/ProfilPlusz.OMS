@@ -4,13 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment (dev, staging, prod)'
+        description: 'Deployment environment (dev, prod)'
         required: true
         default: 'dev'
         type: choice
         options:
           - dev
-          - staging
           - prod
 
 jobs:
@@ -69,7 +68,8 @@ jobs:
           az webapp config connection-string set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --settings DefaultConnection="Server=tcp:$SQL_SERVER_NAME.database.windows.net,1433;Initial Catalog=$SQL_DB_NAME;Persist Security Info=False;User ID=$SQL_ADMIN_USER;Password=$SQL_ADMIN_PASS;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" --connection-string-type SQLAzure
 
       - name: Output webapp name
-        run: echo "Web App Name: $WEBAPP_NAME"
+        run: |
+          echo "Web App Name: $WEBAPP_NAME"
 
   cleanup:
     if: ${{ failure() || cancelled() }}
@@ -88,5 +88,5 @@ jobs:
         run: |
           az group delete --name $RESOURCE_GROUP --yes --no-wait
       - name: Output
-        run: echo "Rollback: Resource group $RESOURCE_GROUP deletion initiated."
-
+        run: |
+          echo "Rollback: Resource group $RESOURCE_GROUP deletion initiated."
