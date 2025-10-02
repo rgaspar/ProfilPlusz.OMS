@@ -55,12 +55,12 @@ jobs:
         run: az sql server firewall-rule create --resource-group $RESOURCE_GROUP --server $SQL_SERVER_NAME --name AllowAzure --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 
       - name: Create App Service Plan
-        run: az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku F1 --is-linux
+        run: az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku B1
 
       - name: Create Web App
         id: deploywebapp
         run: |
-          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --runtime "DOTNET|9.0"
+          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --runtime "DOTNETCORE:9.0"
           echo "webapp_url=https://$WEBAPP_NAME.azurewebsites.net" >> $GITHUB_OUTPUT
 
       - name: Set connection string
@@ -70,6 +70,14 @@ jobs:
       - name: Output webapp name
         run: |
           echo "Web App Name: $WEBAPP_NAME"
+      - name: Output estimated monthly cost
+        run: |
+          echo "---"
+          echo "Becsült havi költség (West Europe, 2025. október):"
+          echo "- App Service Plan (B1, Windows): kb. 13–15 USD/hó"
+          echo "- SQL Database (Basic): kb. 5 USD/hó"
+          echo "- Összesen: kb. 18–20 USD/hó"
+          echo "---"
 
   cleanup:
     if: ${{ failure() || cancelled() }}
