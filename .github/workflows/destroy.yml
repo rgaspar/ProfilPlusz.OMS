@@ -1,0 +1,46 @@
+﻿name: Destroy Azure Infrastructure
+
+env:
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment to destroy (dev, staging, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set variables
+        id: setvars
+        run: |
+          echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          echo "RESOURCE_GROUP=profilplusz-${{ github.event.inputs.environment }}-rg" >> $GITHUB_ENV
+
+      - name: Destroy resource group
+        run: |
+          az group delete --name $RESOURCE_GROUP --yes --no-wait
+
+      - name: Output
+        run: echo "Resource group $RESOURCE_GROUP deletion initiated."
+
