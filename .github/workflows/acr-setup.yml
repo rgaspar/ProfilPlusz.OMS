@@ -3,22 +3,14 @@
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Deployment environment (dev, prod)'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - prod
       acr_name:
-        description: 'ACR név (pl. profilpluszomsacr)'
+        description: 'ACR name (e.g., profilpluszomsacr)'
         required: true
       acr_resource_group:
-        description: 'Resource group név (pl. profilplusz-shared-rg)'
+        description: 'Resource group name (e.g., profilplusz-shared-rg)'
         required: true
       acr_location:
-        description: 'Azure régió (pl. westeurope)'
+        description: 'Azure region (e.g., westeurope)'
         required: true
 
 jobs:
@@ -50,4 +42,4 @@ jobs:
           echo "ACR_USERNAME=${{ steps.acrcreds.outputs.ACR_USERNAME }}"
           echo "ACR_PASSWORD=${{ steps.acrcreds.outputs.ACR_PASSWORD }}"
           echo "---"
-          echo "Másold be ezeket a secreteket a GitHub repository Settings > Secrets and variables > Actions szekcióba!"
+          echo "Copy these secrets to GitHub repository Settings > Secrets and variables > Actions!"
