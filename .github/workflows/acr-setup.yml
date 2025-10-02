@@ -26,10 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     steps:
-      - name: Create resource group if not exists
-        run: |
-          az group create --name ${{ github.event.inputs.acr_resource_group }} --location ${{ github.event.inputs.acr_location }}
-
       - name: Test AZURE_CREDENTIALS values
         run: |
           echo "$AZURE_CREDENTIALS" | jq 'keys' || echo "Secret not available or not valid JSON"
@@ -40,6 +36,10 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create resource group if not exists
+        run: |
+          az group create --name ${{ github.event.inputs.acr_resource_group }} --location ${{ github.event.inputs.acr_location }}
 
       - name: Create ACR
         run: |
