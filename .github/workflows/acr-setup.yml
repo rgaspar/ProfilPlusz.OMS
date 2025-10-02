@@ -7,6 +7,14 @@ description: >
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Deployment environment (dev, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
       acr_name:
         description: 'ACR név (pl. profilpluszomsacr)'
         required: true
