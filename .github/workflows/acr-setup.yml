@@ -57,6 +57,7 @@ jobs:
 
       - name: Output ACR secrets for GitHub
         run: |
+          echo "--- COPY THESE VALUES TO GITHUB SECRETS ---"
           echo "ACR_LOGIN_SERVER=${{ steps.acrcreds.outputs.ACR_LOGIN_SERVER }}"
           echo "ACR_USERNAME=${{ steps.acrcreds.outputs.ACR_USERNAME }}"
           echo "ACR_PASSWORD=${{ steps.acrcreds.outputs.ACR_PASSWORD }}"
