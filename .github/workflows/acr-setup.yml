@@ -17,6 +17,12 @@ jobs:
   setup-acr:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug: Show AZURE_CREDENTIALS keys
+        run: |
+          echo "$AZURE_CREDENTIALS" | jq 'keys' || echo "Secret not available or not valid JSON"
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Azure Login
         uses: azure/login@v2
         with:
