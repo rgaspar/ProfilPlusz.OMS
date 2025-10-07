@@ -3,7 +3,7 @@ run-name: test2 • from ${{ github.ref_name }}
 
 on:
   workflow_run:
-    workflows: [Message1]
+    workflows: ["Message1"]
     types: [completed]
 
 
