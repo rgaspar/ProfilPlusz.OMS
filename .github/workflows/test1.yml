@@ -4,7 +4,7 @@ run-name: test1 • from ${{ github.ref_name }}
 on:
   push:
     branches:
-      - main            # ← hozzáadva
+      - main            # ← hozzáadva 
       - master
       - fejlesztes-20251007
 
