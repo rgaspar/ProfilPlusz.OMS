@@ -3,13 +3,7 @@
 on:
   push:
     branches:
-      - master
-  workflow_dispatch:
-    inputs:
-      image_tag:
-        description: 'Image tag to use'
-        required: true
-        default: 'latest'
+      - '*' # minden branch-en fusson
 
 jobs:
   build_and_push:
@@ -17,6 +11,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Generate image tag
+        id: image_tag
+        run: |
+          TAG="v$(date +%Y%m%d).${{ github.run_number }}"
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
       - name: Azure Container Registry login
         run: |
@@ -27,17 +27,26 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}"
+          IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ env.IMAGE_TAG }}"
           docker build -t $IMAGE_NAME -f ${{ github.workspace }}/Dockerfile ${{ github.workspace }}
 
       - name: Push Docker image to ACR
         run: |
-          IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}"
+          IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ env.IMAGE_TAG }}"
           docker push $IMAGE_NAME
+
+      - name: Töröld a legrégebbi 5 image-et az ACR-ből
+        run: |
+          REPO="profilplusz-oms"
+          ACR="${{ secrets.ACR_LOGIN_SERVER }}"
+          az acr repository show-tags --name $ACR --repository $REPO --orderby time_asc --output tsv > tags.txt
+          for TAG in $(head -n 5 tags.txt); do
+            az acr repository delete --name $ACR --image "$REPO:$TAG" --yes
+          done
 
       - name: Save image name
         run: |
-          echo "${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}" > image.txt
+          echo "${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ env.IMAGE_TAG }}" > image.txt
 
       - name: Upload image name artifact
         uses: actions/upload-artifact@v4
