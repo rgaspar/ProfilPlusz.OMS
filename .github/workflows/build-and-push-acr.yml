@@ -19,6 +19,16 @@ jobs:
         run: |
           echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin     
 
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}"
+          docker build -t $IMAGE_NAME -f Dockerfile .
+
+      - name: Push Docker image to ACR
+        run: |
+          IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}"
+          docker push $IMAGE_NAME
+
       - name: Save image name
         run: |
           echo "${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}" > image.txt
