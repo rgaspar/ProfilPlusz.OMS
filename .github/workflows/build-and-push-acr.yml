@@ -4,7 +4,9 @@ run-name: 🚀 Deploy v${{ github.ref_name }} - from ${{ github.event.workflow_r
 on:
   push:
     branches:
+      - main            # ← hozzáadva 
       - master
+      - fejlesztes-20251007
       
 jobs:
   build_and_push:
