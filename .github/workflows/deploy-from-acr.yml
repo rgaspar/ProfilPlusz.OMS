@@ -35,15 +35,9 @@ jobs:
           echo "RESOURCE_GROUP=profilplusz-${{ github.event.inputs.environment }}-rg" >> $GITHUB_ENV
           echo "WEBAPP_NAME=profilplusz-webapp-${{ github.event.inputs.environment }}" >> $GITHUB_ENV
 
-      - name: Download image name artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: image-name
-
-      - name: Read image name
-        id: read_image
+      - name: Set image name
         run: |
-          IMAGE_NAME=$(cat image.txt)
+          IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}"
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
       - name: Update Web App image
