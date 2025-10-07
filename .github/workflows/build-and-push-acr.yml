@@ -17,14 +17,7 @@ jobs:
 
       - name: Azure Container Registry login
         run: |
-          echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
-
-      - name: Build and push Docker image to ACR
-        run: |
-          IMAGE_NAME=${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}
-          docker build -t $IMAGE_NAME ./Presentation/ASPNET
-          docker push $IMAGE_NAME
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+          echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin     
 
       - name: Save image name
         run: |
