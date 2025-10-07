@@ -1,6 +1,10 @@
 ﻿name: 03 - WebApp Deploy
 
 on:
+  workflow_run:
+    workflows: [ "Build and Push Docker image to ACR" ]
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       environment:
