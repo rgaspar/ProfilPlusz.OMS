@@ -19,11 +19,13 @@ jobs:
         run: |
           echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin     
 
+      - name: List files
+        run: ls -l ${{ github.workspace }}
+
       - name: Build Docker image
-        working-directory: ${{ github.workspace }}
         run: |
           IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}"
-          docker build -t $IMAGE_NAME -f Dockerfile .
+          docker build -t $IMAGE_NAME -f ${{ github.workspace }}/Dockerfile ${{ github.workspace }}
 
       - name: Push Docker image to ACR
         run: |
