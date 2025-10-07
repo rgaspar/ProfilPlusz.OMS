@@ -1,0 +1,15 @@
+﻿name: Message1
+run-name: test2 • from ${{ github.ref_name }}
+
+on:
+  workflow_run:
+    workflows: [Message1]
+    types: [completed]
+
+
+jobs:
+  secondstep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Message 2
+        run: echo 'Message 2'

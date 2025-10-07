@@ -1,0 +1,15 @@
+﻿name: Message1
+run-name: test1 • from ${{ github.ref_name }}
+
+on:
+  push:
+    branches:
+      - master
+      - fejlesztes-20251007
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Message 1
+        run: echo 'Message 1'
