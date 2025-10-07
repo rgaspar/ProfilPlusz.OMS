@@ -1,10 +1,12 @@
-﻿name: 03 - WebApp Deploy
-
+﻿name: Deploy
 on:
   workflow_run:
-    workflows: [ "Build and Push Docker Image to ACR" ]
+    workflows: ["BuildAndPushToACR"]
     types:
       - completed
+    branches:
+      - master
+      - fejlesztes-20251007
   workflow_dispatch:
     inputs:
       environment:
@@ -61,4 +63,3 @@ jobs:
       - name: Output webapp name
         run: |
           echo "Web App Name: $WEBAPP_NAME"
-

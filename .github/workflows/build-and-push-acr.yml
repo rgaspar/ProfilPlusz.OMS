@@ -1,4 +1,4 @@
-﻿name: Build and Push Docker Image to ACR
+﻿name: BuildAndPushToACR
 
 on:
   push:
@@ -35,21 +35,7 @@ jobs:
       - name: Push Docker image to ACR
         run: |
           IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ env.IMAGE_TAG }}"
-          docker push $IMAGE_NAME
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Töröld a legrégebbi 5 image-et az ACR-ből
-        run: |
-          REPO="profilplusz-oms"
-          ACR="${{ secrets.ACR_LOGIN_SERVER }}"
-          az acr repository show-tags --name $ACR --repository $REPO --orderby time_asc --output tsv > tags.txt
-          for TAG in $(head -n 5 tags.txt); do
-            az acr repository delete --name $ACR --image "$REPO:$TAG" --yes
-          done
+          docker push $IMAGE_NAME     
 
       - name: GitHub tag létrehozása az IMAGE_TAG alapján
         run: |
