@@ -15,7 +15,8 @@ jobs:
       - name: Generate image tag
         id: image_tag
         run: |
-          TAG="v$(date +%Y%m%d).${{ github.run_number }}"
+          RUN_NUM=$(printf "%03d" ${{ github.run_number }})
+          TAG="v$(date +%Y%m%d).$RUN_NUM"
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
 
       - name: Azure Container Registry login
@@ -35,14 +36,15 @@ jobs:
           IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ env.IMAGE_TAG }}"
           docker push $IMAGE_NAME
 
-      - name: Töröld a legrégebbi 5 image-et az ACR-ből
+      - name: GitHub tag létrehozása az IMAGE_TAG alapján
         run: |
-          REPO="profilplusz-oms"
-          ACR="${{ secrets.ACR_LOGIN_SERVER }}"
-          az acr repository show-tags --name $ACR --repository $REPO --orderby time_asc --output tsv > tags.txt
-          for TAG in $(head -n 5 tags.txt); do
-            az acr repository delete --name $ACR --image "$REPO:$TAG" --yes
-          done
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git tag $IMAGE_TAG || echo "Tag már létezik, kihagyva."
+          git push origin $IMAGE_TAG || echo "Tag push sikertelen vagy már létezik."
+        env:
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
 
       - name: Save image name
         run: |
