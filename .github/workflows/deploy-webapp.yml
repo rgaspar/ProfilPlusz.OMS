@@ -38,6 +38,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: image-name
+          path: .
 
       - name: Read image name
         id: read_image
