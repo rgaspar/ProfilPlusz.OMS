@@ -1,0 +1,17 @@
+﻿name: Deploy
+on:
+  workflow_run:
+    workflows: ["BuildAndPush2"]
+    types: [completed]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact from previous workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: image-name
+      - run: |
+          echo "Downloaded file content:"
+          cat image.txt

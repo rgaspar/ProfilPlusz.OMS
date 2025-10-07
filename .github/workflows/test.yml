@@ -1,0 +1,14 @@
+﻿name: BuildAndPush2
+on:
+  push:
+    branches: [ fejlesztes-20251007 ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "my-image:latest" > image.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: image-name
+          path: image.txt
