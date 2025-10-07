@@ -20,6 +20,7 @@ jobs:
           echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin     
 
       - name: Build Docker image
+        working-directory: ${{ github.workspace }}
         run: |
           IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.image_tag }}"
           docker build -t $IMAGE_NAME -f Dockerfile .
