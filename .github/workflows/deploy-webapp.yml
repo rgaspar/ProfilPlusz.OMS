@@ -2,8 +2,7 @@
 on:
   workflow_run:
     workflows: ["BuildAndPushToACR"]
-    types:
-      - completed
+    types: [completed]
     branches:
       - master
       - fejlesztes-20251007
