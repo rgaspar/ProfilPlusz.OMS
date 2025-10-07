@@ -1,9 +1,9 @@
-﻿name: Message2                       # ← egyedi név
+﻿name: Test2                       # ← egyedi név
 run-name: test2 • from ${{ github.ref_name }}
 
 on:
   workflow_run:
-    workflows: ["Message1"]          # ← pontosan a test1 'name:' értéke
+    workflows: ["Test1"]          # ← pontosan a test1 'name:' értéke
     types: [completed]
     # ha csak bizonyos branchről szeretnéd:
     # branches:

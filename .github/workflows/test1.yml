@@ -1,4 +1,4 @@
-﻿name: Message1
+﻿name: Test1
 run-name: test1 • from ${{ github.ref_name }}
 
 on:
