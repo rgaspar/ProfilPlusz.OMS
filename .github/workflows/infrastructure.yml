@@ -51,29 +51,6 @@ jobs:
       - name: Create App Service Plan
         run: az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku B1 --is-linux
 
-      - name: Download image name artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: image-name
-
-      - name: Read image name
-        id: read_image
-        run: |
-          IMAGE_NAME=$(cat image.txt)
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
-
-      - name: Create Web App (custom container from ACR)
-        run: |
-          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name $IMAGE_NAME --docker-registry-server-url https://${{ secrets.ACR_LOGIN_SERVER }} --docker-registry-server-user ${{ secrets.ACR_USERNAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
-
-      - name: Set connection string
-        run: |
-          az webapp config connection-string set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --settings DefaultConnection="Server=tcp:$SQL_SERVER_NAME.database.windows.net,1433;Initial Catalog=$SQL_DB_NAME;Persist Security Info=False;User ID=$SQL_ADMIN_USER;Password=$SQL_ADMIN_PASS;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" --connection-string-type SQLAzure
-
-      - name: Output webapp name
-        run: |
-          echo "Web App Name: $WEBAPP_NAME"
-
   cleanup:
     if: ${{ failure() || cancelled() }}
     runs-on: ubuntu-latest
