@@ -1,5 +1,5 @@
 ﻿name: BuildAndPushToACR
-run-name: 🚀 Deploy v${{ github.ref_name }} • from ${{ github.event.workflow_run.head_branch }}
+run-name: 🚀 Deploy v${{ github.ref_name }} - from ${{ github.event.workflow_run.head_branch }}
 
 on:
   push:
