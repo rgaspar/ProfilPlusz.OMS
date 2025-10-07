@@ -13,4 +13,4 @@ RUN dotnet publish "Presentation/ASPNET/ASPNET.csproj" -c Release -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "ASPNET.dll"]
+ENTRYPOINT ["dotnet", "ASPNET.dll"] 
