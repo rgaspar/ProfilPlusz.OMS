@@ -8,10 +8,25 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact from previous workflow
+      - name: Show trigger context
+          run: |
+            echo "Triggered by workflow: ${{ github.event.workflow_run.name }}"
+            echo "Trigger run id:       ${{ github.event.workflow_run.id }}"
+            echo "Trigger head branch:  ${{ github.event.workflow_run.head_branch }}"
+            echo "Trigger head sha:     ${{ github.event.workflow_run.head_sha }}"
+
+      - name: Download artifact "image-name" from previous run
         uses: actions/download-artifact@v4
         with:
-          name: image-name
-      - run: |
-          echo "Downloaded file content:"
-          cat image.txt
+          name: image-name                 # ← pontosan az azonos név, amit uploadnál használtál
+          run-id: ${{ github.event.workflow_run.id }}  # ← EZ A LÉNYEG: abból a runból húzzuk le
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifact
+
+      - name: Verify artifact
+        run: |
+          echo "Files in ./artifact:"
+          ls -la ./artifact
+          test -f ./artifact/image.txt || (echo "❌ artifact/image.txt not found" && exit 1)
+          echo "image.txt content:"
+          cat ./artifact/image.txt
