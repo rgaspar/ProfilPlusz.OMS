@@ -1,4 +1,4 @@
-﻿name: Destroy ProfilPlusz.OMS Azure Infrastructure
+﻿name: 05 - Destroy ProfilPlusz.OMS Azure Infrastructure
 
 on:
   workflow_dispatch:
