@@ -18,8 +18,6 @@ jobs:
     environment:
       name: ${{ github.event.inputs.environment }}
       url: ${{ steps.deploywebapp.outputs.webapp_url }}
-      # Approval is required if you set up the environment in GitHub with required reviewers
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -81,15 +79,6 @@ jobs:
       - name: Output webapp name
         run: |
           echo "Web App Name: $WEBAPP_NAME"
-      - name: Output estimated monthly cost
-        run: |
-          echo "---"
-          echo "Becsült havi költség (West Europe, 2025. október):"
-          echo "- App Service Plan (B1, Linux, Docker): kb. 10–12 USD/hó"
-          echo "- SQL Database (Basic): kb. 5 USD/hó"
-          echo "- Azure Container Registry (Standard): kb. 5 USD/hó"
-          echo "- Összesen: kb. 20–22 USD/hó"
-          echo "---"
 
   cleanup:
     if: ${{ failure() || cancelled() }}
