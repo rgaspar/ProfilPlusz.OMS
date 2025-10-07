@@ -51,9 +51,20 @@ jobs:
       - name: Create App Service Plan
         run: az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku B1 --is-linux
 
+      - name: Download image name artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: image-name
+
+      - name: Read image name
+        id: read_image
+        run: |
+          IMAGE_NAME=$(cat image.txt)
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
       - name: Create Web App (custom container from ACR)
         run: |
-          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name <IMAGE_NAME_PLACEHOLDER> --docker-registry-server-url https://${{ secrets.ACR_LOGIN_SERVER }} --docker-registry-server-user ${{ secrets.ACR_USERNAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
+          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name $IMAGE_NAME --docker-registry-server-url https://${{ secrets.ACR_LOGIN_SERVER }} --docker-registry-server-user ${{ secrets.ACR_USERNAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
 
       - name: Set connection string
         run: |
