@@ -1,6 +1,9 @@
 ﻿name: 02 - Build and Push Docker Image to ACR
 
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       image_tag:

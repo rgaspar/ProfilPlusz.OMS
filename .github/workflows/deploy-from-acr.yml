@@ -1,24 +1,22 @@
 ﻿name: 04 - Deploy to Azure Web App from ACR
 
 on:
+  workflow_run:
+    workflows: ["02 - Build and Push Docker Image to ACR"]
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment (dev, prod)'
+        description: 'Deployment environment (pl. dev, prod)'
         required: true
         default: 'dev'
-        type: choice
-        options:
-          - dev
-          - prod
+        type: string
       image_tag:
-        description: 'Select image tag to deploy'
+        description: 'Image tag to deploy (pl. latest, 0.1, 0.2)'
         required: true
-        type: choice
-        options:
-          - 0.1
-          - 0.2
-          - latest
+        default: 'latest'
+        type: string
 
 jobs:
   deploy:
