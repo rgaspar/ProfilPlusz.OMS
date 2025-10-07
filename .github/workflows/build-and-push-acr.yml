@@ -1,10 +1,12 @@
 ﻿name: BuildAndPushToACR
+run-name: 🚀 Deploy v${{ github.ref_name }} • from ${{ github.event.workflow_run.head_branch }}
 
 on:
   push:
     branches:
-      - '*' # minden branch-en fusson
-
+      - master
+      - fejlesztes-20251007
+      
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
