@@ -25,21 +25,35 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     steps:
-      - name: Test AZURE_CREDENTIALS values
-        run: |
-          echo "$AZURE_CREDENTIALS" | jq 'keys' || echo "Secret not available or not valid JSON"
-        env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Docker Login to ACR
+      - name: Set variables
         run: |
-          az acr login --name profilpluszomsacr
+          echo "RESOURCE_GROUP=profilplusz-${{ github.event.inputs.environment }}-rg" >> $GITHUB_ENV
+          echo "WEBAPP_NAME=profilplusz-webapp-${{ github.event.inputs.environment }}" >> $GITHUB_ENV
 
-      - name: Run Docker Container
+      - name: Download image name artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: image-name
+
+      - name: Read image name
+        id: read_image
         run: |
-          docker run profilpluszomsacr.azurecr.io/profilplusz:${{ github.event.inputs.image_tag }}
+          IMAGE_NAME=$(cat image.txt)
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Update Web App image
+        run: |
+          az webapp config container set --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP \
+            --docker-custom-image-name $IMAGE_NAME \
+            --docker-registry-server-url https://${{ secrets.ACR_LOGIN_SERVER }} \
+            --docker-registry-server-user ${{ secrets.ACR_USERNAME }} \
+            --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
+
+      - name: Output webapp name
+        run: |
+          echo "Web App Name: $WEBAPP_NAME"
