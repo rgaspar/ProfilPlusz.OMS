@@ -2,7 +2,7 @@
 
 on:
   workflow_run:
-    workflows: [ "Build and Push Docker image to ACR" ]
+    workflows: [ "Build and Push Docker Image to ACR" ]
     types:
       - completed
   workflow_dispatch:
