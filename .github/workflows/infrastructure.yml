@@ -1,4 +1,4 @@
-﻿name: Create ProfilPlusz.OMS Azure Infrastructure
+﻿name: 01 - Infrastructure Provisioning
 
 on:
   workflow_dispatch:
