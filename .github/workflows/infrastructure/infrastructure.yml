@@ -1,4 +1,4 @@
-﻿name: 01 - Infrastructure Provisioning
+﻿name: 02 - Infrastructure Provisioning
 
 on:
   workflow_dispatch:
