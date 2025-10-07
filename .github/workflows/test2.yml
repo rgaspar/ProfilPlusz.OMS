@@ -8,13 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Show trigger context
-          run: |
-            echo "Triggered by workflow: ${{ github.event.workflow_run.name }}"
-            echo "Trigger run id:       ${{ github.event.workflow_run.id }}"
-            echo "Trigger head branch:  ${{ github.event.workflow_run.head_branch }}"
-            echo "Trigger head sha:     ${{ github.event.workflow_run.head_sha }}"
-
       - name: Download artifact "image-name" from previous run
         uses: actions/download-artifact@v4
         with:
