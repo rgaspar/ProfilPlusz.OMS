@@ -11,6 +11,8 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    environment:
+      name: dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
