@@ -1,5 +1,4 @@
 ﻿name: Message2
-run-name: test2 • from ${{ github.ref_name }}
 
 on:
   workflow_run:
