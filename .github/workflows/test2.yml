@@ -1,13 +1,17 @@
-﻿name: Message2
+﻿name: Message2                       # ← egyedi név
+run-name: test2 • from ${{ github.ref_name }}
 
 on:
   workflow_run:
-    workflows: ["Message1"]
+    workflows: ["Message1"]          # ← pontosan a test1 'name:' értéke
     types: [completed]
-
+    # ha csak bizonyos branchről szeretnéd:
+    # branches:
+    #   - main
 
 jobs:
   secondstep:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # csak sikeres Message1 után
     runs-on: ubuntu-latest
     steps:
       - name: Message 2
