@@ -1,0 +1,38 @@
+﻿name: 02 - Push Local Docker Image to ACR (with delete)
+
+on:
+  workflow_dispatch:
+    inputs:
+      local_image_tag:
+        description: 'Lokális image tag (pl. profilplusz:0.1)'
+        required: true
+        default: 'profilplusz:0.1'
+      acr_image_tag:
+        description: 'ACR image tag (pl. 0.1, latest)'
+        required: true
+        default: '0.1'
+
+jobs:
+  push_local_image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Container Registry login
+        run: |
+          echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      - name: Delete image from ACR if exists
+        run: |
+          az acr repository delete --name ${{ secrets.ACR_NAME }} --image profilplusz-oms:${{ github.event.inputs.acr_image_tag }} --yes || echo "Image not found, skipping delete."
+
+      - name: Tag local image for ACR
+        run: |
+          docker tag ${{ github.event.inputs.local_image_tag }} ${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.acr_image_tag }}
+
+      - name: Push image to ACR
+        run: |
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.acr_image_tag }}
+
+      - name: Output
+        run: |
+          echo "Image pushed: ${{ secrets.ACR_LOGIN_SERVER }}/profilplusz-oms:${{ github.event.inputs.acr_image_tag }}"
+
