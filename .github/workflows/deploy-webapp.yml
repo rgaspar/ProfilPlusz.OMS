@@ -42,7 +42,7 @@ jobs:
       - name: Read image name
         id: read_image
         run: |
-          IMAGE_NAME=$(cat image.txt)
+          IMAGE_NAME=$(cat ./artifact/image.txt)
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
       - name: Create Web App (custom container from ACR)
