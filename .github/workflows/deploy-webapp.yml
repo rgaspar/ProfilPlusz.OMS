@@ -35,8 +35,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: image-name
-          path: .
-
+          run-id: ${{ github.event.workflow_run.id }}  # ← EZ A LÉNYEG: abból a runból húzzuk le
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifact
+          
       - name: Read image name
         id: read_image
         run: |
