@@ -1,7 +1,4 @@
 ﻿name: BuildAndPush2
-on:
-  push:
-    branches: [ fejlesztes-20251007 ]
 
 jobs:
   build:
