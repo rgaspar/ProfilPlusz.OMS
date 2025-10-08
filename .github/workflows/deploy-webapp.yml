@@ -38,6 +38,14 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}  # ← EZ A LÉNYEG: abból a runból húzzuk le
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ./artifact
+
+      - name: Verify artifact
+        run: |
+          echo "Files in ./artifact:"
+          ls -la ./artifact
+          test -f ./artifact/image.txt || (echo "❌ artifact/image.txt not found" && exit 1)
+          echo "image.txt content:"
+          cat ./artifact/image.txt
           
       - name: Read image name
         id: read_image
@@ -47,7 +55,17 @@ jobs:
 
       - name: Create Web App (custom container from ACR)
         run: |
-          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name $IMAGE_NAME --docker-registry-server-url https://${{ secrets.ACR_LOGIN_SERVER }} --docker-registry-server-user ${{ secrets.ACR_USERNAME }} --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
+          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name $IMAGE_NAME
+
+      - name: Set container registry config
+        run: |
+          az webapp config container set \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --container-image-name $IMAGE_NAME \
+            --container-registry-url https://${{ secrets.ACR_LOGIN_SERVER }} \
+            --container-registry-user ${{ secrets.ACR_USERNAME }} \
+            --container-registry-password ${{ secrets.ACR_PASSWORD }}
 
       - name: Set connection string
         run: |
