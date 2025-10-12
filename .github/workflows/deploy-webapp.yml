@@ -24,6 +24,7 @@ jobs:
         run: |
           echo "ENVIRONMENT=dev" >> $GITHUB_ENV
           echo "RESOURCE_GROUP=profilplusz-dev-rg" >> $GITHUB_ENV
+          # NOTE: SQL_SERVER_NAME may be provisioned by infra; fallback kept for manual cases
           echo "SQL_SERVER_NAME=profilpluszsqldev" >> $GITHUB_ENV
           echo "SQL_ADMIN_USER=${{ secrets.SQL_ADMIN_USER }}" >> $GITHUB_ENV
           echo "SQL_ADMIN_PASS=${{ secrets.SQL_ADMIN_PASS }}" >> $GITHUB_ENV
@@ -35,27 +36,85 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: image-name
-          run-id: ${{ github.event.workflow_run.id }}  # ← EZ A LÉNYEG: abból a runból húzzuk le
+          run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ./artifact
 
-      - name: Verify artifact
+      - name: Verify image artifact
         run: |
-          echo "Files in ./artifact:"
-          ls -la ./artifact
+          echo "Files in ./artifact:"; ls -la ./artifact || true
           test -f ./artifact/image.txt || (echo "❌ artifact/image.txt not found" && exit 1)
-          echo "image.txt content:"
-          cat ./artifact/image.txt
-          
+          echo "image.txt content:"; cat ./artifact/image.txt
+
       - name: Read image name
         id: read_image
         run: |
           IMAGE_NAME=$(cat ./artifact/image.txt)
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
+      - name: Find infrastructure workflow run (to get SQL info)
+        id: find_infra_run
+        run: |
+          echo "Searching for latest successful infrastructure workflow run..."
+          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/workflows/infrastructure.yml/runs?status=completed&per_page=5"
+          echo "API_URL=$API_URL"
+          runs_json=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$API_URL")
+          # pick the most recent successful run
+          infra_run_id=$(echo "$runs_json" | jq -r '.workflow_runs[] | select(.conclusion=="success") | .id' | head -n1)
+          if [ -n "$infra_run_id" ]; then
+            echo "Found infra run id: $infra_run_id"
+            echo "INFRA_RUN_ID=$infra_run_id" >> $GITHUB_ENV
+          else
+            echo "No successful infra run found via API. INFRA_RUN_ID will be empty.";
+          fi
+
+      - name: Download sql-server-info artifact (if infra run found)
+        if: env.INFRA_RUN_ID != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: sql-server-info
+          run-id: ${{ env.INFRA_RUN_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifact
+
+      - name: Verify sql-server-info artifact
+        run: |
+          echo "Files in ./artifact:"; ls -la ./artifact || true
+          if [ -f ./artifact/sql-server-info.txt ]; then
+            echo "sql-server-info.txt found:"; cat ./artifact/sql-server-info.txt
+            SQL_FQDN=$(grep '^SQL_FQDN=' ./artifact/sql-server-info.txt | cut -d'=' -f2-)
+            SQL_SERVER_NAME=$(grep '^SQL_SERVER_NAME=' ./artifact/sql-server-info.txt | cut -d'=' -f2-)
+            echo "SQL_FQDN=$SQL_FQDN" >> $GITHUB_ENV
+            echo "SQL_SERVER_NAME=$SQL_SERVER_NAME" >> $GITHUB_ENV
+          else
+            echo "sql-server-info artifact not found, will try to detect SQL FQDN via az CLI";
+          fi
+
+      - name: Fallback: detect SQL FQDN from resource group (if not set)
+        run: |
+          if [ -z "${{ env.SQL_FQDN }}" ]; then
+            echo "SQL_FQDN not set from artifact, attempting to find provisioned SQL server in resource group..."
+            FQDN=$(az sql server list --resource-group $RESOURCE_GROUP --query "[?tags.provisioned_by=='github_actions' && tags.environment=='dev'] | [0].fullyQualifiedDomainName" -o tsv)
+            if [ -z "$FQDN" ]; then
+              echo "No tagged SQL server found, trying first server in resource group..."
+              FQDN=$(az sql server list --resource-group $RESOURCE_GROUP --query "[0].fullyQualifiedDomainName" -o tsv)
+            fi
+            if [ -n "$FQDN" ]; then
+              echo "Detected SQL FQDN: $FQDN"
+              echo "SQL_FQDN=$FQDN" >> $GITHUB_ENV
+            else
+              echo "❌ Unable to determine SQL FQDN. Aborting."; exit 1
+            fi
+          else
+            echo "SQL_FQDN already set: ${{ env.SQL_FQDN }}"
+          fi
+
       - name: Create Web App (custom container from ACR)
         run: |
-          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name $IMAGE_NAME
+          echo "Creating webapp (if not exists) and setting container..."
+          # create webapp if not exists; if exists command will fail but proceed to config
+          set -e
+          az webapp create --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP --plan $APP_SERVICE_PLAN --deployment-container-image-name $IMAGE_NAME || echo "webapp create returned non-zero (may already exist), continuing..."
 
       - name: Set container registry config
         run: |
@@ -69,7 +128,8 @@ jobs:
 
       - name: Set connection string
         run: |
-          az webapp config connection-string set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --settings DefaultConnection="Server=tcp:$SQL_SERVER_NAME.database.windows.net,1433;Initial Catalog=$SQL_DB_NAME;Persist Security Info=False;User ID=$SQL_ADMIN_USER;Password=$SQL_ADMIN_PASS;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" --connection-string-type SQLAzure
+          echo "Configuring connection string for webapp using SQL_FQDN=${{ env.SQL_FQDN }}"
+          az webapp config connection-string set --resource-group $RESOURCE_GROUP --name $WEBAPP_NAME --settings DefaultConnection="Server=tcp:${{ env.SQL_FQDN }},1433;Initial Catalog=$SQL_DB_NAME;Persist Security Info=False;User ID=$SQL_ADMIN_USER;Password=$SQL_ADMIN_PASS;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" --connection-string-type SQLAzure
 
       - name: Output webapp name
         run: |
