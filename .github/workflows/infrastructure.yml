@@ -46,8 +46,14 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --location $LOCATION \
             --admin-user $SQL_ADMIN_USER \
-            --admin-password $SQL_ADMIN_PASS \
-            --tags provisioned_by=github_actions environment=$ENVIRONMENT
+            --admin-password $SQL_ADMIN_PASS
+
+      - name: Tag SQL Server resource
+        run: |
+          # az sql server create may not accept --tags on all CLI versions; tag resource separately
+          SQL_ID=$(az sql server show --resource-group $RESOURCE_GROUP --name $SQL_SERVER_NAME --query id -o tsv)
+          echo "Tagging SQL server resource id: $SQL_ID"
+          az resource tag --ids "$SQL_ID" --tags provisioned_by=github_actions environment=$ENVIRONMENT || echo "Warning: tagging failed"
 
       - name: Create SQL Database
         run: az sql db create --resource-group $RESOURCE_GROUP --server $SQL_SERVER_NAME --name $SQL_DB_NAME --service-objective Basic

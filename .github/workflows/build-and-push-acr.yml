@@ -2,17 +2,26 @@
 run-name: 🚀 Deploy v${{ github.ref_name }} - from ${{ github.event.workflow_run.head_branch }}
 
 on:
-  push:
-    branches:
-      - main            # ← hozzáadva 
-      - master
-      - fejlesztes-20251007
-      
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment (dev, prod)'
+        required: false
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      image_tag:
+        description: 'Optional image tag (ha üres, akkor automatikusan generálja)'
+        required: false
+        default: ''
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
     environment:
-      name: dev
+      name: ${{ github.event.inputs.environment || 'dev' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,10 +29,15 @@ jobs:
       - name: Generate image tag
         id: image_tag
         run: |
-          YEAR=$(date +%Y)
-          RUN_NUM=$(printf "%03d" ${{ github.run_number }})
-          TAG="v.${YEAR}.${RUN_NUM}"
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            TAG="${{ github.event.inputs.image_tag }}"
+          else
+            YEAR=$(date +%Y)
+            RUN_NUM=$(printf "%03d" ${{ github.run_number }})
+            TAG="v.${YEAR}.${RUN_NUM}"
+          fi
           echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "Using IMAGE_TAG=$TAG"
 
       - name: Azure Container Registry login
         run: |

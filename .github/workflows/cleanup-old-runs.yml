@@ -1,0 +1,103 @@
+﻿name: Cleanup old workflow runs
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # minden nap 03:00 UTC-kor
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Mennyi napnál régebbi runokat töröljön (egész szám)'
+        required: false
+        default: '2'
+      workflow_name:
+        description: '(Opcionális) csak egy adott workflow futásait törölje; üres = minden workflow'
+        required: false
+        default: ''
+      dry_run:
+        description: 'true = ne töröljön ténylegesen, csak listázza. false = végrehajtja a törlést'
+        required: false
+        default: 'true'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup jq
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq jq
+
+      - name: Cleanup old workflow runs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+          DAYS: ${{ github.event.inputs.days || '2' }}
+          WORKFLOW_NAME: '${{ github.event.inputs.workflow_name || '' }}'
+          DRY_RUN: '${{ github.event.inputs.dry_run || 'true' }}'
+        run: |
+          set -euo pipefail
+          echo "Repository: $REPO"
+          echo "Current run id: $CURRENT_RUN_ID"
+          echo "Days threshold: $DAYS"
+          echo "Workflow filter: '$WORKFLOW_NAME'"
+          echo "Dry run: $DRY_RUN"
+
+          # threshold timestamp in ISO8601 UTC
+          THRESHOLD=$(date -u -d "$DAYS days ago" +%Y-%m-%dT%H:%M:%SZ)
+          echo "Threshold (UTC): $THRESHOLD"
+
+          page=1
+          deleted_count=0
+          while true; do
+            echo "Fetching page $page ..."
+            url="https://api.github.com/repos/$REPO/actions/runs?per_page=100&page=$page"
+            response=$(curl -sS -H "Accept: application/vnd.github+json" -H "Authorization: token $GITHUB_TOKEN" "$url")
+
+            runs_len=$(echo "$response" | jq '.workflow_runs | length')
+            if [ "$runs_len" -eq 0 ]; then
+              echo "No more runs on page $page. Done."
+              break
+            fi
+
+            # build jq filter: created_at < THRESHOLD and not current run
+            if [ -n "$WORKFLOW_NAME" ] && [ "$WORKFLOW_NAME" != "''" ]; then
+              jq_filter=".workflow_runs[] | select(.name==\"$WORKFLOW_NAME\") | select(.created_at < \"$THRESHOLD\") | select((.id|tostring) != \"$CURRENT_RUN_ID\") | .id"
+            else
+              jq_filter=".workflow_runs[] | select(.created_at < \"$THRESHOLD\") | select((.id|tostring) != \"$CURRENT_RUN_ID\") | .id"
+            fi
+
+            old_ids=$(echo "$response" | jq -r "$jq_filter") || true
+
+            if [ -z "$(echo "$old_ids" | tr -d '\n')" ]; then
+              echo "No run older than threshold on page $page."
+            else
+              for id in $old_ids; do
+                echo "Candidate to delete: $id"
+                if [ "$DRY_RUN" = 'true' ] || [ "$DRY_RUN" = 'True' ]; then
+                  echo "DRY RUN: would delete run $id"
+                else
+                  echo "Deleting run id: $id ..."
+                  resp=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "Authorization: token $GITHUB_TOKEN" \
+                    "https://api.github.com/repos/$REPO/actions/runs/$id")
+                  if [ "$resp" -eq 204 ]; then
+                    echo "Deleted run $id (204)."
+                    deleted_count=$((deleted_count+1))
+                  else
+                    echo "Failed to delete run $id (HTTP $resp)."
+                  fi
+                fi
+              done
+            fi
+
+            page=$((page+1))
+          done
+
+          echo "Cleanup finished. Deleted count (if not dry-run): $deleted_count"
+

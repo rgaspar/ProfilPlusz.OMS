@@ -7,10 +7,15 @@ on:
       - master
       - fejlesztes-20251007
   workflow_dispatch:
+    inputs:
+      image_name:
+        description: 'Optional full image name (acr login server/repo:tag) for manual deploy'
+        required: false
+        default: ''
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     environment:
       name: dev
@@ -31,8 +36,21 @@ jobs:
           echo "SQL_DB_NAME=profilpluszdevdb" >> $GITHUB_ENV
           echo "APP_SERVICE_PLAN=profilplusz-dev-plan" >> $GITHUB_ENV
           echo "WEBAPP_NAME=profilplusz-webapp-dev" >> $GITHUB_ENV
+          echo "TRIGGER_EVENT=${{ github.event_name }}" >> $GITHUB_ENV
+          echo "INPUT_IMAGE_NAME=${{ github.event.inputs.image_name || '' }}" >> $GITHUB_ENV
+
+      - name: If manual: use provided image_name
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ -n "${{ github.event.inputs.image_name }}" ]; then
+            echo "Using provided image_name for manual deploy: ${{ github.event.inputs.image_name }}"
+            echo "IMAGE_NAME=${{ github.event.inputs.image_name }}" >> $GITHUB_ENV
+          else
+            echo "No image_name provided for manual deploy. If you want fully manual deploy, provide image_name input. Otherwise run BuildAndPushToACR to trigger automatic deploy." && exit 1
+          fi
 
       - name: Download image name artifact
+        if: ${{ github.event_name == 'workflow_run' }}
         uses: actions/download-artifact@v4
         with:
           name: image-name
@@ -40,13 +58,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ./artifact
 
-      - name: Verify image artifact
+      - name: Verify image artifact (if downloaded)
+        if: ${{ github.event_name == 'workflow_run' }}
         run: |
           echo "Files in ./artifact:"; ls -la ./artifact || true
           test -f ./artifact/image.txt || (echo "❌ artifact/image.txt not found" && exit 1)
           echo "image.txt content:"; cat ./artifact/image.txt
 
-      - name: Read image name
+      - name: Read image name (if downloaded)
+        if: ${{ github.event_name == 'workflow_run' }}
         id: read_image
         run: |
           IMAGE_NAME=$(cat ./artifact/image.txt)
