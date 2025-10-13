@@ -1,0 +1,42 @@
+﻿name: Azure Login Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      method:
+        description: 'Validation method: creds (use AZURE_CREDENTIALS JSON) or manual (use client-id/tenant-id/subscription-id + client-secret)'
+        required: false
+        default: 'creds'
+
+permissions:
+  contents: read
+  id-token: write
+  actions: write
+
+jobs:
+  login-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug print (do NOT reveal secrets)
+        run: |
+          echo "Starting azure login test. Do not print secrets."
+
+      - name: Login with creds JSON
+        if: ${{ github.event.inputs.method == 'creds' }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login with explicit credentials
+        if: ${{ github.event.inputs.method == 'manual' }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Show Azure account
+        run: |
+          az account show --output json
+
