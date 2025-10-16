@@ -39,7 +39,7 @@ jobs:
           echo "TRIGGER_EVENT=${{ github.event_name }}" >> $GITHUB_ENV
           echo "INPUT_IMAGE_NAME=${{ github.event.inputs.image_name || '' }}" >> $GITHUB_ENV
 
-      - name: If manual: use provided image_name
+      - name: "If manual: use provided image_name"
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           if [ -n "${{ github.event.inputs.image_name }}" ]; then
@@ -110,7 +110,7 @@ jobs:
             echo "sql-server-info artifact not found, will try to detect SQL FQDN via az CLI";
           fi
 
-      - name: Fallback: detect SQL FQDN from resource group (if not set)
+      - name: "Fallback: detect SQL FQDN from resource group (if not set)"
         run: |
           if [ -z "${{ env.SQL_FQDN }}" ]; then
             echo "SQL_FQDN not set from artifact, attempting to find provisioned SQL server in resource group..."
