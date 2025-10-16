@@ -42,11 +42,40 @@ jobs:
       - name: "If manual: use provided image_name"
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
+          # If user provided image_name via workflow_dispatch input, use it
           if [ -n "${{ github.event.inputs.image_name }}" ]; then
             echo "Using provided image_name for manual deploy: ${{ github.event.inputs.image_name }}"
             echo "IMAGE_NAME=${{ github.event.inputs.image_name }}" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          echo "No image_name provided for manual deploy. Attempting to find latest image in ACR..."
+
+          # Ensure Azure CLI logged in by previous step (azure/login@v2)
+          if ! az account show > /dev/null 2>&1; then
+            echo "Azure CLI not authenticated. Ensure AZURE_CREDENTIALS secret is set and azure/login step succeeded.";
+            exit 1
+          fi
+
+          # Fallback: try to get latest tag from ACR repository
+          ACR_NAME="${{ secrets.ACR_NAME }}"
+          REPO_NAME="profilplusz-oms"
+
+          if [ -z "$ACR_NAME" ]; then
+            echo "secrets.ACR_NAME not set. Cannot query ACR. Provide image_name input or set ACR_NAME secret.";
+            exit 1
+          fi
+
+          echo "Querying ACR ($ACR_NAME) for latest tag of repository $REPO_NAME..."
+          TAG=$(az acr repository show-tags --name "$ACR_NAME" --repository "$REPO_NAME" --orderby time_desc --top 1 -o tsv 2>/dev/null || true)
+
+          if [ -n "$TAG" ]; then
+            IMAGE_NAME="${{ secrets.ACR_LOGIN_SERVER }}/$REPO_NAME:$TAG"
+            echo "Found tag: $TAG, using IMAGE_NAME=$IMAGE_NAME"
+            echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
           else
-            echo "No image_name provided for manual deploy. If you want fully manual deploy, provide image_name input. Otherwise run BuildAndPushToACR to trigger automatic deploy." && exit 1
+            echo "No tag found in ACR repository $REPO_NAME or not authorized to query ACR. Aborting.";
+            exit 1
           fi
 
       - name: Download image name artifact
