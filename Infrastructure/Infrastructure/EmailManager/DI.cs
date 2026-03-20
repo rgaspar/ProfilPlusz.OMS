@@ -10,6 +10,7 @@ public static class DI
     {
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
         services.AddTransient<IEmailService, EmailService>();
+        services.AddScoped<IEmailReaderService, EmailReaderService>();
 
         return services;
     }
