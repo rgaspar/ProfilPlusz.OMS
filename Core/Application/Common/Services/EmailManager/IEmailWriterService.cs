@@ -4,6 +4,6 @@ namespace Application.Common.Services.EmailManager
 {
     public interface IEmailWriterService
     {
-        Task CreateDraftAsync(EmailDto email, CancellationToken cancellationToken = default);
+        Task CreateDraftAsync(DraftEmailDto email, CancellationToken cancellationToken = default);
     }
 }

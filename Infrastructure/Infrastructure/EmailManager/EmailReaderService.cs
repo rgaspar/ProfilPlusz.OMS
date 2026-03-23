@@ -2,26 +2,54 @@
 using Application.Common.Services.EmailManager;
 using MailKit;
 using MailKit.Net.Imap;
+using MailKit.Search;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.EmailManager
 {
     public class EmailReaderService : IEmailReaderService
     {
-        public async Task<List<EmailDto>> GetLatestEmailsAsync(int count)
+        private readonly ImapSettings _settings;
+
+        public EmailReaderService(IOptions<EmailServiceSettings> settings)
+        {
+            _settings = settings.Value.Imap;
+        }
+
+        public async Task<List<EmailDto>> GetLatestEmailsAsync()
         {
             using var client = new ImapClient();
 
-            await client.ConnectAsync("imap.gmail.com", 993, true);
-            await client.AuthenticateAsync("teszt01profilplusz@gmail.com", "oqyv yabu wamh ugdm");
+            await client.ConnectAsync(_settings.Host, _settings.Port, true);
+
+            await client.AuthenticateAsync(_settings.UserName, _settings.Password);
 
             var inbox = client.Inbox;
-            await inbox.OpenAsync(FolderAccess.ReadOnly);
+            await inbox.OpenAsync(FolderAccess.ReadWrite);
+
+            SearchQuery subjectQuery = null;
+
+            foreach (var subject in _settings.SubjectFilters)
+            {
+                var q = SearchQuery.SubjectContains(subject);
+
+                subjectQuery = subjectQuery == null
+                    ? q
+                    : subjectQuery.Or(q);
+            }
+
+            // olvasatlan + subject filter
+            var query = SearchQuery.NotSeen.And(subjectQuery);
+
+            var uids = await inbox.SearchAsync(query);
+
+            var latest = uids.Reverse();
 
             var emails = new List<EmailDto>();
 
-            for (int i = inbox.Count - count; i < inbox.Count; i++)
+            foreach (var uid in latest)
             {
-                var message = await inbox.GetMessageAsync(i);
+                var message = await inbox.GetMessageAsync(uid);
 
                 emails.Add(new EmailDto
                 {
@@ -30,6 +58,9 @@ namespace Infrastructure.EmailManager
                     From = message.From.ToString(),
                     Date = message.Date.DateTime
                 });
+
+                // olvasottnak jelölés
+                await inbox.AddFlagsAsync(uid, MessageFlags.Seen, true);
             }
 
             await client.DisconnectAsync(true);

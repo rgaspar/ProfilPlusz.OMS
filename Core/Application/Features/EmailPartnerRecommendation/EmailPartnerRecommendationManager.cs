@@ -1,11 +1,15 @@
-﻿using Application.Common.Repositories;
+﻿using Application.Common.DTOs.Email;
+using Application.Common.Repositories;
 using Application.Common.Services.AnswerTemplateManager;
 using Application.Common.Services.EmailManager;
 using Application.Common.Services.Location;
+using Application.Features.EmailPartnerRecommendation.Settings;
 using Domain.Services.Email;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,7 +27,9 @@ namespace Application.Features.EmailPartnerRecommendation
         private readonly IPartnerRepository _partnerRepository;
         private readonly IAnswerTemplateService _answerTemplateService;
 
-        public EmailPartnerRecommendationManager(IEmailReaderService emailReaderService, IEmailWriterService emailWriterService, IEmailParserService emailParser, IAddressResolverService addressResolverService, ICountyService countyService, IPartnerRepository partnerRepository, IAnswerTemplateService answerTemplateService)
+        private readonly EmailPartnerRecommendationSettings _settings;
+
+        public EmailPartnerRecommendationManager(IEmailReaderService emailReaderService, IEmailWriterService emailWriterService, IEmailParserService emailParser, IAddressResolverService addressResolverService, ICountyService countyService, IPartnerRepository partnerRepository, IAnswerTemplateService answerTemplateService, IOptions<EmailPartnerRecommendationSettings> settings)
         {
             _emailReaderService = emailReaderService;
             _emailWriterService = emailWriterService;
@@ -32,11 +38,12 @@ namespace Application.Features.EmailPartnerRecommendation
             _countyService = countyService;
             _partnerRepository = partnerRepository;
             _answerTemplateService = answerTemplateService;
+            _settings = settings.Value;
         }
 
         public async Task ProcessUnreadEmailsAsync(CancellationToken cancellationToken = default)
         {
-            var emails = await _emailReaderService.GetLatestEmailsAsync(1);
+            var emails = await _emailReaderService.GetLatestEmailsAsync();
 
             foreach (var email in emails)
             {
@@ -92,17 +99,17 @@ namespace Application.Features.EmailPartnerRecommendation
                             Partners = partners
                         });
 
-                /*
                 //draft email létrehozása
                 await _emailWriterService.CreateDraftAsync(
                     new DraftEmailDto
                     {
-                        To = parsedEmail.SenderEmail,
-                        Subject = "Ajánlott partnerek a környékeden",
+                        ToName = _settings.DefaultToName,
+                        ToEmail = _settings.DefaultToEmail,
+
+                        Subject = _settings.Subject,
                         Body = body
                     },
                     cancellationToken);
-                */
             }
         }
     }

@@ -1,4 +1,10 @@
-﻿namespace Application.Common.DTOs.Email
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Application.Common.DTOs.Email
 {
     public class EmailDto
     {

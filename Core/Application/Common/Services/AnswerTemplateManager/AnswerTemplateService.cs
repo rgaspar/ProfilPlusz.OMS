@@ -1,5 +1,6 @@
 ﻿using Application.Common.Configuration;
 using Application.Common.Repositories;
+using Domain.Entities;
 using Microsoft.Extensions.Options;
 
 namespace Application.Common.Services.AnswerTemplateManager
@@ -8,6 +9,7 @@ namespace Application.Common.Services.AnswerTemplateManager
     {
         private readonly IAnswerTemplateRepository _repository;
         private readonly TemplateSettings _settings;
+        private readonly Dictionary<string, AnswerTemplate> _templateCache = new();
 
         public AnswerTemplateService(
             IAnswerTemplateRepository repository,
@@ -19,8 +21,7 @@ namespace Application.Common.Services.AnswerTemplateManager
 
         public async Task<string> RenderAsync(string key, object? model = null)
         {
-            var template = await _repository.GetByKeyAsync(key)
-                ?? throw new Exception($"Template not found: {key}");
+            var template = await GetTemplateAsync(key);
 
             var fullPath = Path.Combine(AppContext.BaseDirectory, _settings.BasePath, template.Path);
 
@@ -58,6 +59,21 @@ namespace Application.Common.Services.AnswerTemplateManager
                 var value = prop.GetValue(model)?.ToString() ?? "";
                 template = template.Replace($"{{{{{prop.Name}}}}}", value);
             }
+
+            return template;
+        }
+
+        public async Task<AnswerTemplate> GetTemplateAsync(string key)
+        {
+            if (_templateCache.TryGetValue(key, out var cached))
+            {
+                return cached;
+            }
+
+            var template = await _repository.GetByKeyAsync(key)
+                ?? throw new Exception($"Template not found: {key}");
+
+            _templateCache[key] = template;
 
             return template;
         }

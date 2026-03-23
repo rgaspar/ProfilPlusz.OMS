@@ -4,6 +4,7 @@ using Application.Common.Services.AnswerTemplateManager;
 using Application.Common.Services.EmailManager;
 using Application.Common.Services.Location;
 using Application.Features.EmailPartnerRecommendation;
+using Application.Features.EmailPartnerRecommendation.Settings;
 using Domain.Services.Email;
 using FluentValidation;
 using MediatR;
@@ -38,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailParserService, EmailParserService>();
 
         services.Configure<TemplateSettings>(configuration.GetSection("EmailTemplates"));
+        services.Configure<EmailPartnerRecommendationSettings>(configuration.GetSection("EmailPartnerRecommendation"));
 
         //>>> Register services in Application.Features 
         var assembly = Assembly.GetExecutingAssembly();

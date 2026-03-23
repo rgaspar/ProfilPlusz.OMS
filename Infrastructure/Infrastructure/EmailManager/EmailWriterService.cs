@@ -2,19 +2,29 @@
 using Application.Common.Services.EmailManager;
 using MailKit;
 using MailKit.Net.Imap;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace Infrastructure.EmailManager
 {
     public class EmailWriterService : IEmailWriterService
     {
-        public async Task CreateDraftAsync(EmailDto email, CancellationToken cancellationToken = default)
+        private readonly ImapSettings _imapSettings;
+        private readonly SmtpSettings _smtpSettings;
+
+        public EmailWriterService(IOptions<EmailServiceSettings> settings)
+        {
+            _imapSettings = settings.Value.Imap;
+            _smtpSettings = settings.Value.Smtp;
+        }
+
+        public async Task CreateDraftAsync(DraftEmailDto email, CancellationToken cancellationToken = default)
         {
             var message = new MimeMessage();
 
-            message.From.Add(new MailboxAddress("ProfilPlusz", "Teszt01ProfilPlusz@gmail.com"));
+            message.From.Add(new MailboxAddress(_smtpSettings.FromName, _smtpSettings.FromAddress));
 
-            message.To.Add(new MailboxAddress("Címzett neve", "joni9103@outlook.com"));
+            message.To.Add(new MailboxAddress(email.ToName, email.ToEmail));
 
             message.Subject = email.Subject;
 
@@ -25,30 +35,17 @@ namespace Infrastructure.EmailManager
 
             using var client = new ImapClient();
 
-            await client.ConnectAsync(
-                "imap.gmail.com",
-                993,
-                true,
-                cancellationToken);
+            await client.ConnectAsync(_imapSettings.Host, _imapSettings.Port, _imapSettings.UseSsl, cancellationToken);
 
-            await client.AuthenticateAsync(
-                "Teszt01ProfilPlusz@gmail.com",
-                "oqyv yabu wamh ugdm",
-                cancellationToken);
+            await client.AuthenticateAsync(_imapSettings.UserName, _imapSettings.Password, cancellationToken);
 
             var drafts = client.GetFolder(SpecialFolder.Drafts);
 
-            await drafts.OpenAsync(
-                FolderAccess.ReadWrite,
-                cancellationToken);
+            await drafts.OpenAsync(FolderAccess.ReadWrite, cancellationToken);
 
-            await drafts.AppendAsync(
-                        new AppendRequest(message),
-                        cancellationToken);
+            await drafts.AppendAsync(new AppendRequest(message), cancellationToken);
 
-            await client.DisconnectAsync(
-                true,
-                cancellationToken);
+            await client.DisconnectAsync(true, cancellationToken);
         }
     }
 }
