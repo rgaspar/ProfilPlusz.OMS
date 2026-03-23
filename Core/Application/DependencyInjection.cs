@@ -1,14 +1,22 @@
 ﻿using Application.Common.Behaviors;
+using Application.Common.Configuration;
+using Application.Common.Services.AnswerTemplateManager;
+using Application.Common.Services.EmailManager;
+using Application.Common.Services.Location;
+using Application.Features.EmailPartnerRecommendation;
+using Domain.Services.Email;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         //>>> AutoMapper
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
@@ -23,6 +31,13 @@ public static class DependencyInjection
             x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
             x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
         });
+
+        services.AddScoped<IAnswerTemplateService, AnswerTemplateService>();
+        services.AddSingleton<ICountyService, CountyService>();
+        services.AddScoped<IEmailPartnerRecommendationManager, EmailPartnerRecommendationManager>();
+        services.AddScoped<IEmailParserService, EmailParserService>();
+
+        services.Configure<TemplateSettings>(configuration.GetSection("EmailTemplates"));
 
         //>>> Register services in Application.Features 
         var assembly = Assembly.GetExecutingAssembly();

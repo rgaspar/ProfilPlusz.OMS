@@ -23,6 +23,8 @@
         public string? City { get; set; }
         public string? Address { get; set; }
 
+        public string? County { get; set; }
+
         public string? BankAccount { get; set; }
 
         public string? InvoiceType { get; set; }

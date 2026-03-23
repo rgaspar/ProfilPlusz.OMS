@@ -1,6 +1,9 @@
-﻿namespace Domain.Services.Email
+﻿using Domain.Services.Email.Models;
+
+namespace Domain.Services.Email
 {
-    public interface IEmailParser
+    public interface IEmailParserService
     {
+        ParsedEmail Parse(string emailBody);
     }
 }

@@ -15,8 +15,6 @@ public class BaseEntity : IHasSequentialId, IHasIsDeleted, IHasAudit
         IsDeleted = false;
     }
 
-
-
     private static readonly object _lock = new object();
 
     private string GenerateSequentialGuid()

@@ -8,34 +8,47 @@ namespace Infrastructure.EmailManager
 {
     public class EmailWriterService : IEmailWriterService
     {
-        public async Task CreateDraftAsync(EmailDto email)
+        public async Task CreateDraftAsync(EmailDto email, CancellationToken cancellationToken = default)
         {
             var message = new MimeMessage();
 
-            message.From.Add(new MailboxAddress("Saját Név", "Teszt01ProfilPlusz@gmail.com"));
-            message.To.Add(new MailboxAddress("Címzett", "joni9103@outlook.com"));
-            message.Subject = "Teszt draft email";
+            message.From.Add(new MailboxAddress("ProfilPlusz", "Teszt01ProfilPlusz@gmail.com"));
 
-            message.Body = new TextPart("plain")
+            message.To.Add(new MailboxAddress("Címzett neve", "joni9103@outlook.com"));
+
+            message.Subject = email.Subject;
+
+            message.Body = new TextPart("html")
             {
-                Text = "Ez egy draft email .NET-ből MailKit-tel."
+                Text = email.Body
             };
 
             using var client = new ImapClient();
 
-            await client.ConnectAsync("imap.gmail.com", 993, true);
+            await client.ConnectAsync(
+                "imap.gmail.com",
+                993,
+                true,
+                cancellationToken);
 
-            // ⚠️ App Password kell!
-            await client.AuthenticateAsync("Teszt01ProfilPlusz@gmail.com", "oqyv yabu wamh ugdm");
+            await client.AuthenticateAsync(
+                "Teszt01ProfilPlusz@gmail.com",
+                "oqyv yabu wamh ugdm",
+                cancellationToken);
 
-            // Gmail Drafts mappa
             var drafts = client.GetFolder(SpecialFolder.Drafts);
-            await drafts.OpenAsync(FolderAccess.ReadWrite);
 
-            // Draft mentése
-            await drafts.AppendAsync(message);
+            await drafts.OpenAsync(
+                FolderAccess.ReadWrite,
+                cancellationToken);
 
-            await client.DisconnectAsync(true);
+            await drafts.AppendAsync(
+                        new AppendRequest(message),
+                        cancellationToken);
+
+            await client.DisconnectAsync(
+                true,
+                cancellationToken);
         }
     }
 }

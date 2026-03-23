@@ -1,6 +1,7 @@
 ﻿using Application.Common.DTOs.Partner;
 using Application.Common.Repositories;
 using AutoMapper;
+using System.Diagnostics.Metrics;
 
 namespace Application.Common.Services.PartnerManager
 {
@@ -15,9 +16,10 @@ namespace Application.Common.Services.PartnerManager
             _mapper = mapper;
         }
 
-        public async Task<List<PartnerDto>> SearchAsync(string search)
+        public async Task<List<PartnerDto>> GetRecommendedPartnersAsync(List<string> counties, CancellationToken cancellationToken)
         {
-            var partners = await _repo.SearchAsync(search);
+            var partners = await _repo.GetByCountiesAsync(counties, cancellationToken);
+
             return _mapper.Map<List<PartnerDto>>(partners);
         }
     }

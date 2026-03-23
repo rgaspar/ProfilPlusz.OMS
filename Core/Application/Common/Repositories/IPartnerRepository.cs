@@ -4,6 +4,6 @@ namespace Application.Common.Repositories
 {
     public interface IPartnerRepository
     {
-        Task<List<Partner>> SearchAsync(string search);
+        Task<List<Partner>> GetByCountiesAsync(IEnumerable<string> counties, CancellationToken cancellationToken);
     }
 }

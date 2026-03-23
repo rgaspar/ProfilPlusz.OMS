@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner ajánlás</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f5f5f5; font-family: Arial, Helvetica, sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5; padding:20px 0;">
+        <tr>
+            <td align="center">
+
+                <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                    <!-- header -->
+                    <tr>
+                        <td style="background:#1f2937; color:white; padding:20px 30px; font-size:20px; font-weight:bold;">
+                            Profilplusz Kft.
+                        </td>
+                    </tr>
+
+                    <!-- content -->
+                    <tr>
+                        <td style="padding:30px; color:#333; font-size:14px; line-height:1.6;">
+
+                            <p style="margin-top:0;">
+                                Kedves <strong>{{CustomerName}}</strong>,
+                            </p>
+
+                            <p>
+                                köszönjük megrendelését! Az alábbi partner(eke)t ajánljuk az Ön közelében:
+                            </p>
+
+                            <!-- partner lista -->
+                            {{#Partners}}
+
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb; border-radius:6px; margin-bottom:15px;">
+                                <tr>
+                                    <td style="padding:15px;">
+
+                                        <div style="font-size:16px; font-weight:bold; color:#111827;">
+                                            {{Name}}
+                                        </div>
+
+                                        <div style="margin-top:5px; color:#374151;">
+                                            {{Zip}} {{City}}, {{Address}}
+                                        </div>
+
+                                        <div style="margin-top:10px;">
+                                            <strong>Kapcsolattartó:</strong> {{ContactName}}
+                                        </div>
+
+                                        <div>
+                                            <strong>Telefon:</strong> {{Phone}}
+                                        </div>
+
+                                        <div>
+                                            <strong>Email:</strong>
+                                            <a href="mailto:{{EmailPurchaseOrder}}" style="color:#2563eb;">
+                                                {{EmailPurchaseOrder}}
+                                            </a>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            {{/Partners}}
+
+                            <p>
+                                Amennyiben szeretné, közvetlenül is felveheti velük a kapcsolatot.
+                            </p>
+
+                            <p>
+                                Ha további segítségre van szüksége, állunk rendelkezésére.
+                            </p>
+
+                            <p style="margin-bottom:0;">
+                                Üdvözlettel,<br>
+                                <strong>Profilplusz Kft.</strong>
+                            </p>
+
+                        </td>
+                    </tr>
+
+                    <!-- footer -->
+                    <tr>
+                        <td style="background:#f9fafb; padding:20px 30px; font-size:12px; color:#6b7280;">
+
+                            Ez egy automatikus üzenet, kérjük ne válaszoljon rá közvetlenül.
+
+                            <br><br>
+
+                            Profilplusz Kft.<br>
+                            <a href="https://www.profilplusz.hu" style="color:#2563eb;">
+                                www.profilplusz.hu
+                            </a>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

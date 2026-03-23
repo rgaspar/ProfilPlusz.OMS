@@ -13,7 +13,7 @@ public static class BackEndConfiguration
     public static IServiceCollection AddBackEndServices(this IServiceCollection services, IConfiguration configuration)
     {
         //>>> Application Layer
-        services.AddApplicationServices();
+        services.AddApplicationServices(configuration);
 
         //>>> Infrastructure Layer
         services.AddInfrastructureServices(configuration);

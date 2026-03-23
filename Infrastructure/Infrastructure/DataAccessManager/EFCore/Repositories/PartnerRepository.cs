@@ -1,7 +1,7 @@
 ﻿using Application.Common.Repositories;
 using Domain.Entities;
 
-namespace Infrastructure.PartnerManager
+namespace Infrastructure.DataAccessManager.EFCore.Repositories
 {
     public class PartnerRepository : IPartnerRepository
     {
@@ -10,7 +10,7 @@ namespace Infrastructure.PartnerManager
 
         }
 
-        public async Task<List<Partner>> SearchAsync(string search)
+        public Task<List<Partner>> GetByCountiesAsync(IEnumerable<string> counties, CancellationToken cancellationToken)
         {
             var partners = new List<Partner>
             {
@@ -31,6 +31,7 @@ namespace Infrastructure.PartnerManager
                     ZipCode = "2083",
                     City = "Solymár",
                     Address = "Valkó út 8",
+                    County = "Pest vármegye",
                     BankAccount = "11780809-20000514",
                     InvoiceType = "papír",
                     PaymentMethod = "átutalás",
@@ -53,6 +54,7 @@ namespace Infrastructure.PartnerManager
                     ZipCode = "8600",
                     City = "Siófok",
                     Address = "Ipar utca 2.",
+                    County = "Somogy vármegye",
                     BankAccount = "10101315-64265400-01004000",
                     InvoiceType = "papír",
                     PaymentMethod = "átutalás",
@@ -75,6 +77,7 @@ namespace Infrastructure.PartnerManager
                     ZipCode = "8600",
                     City = "Siófok",
                     Address = "Ipar utca 2.",
+                    County = "Somogy vármegye",
                     BankAccount = "10101315-64265400-01004000",
                     InvoiceType = "papír",
                     PaymentMethod = "átutalás",
@@ -119,6 +122,7 @@ namespace Infrastructure.PartnerManager
                     ZipCode = "6400",
                     City = "Kiskunhalas",
                     Address = "Jókai u. 75-79",
+                    County = "Bács-Kiskun vármegye",
                     BankAccount = "10300002-90000000-00734528",
                     InvoiceType = "papír",
                     PaymentMethod = "átutalás",
@@ -127,7 +131,24 @@ namespace Infrastructure.PartnerManager
                 }
             };
 
-            return partners;
+            var normalizedCounties = counties.Select(NormalizeCounty).ToHashSet();
+
+            var result = partners
+                .Where(p =>
+                    !string.IsNullOrWhiteSpace(p.County) &&
+                    normalizedCounties.Contains(NormalizeCounty(p.County)))
+                .ToList();
+
+            return Task.FromResult(result);
+        }
+
+        private static string NormalizeCounty(string county)
+        {
+            return county
+                .Replace(" vármegye", "", StringComparison.OrdinalIgnoreCase)
+                .Replace(" megye", "", StringComparison.OrdinalIgnoreCase)
+                .Trim()
+                .ToLowerInvariant();
         }
     }
 }
