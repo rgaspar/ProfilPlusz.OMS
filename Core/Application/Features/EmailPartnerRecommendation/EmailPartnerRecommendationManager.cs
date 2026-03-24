@@ -92,12 +92,12 @@ namespace Application.Features.EmailPartnerRecommendation
                 //template kitöltése
                 var body = await _answerTemplateService.RenderAsync(
                     "EMAIL_PARTNER_RECOMMENDATION",
-                        new
-                        {
-                            CustomerName = parsedEmail.CustomerName,
-                            Counties = counties,
-                            Partners = partners
-                        });
+                    new
+                    {
+                        CustomerName = parsedEmail.CustomerName,
+                        OrderNumber = parsedEmail.OrderNumber,
+                        Partners = partners
+                    });
 
                 //draft email létrehozása
                 await _emailWriterService.CreateDraftAsync(

@@ -15,8 +15,4 @@
     <ProjectReference Include="..\..\Infrastructure\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Templates\Emails\" />
-  </ItemGroup>
-
 </Project>

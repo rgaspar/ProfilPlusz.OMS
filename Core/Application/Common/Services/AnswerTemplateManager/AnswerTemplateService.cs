@@ -37,8 +37,7 @@ namespace Application.Common.Services.AnswerTemplateManager
 
         public async Task<string[]> GetDefaultRecipientsAsync(string key)
         {
-            var template = await _repository.GetByKeyAsync(key)
-                ?? throw new Exception($"Template not found: {key}");
+            var template = await _repository.GetByKeyAsync(key) ?? throw new Exception($"Template not found: {key}");
 
             if (string.IsNullOrWhiteSpace(template.DefaultRecipients))
                 return [];
@@ -56,8 +55,44 @@ namespace Application.Common.Services.AnswerTemplateManager
 
             foreach (var prop in model.GetType().GetProperties())
             {
-                var value = prop.GetValue(model)?.ToString() ?? "";
-                template = template.Replace($"{{{{{prop.Name}}}}}", value);
+                var value = prop.GetValue(model);
+
+                // LISTA kezelés
+                if (value is IEnumerable<object> list && !(value is string))
+                {
+                    var startTag = $"{{{{#{prop.Name}}}}}";
+                    var endTag = $"{{{{/{prop.Name}}}}}";
+
+                    var startIndex = template.IndexOf(startTag);
+                    var endIndex = template.IndexOf(endTag);
+
+                    if (startIndex >= 0 && endIndex > startIndex)
+                    {
+                        var innerTemplate = template.Substring(
+                            startIndex + startTag.Length,
+                            endIndex - (startIndex + startTag.Length));
+
+                        var renderedItems = "";
+
+                        foreach (var item in list)
+                        {
+                            renderedItems += Render(innerTemplate, item);
+                        }
+
+                        template =
+                            template.Substring(0, startIndex)
+                            + renderedItems
+                            + template.Substring(endIndex + endTag.Length);
+                    }
+                }
+                else
+                {
+                    var stringValue = value?.ToString() ?? "";
+
+                    template = template.Replace(
+                        $"{{{{{prop.Name}}}}}",
+                        stringValue);
+                }
             }
 
             return template;
