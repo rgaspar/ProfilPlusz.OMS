@@ -10,9 +10,51 @@ namespace Infrastructure.DataAccessManager.EFCore.Repositories
 
         }
 
+        public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return Task.FromResult(false);
+
+            var normalizedEmail = NormalizeEmail(email);
+
+            var partners = GetAllPartners(); // lásd lent
+
+            var exists = partners.Any(p =>
+                NormalizeEmail(p.EmailOrderConfirmation) == normalizedEmail ||
+                NormalizeEmail(p.EmailInvoice) == normalizedEmail ||
+                NormalizeEmail(p.EmailPurchaseOrder) == normalizedEmail
+            );
+
+            return Task.FromResult(exists);
+        }
+
         public Task<List<Partner>> GetByCountiesAsync(IEnumerable<string> counties, CancellationToken cancellationToken)
         {
-            var partners = new List<Partner>
+            var partners = GetAllPartners();
+
+            var normalizedCounties = counties.Select(NormalizeCounty).ToHashSet();
+
+            var result = partners
+                .Where(p =>
+                    !string.IsNullOrWhiteSpace(p.County) &&
+                    normalizedCounties.Contains(NormalizeCounty(p.County)))
+                .ToList();
+
+            return Task.FromResult(result);
+        }
+
+        private static string NormalizeCounty(string county)
+        {
+            return county
+                .Replace(" vármegye", "", StringComparison.OrdinalIgnoreCase)
+                .Replace(" megye", "", StringComparison.OrdinalIgnoreCase)
+                .Trim()
+                .ToLowerInvariant();
+        }
+
+        private List<Partner> GetAllPartners()
+        {
+            return new List<Partner>
             {
                 new Partner
                 {
@@ -130,25 +172,11 @@ namespace Infrastructure.DataAccessManager.EFCore.Repositories
                     Currency = "HUF"
                 }
             };
-
-            var normalizedCounties = counties.Select(NormalizeCounty).ToHashSet();
-
-            var result = partners
-                .Where(p =>
-                    !string.IsNullOrWhiteSpace(p.County) &&
-                    normalizedCounties.Contains(NormalizeCounty(p.County)))
-                .ToList();
-
-            return Task.FromResult(result);
         }
 
-        private static string NormalizeCounty(string county)
+        private static string NormalizeEmail(string email)
         {
-            return county
-                .Replace(" vármegye", "", StringComparison.OrdinalIgnoreCase)
-                .Replace(" megye", "", StringComparison.OrdinalIgnoreCase)
-                .Trim()
-                .ToLowerInvariant();
+            return email?.Trim().ToLowerInvariant() ?? "";
         }
     }
 }

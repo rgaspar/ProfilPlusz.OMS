@@ -16,7 +16,7 @@ namespace Infrastructure.EmailManager
             _settings = settings.Value.Imap;
         }
 
-        public async Task<List<EmailDto>> GetLatestEmailsAsync()
+        public async Task<List<EmailDto>> GetUnreadEmailsAsync()
         {
             using var client = new ImapClient();
 
@@ -53,10 +53,12 @@ namespace Infrastructure.EmailManager
 
                 emails.Add(new EmailDto
                 {
+                    ExternalId = uid.ToString(),
                     Subject = message.Subject,
                     Body = message.TextBody,
                     From = message.From.ToString(),
-                    Date = message.Date.DateTime
+                    ReceivedAt = message.Date.LocalDateTime,
+                    
                 });
 
                 // olvasottnak jelölés

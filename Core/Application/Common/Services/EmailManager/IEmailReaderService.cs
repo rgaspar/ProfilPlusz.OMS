@@ -4,6 +4,6 @@ namespace Application.Common.Services.EmailManager
 {
     public interface IEmailReaderService
     {
-        Task<List<EmailDto>> GetLatestEmailsAsync();
+        Task<List<EmailDto>> GetUnreadEmailsAsync();
     }
 }
