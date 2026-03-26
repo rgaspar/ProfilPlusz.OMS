@@ -1,8 +1,10 @@
 ﻿using Application.Common.Behaviors;
 using Application.Common.Configuration;
+using Application.Common.Repositories;
 using Application.Common.Services.AnswerTemplateManager;
 using Application.Common.Services.EmailManager;
 using Application.Common.Services.Location;
+using Application.Common.Services.Statistics;
 using Application.Features.EmailPartnerRecommendation;
 using Application.Features.EmailPartnerRecommendation.Settings;
 using Domain.Services.Email;
@@ -37,6 +39,7 @@ public static class DependencyInjection
         services.AddSingleton<ICountyService, CountyService>();
         services.AddScoped<IEmailPartnerRecommendationManager, EmailPartnerRecommendationManager>();
         services.AddScoped<IEmailParserService, EmailParserService>();
+        services.AddScoped<IEmailStatisticsService, EmailStatisticsService>();
 
         services.Configure<TemplateSettings>(configuration.GetSection("EmailTemplates"));
         services.Configure<EmailPartnerRecommendationSettings>(configuration.GetSection("EmailPartnerRecommendation"));
