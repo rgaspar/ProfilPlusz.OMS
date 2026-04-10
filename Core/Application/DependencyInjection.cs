@@ -1,5 +1,6 @@
 ﻿using Application.Common.Behaviors;
 using Application.Common.Configuration;
+using Application.Common.Mappings;
 using Application.Common.Repositories;
 using Application.Common.Services.AnswerTemplateManager;
 using Application.Common.Services.EmailManager;
@@ -22,7 +23,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         //>>> AutoMapper
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(cfg => { }, typeof(MappingProfile).Assembly);
 
         //>>> FluentValidation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
