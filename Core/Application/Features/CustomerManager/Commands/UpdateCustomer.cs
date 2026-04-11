@@ -1,5 +1,6 @@
 ﻿using Application.Common.Repositories;
 using Domain.Entities;
+using Domain.Enums;
 using FluentValidation;
 using MediatR;
 
@@ -10,19 +11,32 @@ public class UpdateCustomerResult
     public Customer? Data { get; set; }
 }
 
-public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
+public class UpdateAddressDto
 {
-    public string? Id { get; init; }
-    public string? Name { get; set; }
-    public string? Description { get; set; }
     public string? Street { get; set; }
     public string? City { get; set; }
     public string? State { get; set; }
     public string? ZipCode { get; set; }
     public string? Country { get; set; }
+
+    public AddressType Type { get; set; }
+}
+
+public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
+{
+    public string? Id { get; init; }
+
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+
     public string? PhoneNumber { get; set; }
     public string? FaxNumber { get; set; }
+
     public string? EmailAddress { get; set; }
+    public string? EmailAddressOrderConfirmation { get; set; }
+    public string? EmailAddressInvoice { get; set; }
+    public string? EmailAddressPurchaseOrder { get; set; }
+
     public string? Website { get; set; }
     public string? WhatsApp { get; set; }
     public string? LinkedIn { get; set; }
@@ -30,9 +44,21 @@ public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
     public string? Instagram { get; set; }
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
+
+    public string? TaxNumber { get; set; }
+    public string? EuTaxNumber { get; set; }
+    public string? BankAccountNumber { get; set; }
+
+    public InvoiceType? InvoiceType { get; set; }
+    public PaymentMethod? PaymentMethod { get; set; }
+    public int? PaymentDeadline { get; set; }
+    public Currency? Currency { get; set; }
+
     public string? CustomerGroupId { get; set; }
     public string? CustomerCategoryId { get; set; }
-    public string? CreatedById { get; init; }
+
+    public List<UpdateAddressDto>? Addresses { get; set; }
+
     public string? UpdatedById { get; init; }
 }
 
@@ -40,16 +66,30 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerRequest>
 {
     public UpdateCustomerValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
-        RuleFor(x => x.Name).NotEmpty();
-        RuleFor(x => x.Street).NotEmpty();
-        RuleFor(x => x.City).NotEmpty();
-        RuleFor(x => x.State).NotEmpty();
-        RuleFor(x => x.ZipCode).NotEmpty();
-        RuleFor(x => x.PhoneNumber).NotEmpty();
-        RuleFor(x => x.EmailAddress).NotEmpty();
-        RuleFor(x => x.CustomerGroupId).NotEmpty();
-        RuleFor(x => x.CustomerCategoryId).NotEmpty();
+        RuleFor(x => x.Id)
+            .NotEmpty();
+
+        RuleFor(x => x.Name)
+            .NotEmpty();
+
+        RuleFor(x => x.EmailAddress)
+            .NotEmpty()
+            .EmailAddress();
+
+        RuleFor(x => x.CustomerGroupId)
+            .NotEmpty();
+
+        RuleFor(x => x.CustomerCategoryId)
+            .NotEmpty();
+
+        RuleForEach(x => x.Addresses)
+            .ChildRules(addr =>
+            {
+                addr.RuleFor(x => x.Street).NotEmpty();
+                addr.RuleFor(x => x.City).NotEmpty();
+                addr.RuleFor(x => x.ZipCode).NotEmpty();
+                addr.RuleFor(x => x.Country).NotEmpty();
+            });
     }
 }
 
@@ -60,8 +100,7 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
 
     public UpdateCustomerHandler(
         ICommandRepository<Customer> repository,
-        IUnitOfWork unitOfWork
-        )
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
@@ -69,26 +108,26 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
 
     public async Task<UpdateCustomerResult> Handle(UpdateCustomerRequest request, CancellationToken cancellationToken)
     {
-
         var entity = await _repository.GetAsync(request.Id ?? string.Empty, cancellationToken);
 
         if (entity == null)
         {
-            throw new Exception($"Entity not found: {request.Id}");
+            throw new Exception($"Customer not found: {request.Id}");
         }
 
         entity.UpdatedById = request.UpdatedById;
 
         entity.Name = request.Name;
         entity.Description = request.Description;
-        entity.Street = request.Street;
-        entity.City = request.City;
-        entity.State = request.State;
-        entity.ZipCode = request.ZipCode;
-        entity.Country = request.Country;
+
         entity.PhoneNumber = request.PhoneNumber;
         entity.FaxNumber = request.FaxNumber;
+
         entity.EmailAddress = request.EmailAddress;
+        entity.EmailAddressOrderConfirmation = request.EmailAddressOrderConfirmation;
+        entity.EmailAddressInvoice = request.EmailAddressInvoice;
+        entity.EmailAddressPurchaseOrder = request.EmailAddressPurchaseOrder;
+
         entity.Website = request.Website;
         entity.WhatsApp = request.WhatsApp;
         entity.LinkedIn = request.LinkedIn;
@@ -96,10 +135,47 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         entity.Instagram = request.Instagram;
         entity.TwitterX = request.TwitterX;
         entity.TikTok = request.TikTok;
+
+        entity.TaxNumber = request.TaxNumber;
+        entity.EuTaxNumber = request.EuTaxNumber;
+        entity.BankAccountNumber = request.BankAccountNumber;
+
+        entity.InvoiceType = request.InvoiceType;
+        entity.PaymentMethod = request.PaymentMethod;
+        entity.PaymentDeadlineDays = request.PaymentDeadline;
+        entity.Currency = request.Currency;
+
         entity.CustomerGroupId = request.CustomerGroupId;
         entity.CustomerCategoryId = request.CustomerCategoryId;
 
+        // címek teljes cseréje
+        entity.AddressList.Clear();
+
+        if (request.Addresses != null && request.Addresses.Count > 0)
+        {
+            foreach (var addr in request.Addresses)
+            {
+                entity.AddressList.Add(new Address
+                {
+                    Street = addr.Street,
+                    City = addr.City,
+                    State = addr.State,
+                    ZipCode = addr.ZipCode,
+                    Country = addr.Country,
+                    Type = addr.Type
+                });
+            }
+        }
+        else
+        {
+            entity.AddressList.Add(new Address
+            {
+                Type = AddressType.Headquarters
+            });
+        }
+
         _repository.Update(entity);
+
         await _unitOfWork.SaveAsync(cancellationToken);
 
         return new UpdateCustomerResult
@@ -108,4 +184,3 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         };
     }
 }
-

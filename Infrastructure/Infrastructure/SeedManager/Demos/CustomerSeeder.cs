@@ -1,6 +1,7 @@
 ﻿using Application.Common.Repositories;
 using Application.Features.NumberSequenceManager;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.SeedManager.Demos;
@@ -32,12 +33,14 @@ public class CustomerSeeder
     {
         var groups = (await _groupRepository.GetQuery().ToListAsync()).Select(x => x.Id).ToArray();
         var categories = (await _categoryRepository.GetQuery().ToListAsync()).Select(x => x.Id).ToArray();
-        var cities = new string[] { "New York", "Los Angeles", "San Francisco", "Chicago" };
-        var streets = new string[] { "Main St", "Broadway", "Market St", "Elm St" };
-        var states = new string[] { "NY", "CA", "IL", "TX" };
-        var zipCodes = new string[] { "10001", "90001", "94101", "60601" };
-        var phoneNumbers = new string[] { "555-1234", "555-5678", "555-8765", "555-4321" };
-        var emailDomains = new string[] { "example.com", "demo.com", "test.com", "sample.com" };
+
+        var cities = new[] { "New York", "Los Angeles", "San Francisco", "Chicago" };
+        var streets = new[] { "Main St", "Broadway", "Market St", "Elm St" };
+        var states = new[] { "NY", "CA", "IL", "TX" };
+        var zipCodes = new[] { "10001", "90001", "94101", "60601" };
+        var phoneNumbers = new[] { "555-1234", "555-5678", "555-8765", "555-4321" };
+        var emailDomains = new[] { "example.com", "demo.com", "test.com", "sample.com" };
+        var currencies = new[] { Currency.USD, Currency.EUR };
 
         var random = new Random();
 
@@ -67,15 +70,47 @@ public class CustomerSeeder
 
         foreach (var customer in customers)
         {
+            var baseName = customer.Name?.Split(' ')[0].ToLower();
+
             customer.Number = _numberSequenceService.GenerateNumber(nameof(Customer), "", "CST");
+
             customer.CustomerGroupId = GetRandomValue(groups, random);
             customer.CustomerCategoryId = GetRandomValue(categories, random);
-            customer.City = GetRandomString(cities, random);
-            customer.Street = GetRandomString(streets, random);
-            customer.State = GetRandomString(states, random);
-            customer.ZipCode = GetRandomString(zipCodes, random);
+
             customer.PhoneNumber = GetRandomString(phoneNumbers, random);
-            customer.EmailAddress = $"{customer.Name?.Split(' ')[0].ToLower()}@{GetRandomString(emailDomains, random)}";
+
+            customer.EmailAddress = $"{baseName}@{GetRandomString(emailDomains, random)}";
+            customer.EmailAddressInvoice = $"billing@{GetRandomString(emailDomains, random)}";
+            customer.EmailAddressOrderConfirmation = $"orders@{GetRandomString(emailDomains, random)}";
+
+            customer.Website = $"https://www.{baseName}.com";
+
+            customer.TaxNumber = $"{random.Next(10000000, 99999999)}-2-42";
+            customer.EuTaxNumber = $"EU{random.Next(10000000, 99999999)}";
+
+            customer.BankAccountNumber = $"{random.Next(10000000, 99999999)}-{random.Next(10000000, 99999999)}";
+
+            customer.InvoiceType = InvoiceType.Paper;
+            customer.PaymentMethod = GetRandomValue(new[]
+            {
+                PaymentMethod.BankTransfer,
+                PaymentMethod.Cash
+            }, random);
+
+            customer.PaymentDeadlineDays = GetRandomValue(new[] { 8, 15, 30 }, random);
+
+            customer.Currency = GetRandomValue(currencies, random);
+
+            // cím hozzáadása
+            customer.AddressList.Add(new Address
+            {
+                Street = GetRandomString(streets, random),
+                City = GetRandomString(cities, random),
+                State = GetRandomString(states, random),
+                ZipCode = GetRandomString(zipCodes, random),
+                Country = "USA",
+                Type = AddressType.Headquarters
+            });
 
             await _customerRepository.CreateAsync(customer);
         }

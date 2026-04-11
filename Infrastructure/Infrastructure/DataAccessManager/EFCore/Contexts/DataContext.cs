@@ -56,6 +56,8 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
 
     public DbSet<ProcessedEmail> ProcessedEmail { get; set; }
 
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -100,7 +102,8 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
         modelBuilder.ApplyConfiguration(new ScrappingConfiguration());
 
         modelBuilder.ApplyConfiguration(new AnswerTemplateConfiguration());
-        modelBuilder.ApplyConfiguration(new AnswerTemplateConfiguration());
+
+        modelBuilder.ApplyConfiguration(new AddressConfiguration());
     }
 
 }
