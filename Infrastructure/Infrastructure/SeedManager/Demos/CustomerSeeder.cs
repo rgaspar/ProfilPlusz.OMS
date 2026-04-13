@@ -36,7 +36,7 @@ public class CustomerSeeder
 
         var cities = new[] { "New York", "Los Angeles", "San Francisco", "Chicago" };
         var streets = new[] { "Main St", "Broadway", "Market St", "Elm St" };
-        var states = new[] { "NY", "CA", "IL", "TX" };
+        var states = new[] { "Bács-Kiskun vármegye", "Baranya vármegye", "Békés vármegye", "Borsod-Abaúj-Zemplén vármegye", "Csongrád-Csanád vármegye", "Fejér vármegye", "Győr-Moson-Sopron vármegye", "Hajdú-Bihar vármegye", "Heves vármegye", "Jász-Nagykun-Szolnok vármegye", "Komárom-Esztergom vármegye", "Nógrád vármegye", "Pest vármegye", "Somogy vármegye", "Szabolcs-Szatmár-Bereg vármegye", "Tolna vármegye", "Vas vármegye", "Veszprém vármegye", "Zala vármegye", "Budapest" };
         var zipCodes = new[] { "10001", "90001", "94101", "60601" };
         var phoneNumbers = new[] { "555-1234", "555-5678", "555-8765", "555-4321" };
         var emailDomains = new[] { "example.com", "demo.com", "test.com", "sample.com" };

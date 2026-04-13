@@ -28,8 +28,6 @@ namespace Infrastructure.LocationManager
                 };
             }
 
-            formattedAddress = "2251 Tápiószecső Akàcfa utca 1";
-
             var url =
                 "https://nominatim.openstreetmap.org/search" +
                 $"?q={Uri.EscapeDataString(formattedAddress)}" +

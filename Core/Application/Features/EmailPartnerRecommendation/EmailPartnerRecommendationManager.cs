@@ -24,21 +24,23 @@ namespace Application.Features.EmailPartnerRecommendation
         private readonly IEmailParserService _emailParser;
         private readonly IAddressResolverService _addressResolverService;
         private readonly ICountyService _countyService;
-        private readonly IPartnerRepository _partnerRepository;
+        /*private readonly IPartnerRepository _partnerRepository;*/
+        private readonly ICommandRepository<Customer> _customerRepository;
         private readonly IAnswerTemplateService _answerTemplateService;
 
         private readonly EmailPartnerRecommendationSettings _settings;
 
         private readonly IProcessedEmailRepository _processedEmailRepository;
 
-        public EmailPartnerRecommendationManager(IEmailReaderService emailReaderService, IEmailWriterService emailWriterService, IEmailParserService emailParser, IAddressResolverService addressResolverService, ICountyService countyService, IPartnerRepository partnerRepository, IAnswerTemplateService answerTemplateService, IOptions<EmailPartnerRecommendationSettings> settings, IProcessedEmailRepository processedEmailRepository)
+        public EmailPartnerRecommendationManager(IEmailReaderService emailReaderService, IEmailWriterService emailWriterService, IEmailParserService emailParser, IAddressResolverService addressResolverService, ICountyService countyService/*, IPartnerRepository partnerRepository*/, ICommandRepository<Customer> customerRepository, IAnswerTemplateService answerTemplateService, IOptions<EmailPartnerRecommendationSettings> settings, IProcessedEmailRepository processedEmailRepository)
         {
             _emailReaderService = emailReaderService;
             _emailWriterService = emailWriterService;
             _emailParser = emailParser;
             _addressResolverService = addressResolverService;
             _countyService = countyService;
-            _partnerRepository = partnerRepository;
+            //_partnerRepository = partnerRepository;
+            _customerRepository = customerRepository;
             _answerTemplateService = answerTemplateService;
             _settings = settings.Value;
             _processedEmailRepository = processedEmailRepository;
@@ -75,7 +77,8 @@ namespace Application.Features.EmailPartnerRecommendation
                         continue;
                     }
 
-                    var partnerExists = await _partnerRepository.ExistsByEmailAsync(parsedEmail.Email, cancellationToken);
+                    //var partnerExists = await _partnerRepository.ExistsByEmailAsync(parsedEmail.Email, cancellationToken);
+                    var partnerExists = await _customerRepository.ExistsByEmailAsync(parsedEmail.Email, cancellationToken);
 
                     log.PartnerExists = partnerExists;
 
