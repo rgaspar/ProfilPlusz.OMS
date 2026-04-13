@@ -76,7 +76,7 @@ namespace Application.Common.Services.EmailManager
                 Street = lines.ElementAtOrDefault(1),
                 FloorDoor = lines.ElementAtOrDefault(2),
                 Zip = Regex.Match(zipCityLine, @"\d{4}").Value,
-                City = Regex.Replace(zipCityLine, @"\d{4}", "").Trim(),
+                City = Regex.Replace(zipCityLine, @"\b[IVXLCDM]+\.\s*|\b\d{4}\b", "", RegexOptions.IgnoreCase).Trim(),
                 Country = lines.FirstOrDefault(x =>
                     x.Contains("Magyarország", StringComparison.OrdinalIgnoreCase))
             };

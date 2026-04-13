@@ -120,7 +120,7 @@ namespace Application.Features.EmailCustomerRecommendation
 
                     var body =
                         await _answerTemplateService.RenderAsync(
-                            "EMAIL_PARTNER_RECOMMENDATION",
+                            "EMAIL_CUSTOMER_RECOMMENDATION",
                             new
                             {
                                 CustomerName = parsedEmail.CustomerName,

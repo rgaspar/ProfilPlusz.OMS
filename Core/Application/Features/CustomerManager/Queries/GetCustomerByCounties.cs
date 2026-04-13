@@ -40,20 +40,18 @@ public class GetCustomersByCountiesHandler
             };
         }
 
-        var normalizedCounties = request.States
-            .Select(NormalizeCounty)
-            .ToList();
+        var normalizedCounties = request.States.Select(NormalizeCounty).ToList();
 
         var customers = await _context
             .Customer
             .AsNoTracking()
             .ApplyIsDeletedFilter(request.IsDeleted)
+            .Include(x => x.AddressList)
             .Where(customer =>
                 customer.AddressList.Any(address =>
                     address.Type == AddressType.Site &&
                     !string.IsNullOrWhiteSpace(address.State) &&
-                    normalizedCounties.Contains(
-                        NormalizeCounty(address.State))
+                    normalizedCounties.Contains(address.State.Trim().ToLower())
                 ))
             .ToListAsync(cancellationToken);
 

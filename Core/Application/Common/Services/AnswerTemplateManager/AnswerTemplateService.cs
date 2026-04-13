@@ -2,6 +2,8 @@
 using Application.Common.Repositories;
 using Domain.Entities;
 using Microsoft.Extensions.Options;
+using System.Collections;
+using System.Reflection;
 
 namespace Application.Common.Services.AnswerTemplateManager
 {
@@ -9,6 +11,7 @@ namespace Application.Common.Services.AnswerTemplateManager
     {
         private readonly IAnswerTemplateRepository _repository;
         private readonly TemplateSettings _settings;
+
         private readonly Dictionary<string, AnswerTemplate> _templateCache = new();
 
         public AnswerTemplateService(
@@ -23,51 +26,77 @@ namespace Application.Common.Services.AnswerTemplateManager
         {
             var template = await GetTemplateAsync(key);
 
-            var fullPath = Path.Combine(AppContext.BaseDirectory, _settings.BasePath, template.Path);
+            var fullPath = Path.Combine(
+                AppContext.BaseDirectory,
+                _settings.BasePath,
+                template.Path);
 
             if (!File.Exists(fullPath))
-            {
                 throw new Exception($"Template file not found: {fullPath}");
-            }
 
             var content = await File.ReadAllTextAsync(fullPath);
 
             return Render(content, model);
         }
 
-        public async Task<string[]> GetDefaultRecipientsAsync(string key)
+        private string Render(string template, object? model)
         {
-            var template = await _repository.GetByKeyAsync(key) ?? throw new Exception($"Template not found: {key}");
+            if (string.IsNullOrWhiteSpace(template) || model == null)
+                return template;
 
-            if (string.IsNullOrWhiteSpace(template.DefaultRecipients))
-                return [];
-
-            return template.DefaultRecipients
-                .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .Select(x => x.Trim())
-                .ToArray();
+            return RenderInternal(template, model, new HashSet<object>());
         }
 
-        private string Render(string template, object? model)
+        private string RenderInternal(
+            string template,
+            object model,
+            HashSet<object> visited)
         {
             if (model == null)
                 return template;
 
-            foreach (var prop in model.GetType().GetProperties())
+            var type = model.GetType();
+
+            // végtelen ciklus védelem
+            if (!IsSimpleType(type))
+            {
+                if (visited.Contains(model))
+                    return template;
+
+                visited.Add(model);
+            }
+
+            var properties = type
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetIndexParameters().Length == 0);
+
+            foreach (var prop in properties)
             {
                 var value = prop.GetValue(model);
 
-                // LISTA kezelés
-                if (value is IEnumerable<object> list && !(value is string))
+                var key = prop.Name;
+
+                // -------------------------
+                // LISTA BLOKK
+                // {{#Items}} ... {{/Items}}
+                // -------------------------
+                if (value is IEnumerable list && value is not string)
                 {
-                    var startTag = $"{{{{#{prop.Name}}}}}";
-                    var endTag = $"{{{{/{prop.Name}}}}}";
+                    var startTag = $"{{{{#{key}}}}}";
+                    var endTag = $"{{{{/{key}}}}}";
 
-                    var startIndex = template.IndexOf(startTag);
-                    var endIndex = template.IndexOf(endTag);
-
-                    if (startIndex >= 0 && endIndex > startIndex)
+                    while (true)
                     {
+                        var startIndex = template.IndexOf(startTag, StringComparison.Ordinal);
+
+                        if (startIndex < 0)
+                            break;
+
+                        var endIndex = template.IndexOf(endTag, startIndex, StringComparison.Ordinal);
+
+                        if (endIndex < 0)
+                            break;
+
                         var innerTemplate = template.Substring(
                             startIndex + startTag.Length,
                             endIndex - (startIndex + startTag.Length));
@@ -76,7 +105,10 @@ namespace Application.Common.Services.AnswerTemplateManager
 
                         foreach (var item in list)
                         {
-                            renderedItems += Render(innerTemplate, item);
+                            renderedItems += RenderInternal(
+                                innerTemplate,
+                                item!,
+                                visited);
                         }
 
                         template =
@@ -85,32 +117,130 @@ namespace Application.Common.Services.AnswerTemplateManager
                             + template.Substring(endIndex + endTag.Length);
                     }
                 }
+
+                // -------------------------
+                // KOMPLEX OBJECT
+                // pl Address, Contact
+                // -------------------------
+                else if (value != null && !IsSimpleType(prop.PropertyType))
+                {
+                    template = RenderComplexObject(
+                        template,
+                        key,
+                        value,
+                        visited);
+                }
+
+                // -------------------------
+                // SIMPLE VALUE
+                // -------------------------
                 else
                 {
-                    var stringValue = value?.ToString() ?? "";
-
                     template = template.Replace(
-                        $"{{{{{prop.Name}}}}}",
-                        stringValue);
+                        $"{{{{{key}}}}}",
+                        FormatValue(value),
+                        StringComparison.Ordinal);
                 }
             }
 
             return template;
         }
 
+        private string RenderComplexObject(
+            string template,
+            string prefix,
+            object value,
+            HashSet<object> visited)
+        {
+            var properties = value
+                .GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetIndexParameters().Length == 0);
+
+            foreach (var prop in properties)
+            {
+                var propValue = prop.GetValue(value);
+
+                var key = $"{prefix}.{prop.Name}";
+
+                if (propValue != null && !IsSimpleType(prop.PropertyType))
+                {
+                    template = RenderComplexObject(
+                        template,
+                        key,
+                        propValue,
+                        visited);
+                }
+                else
+                {
+                    template = template.Replace(
+                        $"{{{{{key}}}}}",
+                        FormatValue(propValue),
+                        StringComparison.Ordinal);
+                }
+            }
+
+            return template;
+        }
+
+        private static bool IsSimpleType(Type type)
+        {
+            if (Nullable.GetUnderlyingType(type) is Type underlying)
+                type = underlying;
+
+            return
+                type.IsPrimitive
+                || type.IsEnum
+                || type == typeof(string)
+                || type == typeof(decimal)
+                || type == typeof(DateTime)
+                || type == typeof(DateTimeOffset)
+                || type == typeof(TimeSpan)
+                || type == typeof(Guid)
+                || Convert.GetTypeCode(type) != TypeCode.Object;
+        }
+
+        private static string FormatValue(object? value)
+        {
+            if (value == null)
+                return "";
+
+            return value switch
+            {
+                DateTime dt => dt.ToString("yyyy.MM.dd HH:mm"),
+                DateTimeOffset dto => dto.ToString("yyyy.MM.dd HH:mm"),
+                bool b => b ? "igen" : "nem",
+                _ => value.ToString() ?? ""
+            };
+        }
+
         public async Task<AnswerTemplate> GetTemplateAsync(string key)
         {
             if (_templateCache.TryGetValue(key, out var cached))
-            {
                 return cached;
-            }
 
-            var template = await _repository.GetByKeyAsync(key)
+            var template =
+                await _repository.GetByKeyAsync(key)
                 ?? throw new Exception($"Template not found: {key}");
 
             _templateCache[key] = template;
 
             return template;
+        }
+
+        public async Task<string[]> GetDefaultRecipientsAsync(string key)
+        {
+            var template =
+                await _repository.GetByKeyAsync(key)
+                ?? throw new Exception($"Template not found: {key}");
+
+            if (string.IsNullOrWhiteSpace(template.DefaultRecipients))
+                return Array.Empty<string>();
+
+            return template.DefaultRecipients
+                .Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .ToArray();
         }
     }
 }

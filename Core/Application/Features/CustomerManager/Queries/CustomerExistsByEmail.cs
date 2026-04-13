@@ -41,16 +41,15 @@ public class CustomerExistsByEmailHandler
         var normalizedEmail = NormalizeEmail(request.Email);
 
         var exists = await _context
-            .Customer
-            .AsNoTracking()
-            .ApplyIsDeletedFilter(request.IsDeleted)
-            .AnyAsync(customer =>
-            NormalizeEmail(customer.EmailAddress) == normalizedEmail ||
-            NormalizeEmail(customer.EmailAddressInvoice) == normalizedEmail ||
-            NormalizeEmail(customer.EmailAddressOrderConfirmation) == normalizedEmail ||
-            NormalizeEmail(customer.EmailAddressPurchaseOrder) == normalizedEmail,
+        .Customer
+        .AsNoTracking()
+        .ApplyIsDeletedFilter(request.IsDeleted)
+        .AnyAsync(customer =>
+            (customer.EmailAddress != null && customer.EmailAddress.Trim().ToLower() == normalizedEmail) ||
+            (customer.EmailAddressInvoice != null && customer.EmailAddressInvoice.Trim().ToLower() == normalizedEmail) ||
+            (customer.EmailAddressOrderConfirmation != null && customer.EmailAddressOrderConfirmation.Trim().ToLower() == normalizedEmail) ||
+            (customer.EmailAddressPurchaseOrder != null && customer.EmailAddressPurchaseOrder.Trim().ToLower() == normalizedEmail),
             cancellationToken);
-
 
         return new CustomerExistsByEmailResult
         {
