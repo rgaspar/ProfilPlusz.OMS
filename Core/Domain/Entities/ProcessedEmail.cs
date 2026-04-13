@@ -20,9 +20,9 @@ namespace Domain.Entities
 
         public string CustomerName { get; set; }
 
-        public string County { get; set; }
+        public string State { get; set; }
 
-        public bool PartnerExists { get; set; }
+        public bool CustomerExists { get; set; }
 
         public bool RecommendationSent { get; set; }
 

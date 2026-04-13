@@ -31,7 +31,7 @@ namespace Infrastructure.DataAccessManager.EFCore.Configurations
             builder.Property(x => x.CustomerName)
                 .HasMaxLength(200);
 
-            builder.Property(x => x.County)
+            builder.Property(x => x.State)
                 .HasMaxLength(100);
 
             builder.Property(x => x.Status)

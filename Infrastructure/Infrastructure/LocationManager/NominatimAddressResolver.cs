@@ -22,7 +22,7 @@ namespace Infrastructure.LocationManager
             {
                 return new AddressInfo
                 {
-                    County = "Budapest",
+                    State = "Budapest",
                     City = shippingAddress.City,
                     Zip = shippingAddress.Zip
                 };
@@ -59,7 +59,7 @@ namespace Infrastructure.LocationManager
 
             return new AddressInfo
             {
-                County = addressObj.TryGetProperty("county", out var county)
+                State = addressObj.TryGetProperty("county", out var county)
                     ? county.GetString()
                     : null,
 

@@ -3,47 +3,41 @@ using Application.Common.Repositories;
 using Application.Common.Services.AnswerTemplateManager;
 using Application.Common.Services.EmailManager;
 using Application.Common.Services.Location;
-using Application.Features.EmailPartnerRecommendation.Settings;
+using Application.Features.CustomerManager.Queries;
+using Application.Features.EmailCustomerRecommendation.Settings;
+using Application.Features.EmailPartnerRecommendation;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Services.Email;
+using MediatR;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Features.EmailPartnerRecommendation
+namespace Application.Features.EmailCustomerRecommendation
 {
-    public class EmailPartnerRecommendationManager : IEmailPartnerRecommendationManager
+    public class EmailCustomerRecommendationManager : IEmailCustomerRecommendationManager
     {
         private readonly IEmailReaderService _emailReaderService;
         private readonly IEmailWriterService _emailWriterService;
         private readonly IEmailParserService _emailParser;
         private readonly IAddressResolverService _addressResolverService;
-        private readonly ICountyService _countyService;
-        /*private readonly IPartnerRepository _partnerRepository;*/
+        private readonly IStateService _stateService;
         private readonly ICommandRepository<Customer> _customerRepository;
         private readonly IAnswerTemplateService _answerTemplateService;
-
-        private readonly EmailPartnerRecommendationSettings _settings;
-
+        private readonly EmailCustomerRecommendationSettings _settings;
         private readonly IProcessedEmailRepository _processedEmailRepository;
+        private readonly ISender _sender;
 
-        public EmailPartnerRecommendationManager(IEmailReaderService emailReaderService, IEmailWriterService emailWriterService, IEmailParserService emailParser, IAddressResolverService addressResolverService, ICountyService countyService/*, IPartnerRepository partnerRepository*/, ICommandRepository<Customer> customerRepository, IAnswerTemplateService answerTemplateService, IOptions<EmailPartnerRecommendationSettings> settings, IProcessedEmailRepository processedEmailRepository)
+        public EmailCustomerRecommendationManager(IEmailReaderService emailReaderService, IEmailWriterService emailWriterService, IEmailParserService emailParser, IAddressResolverService addressResolverService, IStateService stateService, IAnswerTemplateService answerTemplateService, IOptions<EmailCustomerRecommendationSettings> settings, IProcessedEmailRepository processedEmailRepository, ISender sender)
         {
             _emailReaderService = emailReaderService;
             _emailWriterService = emailWriterService;
             _emailParser = emailParser;
             _addressResolverService = addressResolverService;
-            _countyService = countyService;
-            //_partnerRepository = partnerRepository;
-            _customerRepository = customerRepository;
+            _stateService = stateService;
             _answerTemplateService = answerTemplateService;
             _settings = settings.Value;
             _processedEmailRepository = processedEmailRepository;
+            _sender = sender;
         }
 
         public async Task ProcessUnreadEmailsAsync(CancellationToken cancellationToken = default)
@@ -77,12 +71,13 @@ namespace Application.Features.EmailPartnerRecommendation
                         continue;
                     }
 
-                    //var partnerExists = await _partnerRepository.ExistsByEmailAsync(parsedEmail.Email, cancellationToken);
-                    var partnerExists = await _customerRepository.ExistsByEmailAsync(parsedEmail.Email, cancellationToken);
+                    var customerExistsResult = await _sender.Send(new CustomerExistsByEmailRequest { Email = parsedEmail.Email, IsDeleted = false }, cancellationToken);
 
-                    log.PartnerExists = partnerExists;
+                    var customerExists = customerExistsResult.Exists;
 
-                    if (partnerExists)
+                    log.CustomerExists = customerExists;
+
+                    if (customerExists)
                     {
                         log.Status = EmailProcessingStatus.Skipped;
                         continue;
@@ -96,21 +91,28 @@ namespace Application.Features.EmailPartnerRecommendation
 
                     var addressInfo = await _addressResolverService.ResolveAsync(parsedEmail.ShippingAddress);
 
-                    if (string.IsNullOrWhiteSpace(addressInfo?.County))
+                    if (string.IsNullOrWhiteSpace(addressInfo?.State))
                     {
                         log.Status = EmailProcessingStatus.Skipped;
                         continue;
                     }
 
-                    var normalizedCounty = _countyService.Normalize(addressInfo.County);
+                    var normalizedState = _stateService.Normalize(addressInfo.State);
 
-                    log.County = normalizedCounty;
+                    log.State = normalizedState;
 
-                    var counties = _countyService.GetWithNeighbours(normalizedCounty);
+                    var states = _stateService.GetWithNeighbours(normalizedState);
 
-                    var partners = await _partnerRepository.GetByCountiesAsync(counties, cancellationToken);
+                    var result = await _sender.Send(
+                                new GetCustomersByCountiesRequest
+                                {
+                                    States = states
+                                },
+                                cancellationToken);
 
-                    if (!partners.Any())
+                    var customers = result.Data;
+
+                    if (!customers.Any())
                     {
                         log.Status = EmailProcessingStatus.Skipped;
                         continue;
@@ -123,7 +125,7 @@ namespace Application.Features.EmailPartnerRecommendation
                             {
                                 CustomerName = parsedEmail.CustomerName,
                                 OrderNumber = parsedEmail.OrderNumber,
-                                Partners = partners
+                                Customers = customers
                             });
 
                     await _emailWriterService.CreateDraftAsync(

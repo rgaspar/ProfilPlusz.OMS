@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Features.EmailPartnerRecommendation.Settings
+namespace Application.Features.EmailCustomerRecommendation.Settings
 {
-    public class EmailPartnerRecommendationSettings
+    public class EmailCustomerRecommendationSettings
     {
         public string DefaultToEmail { get; set; } = "";
 

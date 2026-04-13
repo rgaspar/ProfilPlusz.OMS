@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.Common.Services.Location
 {
-    public interface ICountyService
+    public interface IStateService
     {
         IReadOnlyList<string> GetAll();
 

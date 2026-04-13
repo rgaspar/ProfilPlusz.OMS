@@ -6,8 +6,9 @@ using Application.Common.Services.AnswerTemplateManager;
 using Application.Common.Services.EmailManager;
 using Application.Common.Services.Location;
 using Application.Common.Services.Statistics;
+using Application.Features.EmailCustomerRecommendation;
+using Application.Features.EmailCustomerRecommendation.Settings;
 using Application.Features.EmailPartnerRecommendation;
-using Application.Features.EmailPartnerRecommendation.Settings;
 using Domain.Services.Email;
 using FluentValidation;
 using MediatR;
@@ -37,13 +38,13 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IAnswerTemplateService, AnswerTemplateService>();
-        services.AddSingleton<ICountyService, CountyService>();
-        services.AddScoped<IEmailPartnerRecommendationManager, EmailPartnerRecommendationManager>();
+        services.AddSingleton<IStateService, StateService>();
+        services.AddScoped<IEmailCustomerRecommendationManager, EmailCustomerRecommendationManager>();
         services.AddScoped<IEmailParserService, EmailParserService>();
         services.AddScoped<IEmailStatisticsService, EmailStatisticsService>();
 
         services.Configure<TemplateSettings>(configuration.GetSection("EmailTemplates"));
-        services.Configure<EmailPartnerRecommendationSettings>(configuration.GetSection("EmailPartnerRecommendation"));
+        services.Configure<EmailCustomerRecommendationSettings>(configuration.GetSection("EmailPartnerRecommendation"));
 
         //>>> Register services in Application.Features 
         var assembly = Assembly.GetExecutingAssembly();

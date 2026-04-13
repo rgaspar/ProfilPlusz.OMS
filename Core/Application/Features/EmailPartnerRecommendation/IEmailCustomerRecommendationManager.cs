@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.Features.EmailPartnerRecommendation
 {
-    public interface IEmailPartnerRecommendationManager
+    public interface IEmailCustomerRecommendationManager
     {
         Task ProcessUnreadEmailsAsync(CancellationToken cancellationToken = default);
     }

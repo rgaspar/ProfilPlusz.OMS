@@ -1,16 +1,23 @@
 ﻿using Application.Common.CQS.Queries;
+using Application.Common.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.CustomerManager.Queries;
 
-public class CustomerExistsByEmailRequest : IRequest<bool>
+public class CustomerExistsByEmailResult
 {
-    public string EmailAddress { get; init; } = default!;
+    public bool Exists { get; init; }
+}
+
+public class CustomerExistsByEmailRequest : IRequest<CustomerExistsByEmailResult>
+{
+    public string Email { get; init; } = default!;
+    public bool IsDeleted { get; init; } = false;
 }
 
 public class CustomerExistsByEmailHandler
-    : IRequestHandler<CustomerExistsByEmailRequest, bool>
+    : IRequestHandler<CustomerExistsByEmailRequest, CustomerExistsByEmailResult>
 {
     private readonly IQueryContext _context;
 
@@ -19,14 +26,39 @@ public class CustomerExistsByEmailHandler
         _context = context;
     }
 
-    public async Task<bool> Handle(
-        CustomerExistsByEmailRequest request,
-        CancellationToken cancellationToken)
+    public async Task<CustomerExistsByEmailResult> Handle(
+    CustomerExistsByEmailRequest request,
+    CancellationToken cancellationToken)
     {
-        return await _context.Customer
+        if (string.IsNullOrWhiteSpace(request.Email))
+        {
+            return new CustomerExistsByEmailResult
+            {
+                Exists = false
+            };
+        }
+
+        var normalizedEmail = NormalizeEmail(request.Email);
+
+        var exists = await _context
+            .Customer
             .AsNoTracking()
-            .AnyAsync(
-                x => x.EmailAddress == request.EmailAddress,
-                cancellationToken);
+            .ApplyIsDeletedFilter(request.IsDeleted)
+            .AnyAsync(customer =>
+            NormalizeEmail(customer.EmailAddress) == normalizedEmail ||
+            NormalizeEmail(customer.EmailAddressInvoice) == normalizedEmail ||
+            NormalizeEmail(customer.EmailAddressOrderConfirmation) == normalizedEmail ||
+            NormalizeEmail(customer.EmailAddressPurchaseOrder) == normalizedEmail,
+            cancellationToken);
+
+
+        return new CustomerExistsByEmailResult
+        {
+            Exists = exists
+        };
+    }
+    private static string NormalizeEmail(string email)
+    {
+        return email?.Trim().ToLowerInvariant() ?? string.Empty;
     }
 }

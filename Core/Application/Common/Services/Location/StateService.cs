@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.Common.Services.Location
 {
-    public class CountyService : ICountyService
+    public class StateService : IStateService
     {
         private static readonly Dictionary<string, string[]> _neighbours =
         new(StringComparer.OrdinalIgnoreCase)

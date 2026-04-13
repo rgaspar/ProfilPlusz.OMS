@@ -27,11 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Templates\Email\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Templates\Email\EmailPartnerRecommendation.html">
+    <None Update="Templates\Email\EmailCustomerRecommendation.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

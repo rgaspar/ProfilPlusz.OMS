@@ -68,7 +68,7 @@ public static class DI
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
         services.AddScoped<IAnswerTemplateRepository, AnswerTemplateRepository>();
-        services.AddScoped<IPartnerRepository, PartnerRepository>();
+        //services.AddScoped<IPartnerRepository, PartnerRepository>();
         services.AddScoped<IProcessedEmailRepository, ProcessedEmailRepository>();
 
         return services;

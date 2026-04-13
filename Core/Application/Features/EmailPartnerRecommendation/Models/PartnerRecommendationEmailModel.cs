@@ -10,8 +10,8 @@ namespace Application.Features.EmailPartnerRecommendation.Models
     {
         public string CustomerName { get; set; } = null!;
 
-        public List<string> Counties { get; set; } = new();
+        public List<string> States { get; set; } = new();
 
-        public List<PartnerEmailModel> Partners { get; set; } = new();
+        public List<PartnerEmailModel> Customers { get; set; } = new();
     }
 }

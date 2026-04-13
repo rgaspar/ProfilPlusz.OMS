@@ -12,7 +12,7 @@ namespace Application.Common.Mappings
         {
             CreateMap<AddressInfoDto, AddressInfo>();
             CreateMap<AddressInfo, AddressInfoDto>();
-            CreateMap<Partner, PartnerDto>();
+            //CreateMap<Partner, PartnerDto>();
         }
     }
 }

@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace ASPNET.BackEnd.Controllers
 {
     [ApiController]
-    [Route("api/email-partner-recommendations")]
-    public class EmailPartnerRecommendationController : ControllerBase
+    [Route("api/email-customer-recommendations")]
+    public class EmailCustomerRecommendationController : ControllerBase
     {
-        private readonly IEmailPartnerRecommendationManager _manager;
+        private readonly IEmailCustomerRecommendationManager _manager;
 
-        public EmailPartnerRecommendationController(
-            IEmailPartnerRecommendationManager manager)
+        public EmailCustomerRecommendationController(
+            IEmailCustomerRecommendationManager manager)
         {
             _manager = manager;
         }
