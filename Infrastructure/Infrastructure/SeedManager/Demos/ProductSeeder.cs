@@ -1,98 +1,294 @@
 ﻿using Application.Common.Repositories;
-using Application.Features.NumberSequenceManager;
 using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.SeedManager.Demos
+namespace Infrastructure.SeedManager.Demos;
+
+public class ProductSeeder
 {
-    public class ProductSeeder
+    private readonly ICommandRepository<Product> _productRepository;
+    private readonly ICommandRepository<ProductGroup> _productGroupRepository;
+    private readonly ICommandRepository<UnitMeasure> _unitMeasureRepository;
+    private readonly ICommandRepository<Brand> _brandRepository;
+    private readonly ICommandRepository<Color> _colorRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ProductSeeder(
+        ICommandRepository<Product> productRepository,
+        ICommandRepository<ProductGroup> productGroupRepository,
+        ICommandRepository<UnitMeasure> unitMeasureRepository,
+        ICommandRepository<Brand> brandRepository,
+        ICommandRepository<Color> colorRepository,
+        IUnitOfWork unitOfWork)
     {
-        private readonly ICommandRepository<Product> _productRepository;
-        private readonly ICommandRepository<ProductGroup> _productGroupRepository;
-        private readonly ICommandRepository<UnitMeasure> _unitMeasureRepository;
-        private readonly NumberSequenceService _numberSequenceService;
-        private readonly IUnitOfWork _unitOfWork;
+        _productRepository = productRepository;
+        _productGroupRepository = productGroupRepository;
+        _unitMeasureRepository = unitMeasureRepository;
+        _brandRepository = brandRepository;
+        _colorRepository = colorRepository;
+        _unitOfWork = unitOfWork;
+    }
 
-        public ProductSeeder(
-            ICommandRepository<Product> productRepository,
-            ICommandRepository<ProductGroup> productGroupRepository,
-            ICommandRepository<UnitMeasure> unitMeasureRepository,
-            NumberSequenceService numberSequenceService,
-            IUnitOfWork unitOfWork
-        )
+    public async Task GenerateDataAsync()
+    {
+        var unitMeasureId = await _unitMeasureRepository
+            .GetQuery()
+            .Where(x => x.Name == "unit")
+            .Select(x => x.Id)
+            .FirstAsync();
+
+
+        var groups = await _productGroupRepository
+            .GetQuery()
+            .ToDictionaryAsync(x => x.Name!, x => x.Id!);
+
+
+        var brands = await EnsureBrandsAsync(new[]
         {
-            _productRepository = productRepository;
-            _productGroupRepository = productGroupRepository;
-            _unitMeasureRepository = unitMeasureRepository;
-            _numberSequenceService = numberSequenceService;
-            _unitOfWork = unitOfWork;
-        }
+            "Progress",
+            "Global",
+            "Faber"
+        });
 
-        public async Task GenerateDataAsync()
+        var colors = await EnsureColorsAsync(new[]
         {
-            var productGroups = await _productGroupRepository.GetQuery().ToListAsync();
-            var measures = (await _unitMeasureRepository.GetQuery().Where(x => x.Name == "unit").ToListAsync()).Select(x => x.Id).ToArray();
+            "Cream",
+            "Fekete",
+            "Kék",
+            "Átlátszó",
+            "Rozsdamentes"
+        });
 
-            var groupMapping = new Dictionary<string, string>();
 
-            foreach (var pg in productGroups)
+        var products = new List<Product>
+        {
+            new Product
             {
-                if (!string.IsNullOrEmpty(pg.Name) && pg.Id != null)
-                {
-                    groupMapping.Add(pg.Name, pg.Id);
-                }
+                Number = "CPTA 10-SL02",
+                Name = "Progress Proterminal Stone Line Cream Alumínium L Profil Sarokelem 10 mm",
+                FactoryName = "Stone Line Cream Corner",
+
+                SalesUnitQuantity = 1,
+                MinimumSalesQuantity = 1,
+                OrderQuantityStep = 10,
+                PackageQuantity = 10,
+
+                IsStockProduct = true,
+                WarningStock = 20,
+                MinimumStock = 15,
+
+                HasSerialNumber = false,
+
+                ProductGroupId = groups["Sarokelem"],
+                Manufacturer = "Progress",
+                BrandId = brands["Progress"],
+                ManufacturerNumber = "CPTA 10-SL02",
+
+                ColorId = colors["Cream"],
+
+                Weight = 0.001m,
+
+                PurchaseCurrency = Currency.EUR,
+                SalesCurrency = Currency.HUF,
+
+                Status = ProductStatus.Active,
+
+                UnitMeasureId = unitMeasureId
+            },
+
+
+            new Product
+            {
+                Number = "GBFLABL 10",
+                Name = "L profil Matt Fekete Alumínium 10 mm (2,7m/szál)",
+                FactoryName = "L black 10 mm",
+
+                SalesUnitQuantity = 1,
+                MinimumSalesQuantity = 1,
+                OrderQuantityStep = 1,
+                PackageQuantity = 100,
+
+                Ean = "8031893354019",
+
+                IsStockProduct = true,
+                WarningStock = 60,
+                MinimumStock = 50,
+
+                ProductGroupId = groups["L profil"],
+                Manufacturer = "Progress",
+                BrandId = brands["Global"],
+                ManufacturerNumber = "GBFLABL 10/",
+
+                ColorId = colors["Fekete"],
+
+                Weight = 0.03m,
+
+                PurchaseCurrency = Currency.EUR,
+                SalesCurrency = Currency.HUF,
+
+                Status = ProductStatus.Active,
+
+                UnitMeasureId = unitMeasureId
+            },
+
+
+            new Product
+            {
+                Number = "GBFLBA 10",
+                Name = "L profil Matt Fekete Alumínium 10 mm (2,7m/szál)",
+                FactoryName = "Glob. L matt 10 black",
+
+                SalesUnitQuantity = 1,
+                MinimumSalesQuantity = 1,
+                OrderQuantityStep = 1,
+                PackageQuantity = 100,
+
+                Ean = "8031893236988",
+
+                IsStockProduct = true,
+                WarningStock = 60,
+                MinimumStock = 50,
+
+                ProductGroupId = groups["L profil"],
+                Manufacturer = "Progress",
+                BrandId = brands["Global"],
+                ManufacturerNumber = "GBFLBA 10/",
+
+                ColorId = colors["Fekete"],
+
+                Weight = 0.03m,
+
+                PurchaseCurrency = Currency.EUR,
+                SalesCurrency = Currency.HUF,
+
+                Status = ProductStatus.Blocked,
+
+                UnitMeasureId = unitMeasureId
+            },
+
+
+            new Product
+            {
+                Number = "PDES 3530/EN",
+                Name = "Progress Prodeso 3 rétegű vízszigetelő membrán 30 fm",
+                FactoryName = "Prodeso",
+
+                SalesUnitQuantity = 1,
+                MinimumSalesQuantity = 1,
+                OrderQuantityStep = 8,
+                PackageQuantity = 8,
+
+                Ean = "8031893203904",
+
+                IsStockProduct = true,
+                WarningStock = 10,
+                MinimumStock = 8,
+
+                ProductGroupId = groups["Membrán"],
+                Manufacturer = "Progress",
+                BrandId = brands["Progress"],
+                ManufacturerNumber = "PDES 3530/EN",
+
+                ColorId = colors["Kék"],
+
+                Weight = 19.7m,
+
+                PurchaseCurrency = Currency.EUR,
+                SalesCurrency = Currency.HUF,
+
+                Status = ProductStatus.Active,
+
+                UnitMeasureId = unitMeasureId
+            },
+
+
+            new Product
+            {
+                Number = "SR0100003",
+                Name = "Faber Cement Remover 1L",
+                FactoryName = "Faber Cement Remover",
+
+                SalesUnitQuantity = 1,
+                MinimumSalesQuantity = 1,
+                OrderQuantityStep = 12,
+                PackageQuantity = 12,
+
+                Ean = "8027365010323",
+
+                IsStockProduct = true,
+                WarningStock = 53,
+                MinimumStock = 42,
+
+                HasSerialNumber = true,
+
+                ProductGroupId = groups["Tisztítószerek"],
+                Manufacturer = "Faber",
+                BrandId = brands["Faber"],
+                ManufacturerNumber = "SR0100003",
+
+                ColorId = colors["Átlátszó"],
+
+                Weight = 1.002m,
+
+                PurchaseCurrency = Currency.EUR,
+                SalesCurrency = Currency.HUF,
+
+                Status = ProductStatus.Discontinued,
+
+                UnitMeasureId = unitMeasureId
             }
+        };
 
 
-            var products = new List<Product>
-            {
-                // Hardware
-                new Product { Name = "Dell Servers", UnitPrice = 5000.0, ProductGroupId = groupMapping["Hardware"] },
-                new Product { Name = "Dell Desktop Computers", UnitPrice = 2000.0, ProductGroupId = groupMapping["Hardware"] },
-                new Product { Name = "Dell Laptops", UnitPrice = 3000.0, ProductGroupId = groupMapping["Hardware"] },
-
-                // Networking
-                new Product { Name = "Network Cables", UnitPrice = 100.0, ProductGroupId = groupMapping["Networking"] },
-                new Product { Name = "Routers and Switches", UnitPrice = 1000.0, ProductGroupId = groupMapping["Networking"] },
-                new Product { Name = "Antennas and Signal Boosters", UnitPrice = 2000.0, ProductGroupId = groupMapping["Networking"] },
-                new Product { Name = "Wifii", UnitPrice = 1000.0, ProductGroupId = groupMapping["Networking"] },
-
-                // Storage
-                new Product { Name = "HDD 500", UnitPrice = 500.0, ProductGroupId = groupMapping["Storage"] },
-                new Product { Name = "HDD 1T", UnitPrice = 800.0, ProductGroupId = groupMapping["Storage"] },
-                new Product { Name = "SSD 500", UnitPrice = 1000.0, ProductGroupId = groupMapping["Storage"] },
-                new Product { Name = "SSD 1T", UnitPrice = 1500.0, ProductGroupId = groupMapping["Storage"] },
-
-                // Device
-                new Product { Name = "Dell Keyboard", UnitPrice = 700.0, ProductGroupId = groupMapping["Device"] },
-                new Product { Name = "Dell Mouse", UnitPrice = 500.0, ProductGroupId = groupMapping["Device"] },
-                new Product { Name = "Dell Monitor 27inch", UnitPrice = 1000.0, ProductGroupId = groupMapping["Device"] },
-                new Product { Name = "Dell Monitor 32inch", UnitPrice = 1500.0, ProductGroupId = groupMapping["Device"] },
-                new Product { Name = "Dell Webcams", UnitPrice = 500.0, ProductGroupId = groupMapping["Device"] },
-
-                // Software
-                new Product { Name = "D365 License", UnitPrice = 800.0, Physical = false, ProductGroupId = groupMapping["Software"] },
-
-                // Service
-                new Product { Name = "IT Security", UnitPrice = 500.0, Physical = false, ProductGroupId = groupMapping["Service"] },
-                new Product { Name = "Discount", UnitPrice = -1, Physical = false, ProductGroupId = groupMapping["Service"] }
-            };
-
-            foreach (var product in products)
-            {
-                product.Number = _numberSequenceService.GenerateNumber(nameof(Product), "", "ART");
-                product.UnitMeasureId = measures[0];
-                product.Physical ??= true;
-
-                await _productRepository.CreateAsync(product);
-            }
-
-            await _unitOfWork.SaveAsync();
-        }
-
-        private static T GetRandomValue<T>(T[] array, Random random)
+        foreach (var product in products)
         {
-            return array[random.Next(array.Length)];
+            product.Physical = true;
+
+            await _productRepository.CreateAsync(product);
         }
+
+        await _unitOfWork.SaveAsync();
+    }
+
+
+
+    private async Task<Dictionary<string, string>> EnsureBrandsAsync(IEnumerable<string> names)
+    {
+        var existing = await _brandRepository
+            .GetQuery()
+            .ToDictionaryAsync(x => x.Name!, x => x.Id!);
+
+        foreach (var name in names)
+        {
+            if (!existing.ContainsKey(name))
+            {
+                var entity = new Brand { Name = name };
+                await _brandRepository.CreateAsync(entity);
+                existing[name] = entity.Id!;
+            }
+        }
+
+        return existing;
+    }
+
+
+    private async Task<Dictionary<string, string>> EnsureColorsAsync(IEnumerable<string> names)
+    {
+        var existing = await _colorRepository
+            .GetQuery()
+            .ToDictionaryAsync(x => x.Name!, x => x.Id!);
+
+        foreach (var name in names)
+        {
+            if (!existing.ContainsKey(name))
+            {
+                var entity = new Color { Name = name };
+                await _colorRepository.CreateAsync(entity);
+                existing[name] = entity.Id!;
+            }
+        }
+
+        return existing;
     }
 }

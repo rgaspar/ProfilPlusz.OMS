@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.SeedManager.Demos;
 
-public class ProductGroupSeeder
+public class ColorSeeder
 {
-    private readonly ICommandRepository<ProductGroup> _repository;
+    private readonly ICommandRepository<Color> _repository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public ProductGroupSeeder(
-        ICommandRepository<ProductGroup> repository,
+    public ColorSeeder(
+        ICommandRepository<Color> repository,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
@@ -19,13 +19,13 @@ public class ProductGroupSeeder
 
     public async Task GenerateDataAsync()
     {
-        var groups = new[]
+        var colors = new[]
         {
-            "Sarokelem",
-            "L profil",
-            "Membrán",
-            "Tisztítószerek",
-            "Szögletes profilok"
+            "Cream",
+            "Fekete",
+            "Kék",
+            "Átlátszó",
+            "Rozsdamentes"
         };
 
         var existing = await _repository
@@ -33,14 +33,14 @@ public class ProductGroupSeeder
             .Select(x => x.Name)
             .ToListAsync();
 
-        foreach (var name in groups)
+        foreach (var color in colors)
         {
-            if (!existing.Contains(name))
+            if (!existing.Contains(color))
             {
                 await _repository.CreateAsync(
-                    new ProductGroup
+                    new Color
                     {
-                        Name = name
+                        Name = color
                     });
             }
         }

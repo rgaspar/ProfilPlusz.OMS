@@ -2,15 +2,13 @@
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.SeedManager.Demos;
-
-public class ProductGroupSeeder
+public class BrandSeeder
 {
-    private readonly ICommandRepository<ProductGroup> _repository;
+    private readonly ICommandRepository<Brand> _repository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public ProductGroupSeeder(
-        ICommandRepository<ProductGroup> repository,
+    public BrandSeeder(
+        ICommandRepository<Brand> repository,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
@@ -19,13 +17,11 @@ public class ProductGroupSeeder
 
     public async Task GenerateDataAsync()
     {
-        var groups = new[]
+        var brands = new[]
         {
-            "Sarokelem",
-            "L profil",
-            "Membrán",
-            "Tisztítószerek",
-            "Szögletes profilok"
+            "Progress",
+            "Global",
+            "Faber"
         };
 
         var existing = await _repository
@@ -33,14 +29,14 @@ public class ProductGroupSeeder
             .Select(x => x.Name)
             .ToListAsync();
 
-        foreach (var name in groups)
+        foreach (var brand in brands)
         {
-            if (!existing.Contains(name))
+            if (!existing.Contains(brand))
             {
                 await _repository.CreateAsync(
-                    new ProductGroup
+                    new Brand
                     {
-                        Name = name
+                        Name = brand
                     });
             }
         }
