@@ -1,0 +1,78 @@
+name: 02 - Build and Push Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment (dev, prod)'
+        required: false
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      image_tag:
+        description: 'Optional image tag (ha üres, automatikusan generálja)'
+        required: false
+        default: ''
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'dev' }}
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate image tag
+        id: image_tag
+        run: |
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            TAG="${{ github.event.inputs.image_tag }}"
+          else
+            YEAR=$(date +%Y)
+            RUN_NUM=$(printf "%03d" ${{ github.run_number }})
+            TAG="v.${YEAR}.${RUN_NUM}"
+          fi
+          echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+          echo "Using IMAGE_TAG=$TAG"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/profilplusz-oms:${{ env.IMAGE_TAG }}"
+          docker build -t "$IMAGE_NAME" -f ${{ github.workspace }}/Dockerfile ${{ github.workspace }}
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Push Docker image to GHCR
+        run: docker push "${{ env.IMAGE_NAME }}"
+
+      - name: Create GitHub tag
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git tag ${{ env.IMAGE_TAG }} || echo "Tag már létezik, kihagyva."
+          git push origin ${{ env.IMAGE_TAG }} || echo "Tag push sikertelen vagy már létezik."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save image name artifact
+        run: echo "${{ env.IMAGE_NAME }}" > image.txt
+
+      - name: Upload image name artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-name
+          path: image.txt

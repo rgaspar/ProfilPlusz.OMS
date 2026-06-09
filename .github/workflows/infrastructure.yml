@@ -1,4 +1,4 @@
-﻿name: 01 - Infrastructure Provisioning
+name: 01 - Infrastructure Provisioning
 
 on:
   workflow_dispatch:
@@ -26,15 +26,16 @@ jobs:
       - name: Set variables
         id: setvars
         run: |
-          echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
-          echo "RESOURCE_GROUP=profilplusz-${{ github.event.inputs.environment }}-rg" >> $GITHUB_ENV
+          ENV="${{ github.event.inputs.environment }}"
+          echo "ENVIRONMENT=$ENV" >> $GITHUB_ENV
+          echo "RESOURCE_GROUP=profilplusz-${ENV}-rg" >> $GITHUB_ENV
           echo "LOCATION=${{ secrets.AZURE_LOCATION }}" >> $GITHUB_ENV
-          echo "SQL_SERVER_NAME=profilpluszsql${{ github.event.inputs.environment }}$RANDOM" >> $GITHUB_ENV
+          echo "SQL_SERVER_NAME=profilpluszsql${ENV}" >> $GITHUB_ENV
           echo "SQL_ADMIN_USER=${{ secrets.SQL_ADMIN_USER }}" >> $GITHUB_ENV
           echo "SQL_ADMIN_PASS=${{ secrets.SQL_ADMIN_PASS }}" >> $GITHUB_ENV
-          echo "SQL_DB_NAME=profilplusz${{ github.event.inputs.environment }}db" >> $GITHUB_ENV
-          echo "APP_SERVICE_PLAN=profilplusz-${{ github.event.inputs.environment }}-plan" >> $GITHUB_ENV
-          echo "WEBAPP_NAME=profilplusz-webapp-${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+          echo "SQL_DB_NAME=profilplusz${ENV}db" >> $GITHUB_ENV
+          echo "APP_SERVICE_PLAN=profilplusz-${ENV}-plan" >> $GITHUB_ENV
+          echo "WEBAPP_NAME=profilplusz-webapp-${ENV}" >> $GITHUB_ENV
 
       - name: Create resource group
         run: az group create --name $RESOURCE_GROUP --location $LOCATION
@@ -46,31 +47,51 @@ jobs:
             --resource-group $RESOURCE_GROUP \
             --location $LOCATION \
             --admin-user $SQL_ADMIN_USER \
-            --admin-password $SQL_ADMIN_PASS
+            --admin-password $SQL_ADMIN_PASS \
+            || echo "SQL Server already exists, continuing..."
 
       - name: Tag SQL Server resource
         run: |
-          # az sql server create may not accept --tags on all CLI versions; tag resource separately
           SQL_ID=$(az sql server show --resource-group $RESOURCE_GROUP --name $SQL_SERVER_NAME --query id -o tsv)
-          echo "Tagging SQL server resource id: $SQL_ID"
-          az resource tag --ids "$SQL_ID" --tags provisioned_by=github_actions environment=$ENVIRONMENT || echo "Warning: tagging failed"
+          az resource tag --ids "$SQL_ID" --tags provisioned_by=github_actions environment=$ENVIRONMENT \
+            || echo "Warning: tagging failed"
 
       - name: Create SQL Database
-        run: az sql db create --resource-group $RESOURCE_GROUP --server $SQL_SERVER_NAME --name $SQL_DB_NAME --service-objective Basic
+        run: |
+          az sql db create \
+            --resource-group $RESOURCE_GROUP \
+            --server $SQL_SERVER_NAME \
+            --name $SQL_DB_NAME \
+            --service-objective Basic \
+            || echo "SQL Database already exists, continuing..."
 
       - name: Allow Azure services to access SQL
-        run: az sql server firewall-rule create --resource-group $RESOURCE_GROUP --server $SQL_SERVER_NAME --name AllowAzure --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+        run: |
+          az sql server firewall-rule create \
+            --resource-group $RESOURCE_GROUP \
+            --server $SQL_SERVER_NAME \
+            --name AllowAzure \
+            --start-ip-address 0.0.0.0 \
+            --end-ip-address 0.0.0.0 \
+            || echo "Firewall rule already exists, continuing..."
 
       - name: Create App Service Plan
-        run: az appservice plan create --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP --sku B1 --is-linux
+        run: |
+          az appservice plan create \
+            --name $APP_SERVICE_PLAN \
+            --resource-group $RESOURCE_GROUP \
+            --sku F1 \
+            --is-linux \
+            || echo "App Service Plan already exists, continuing..."
 
-      - name: Save SQL server info and upload artifact
+      - name: Save and upload SQL server info artifact
         run: |
           mkdir -p artifact
           FQDN=$(az sql server show --resource-group $RESOURCE_GROUP --name $SQL_SERVER_NAME --query fullyQualifiedDomainName -o tsv)
           echo "SQL_SERVER_NAME=$SQL_SERVER_NAME" > artifact/sql-server-info.txt
           echo "SQL_FQDN=$FQDN" >> artifact/sql-server-info.txt
-        # upload artifact
+          echo "Provisioned SQL FQDN: $FQDN"
+
       - name: Upload sql-server-info artifact
         uses: actions/upload-artifact@v4
         with:
@@ -86,13 +107,13 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Set variables
         run: |
-          echo "ENVIRONMENT=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
           echo "RESOURCE_GROUP=profilplusz-${{ github.event.inputs.environment }}-rg" >> $GITHUB_ENV
+
       - name: Delete resource group (rollback)
-        run: |
-          az group delete --name $RESOURCE_GROUP --yes --no-wait
+        run: az group delete --name $RESOURCE_GROUP --yes --no-wait
+
       - name: Output
-        run: |
-          echo "Rollback: Resource group $RESOURCE_GROUP deletion initiated."
+        run: echo "Rollback: Resource group $RESOURCE_GROUP deletion initiated."

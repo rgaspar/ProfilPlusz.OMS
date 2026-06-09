@@ -1,45 +1,32 @@
-﻿# CI/CD lépések és workflow dokumentáció
+# CI/CD Workflow dokumentáció
 
-## Fő lépések
+## Lépések sorrendben
 
-1. **Build and Push Docker Image to ACR**
-   - Automatikusan fut minden branch-en.
-   - Létrehozza az image-et, pusholja az Azure Container Registry-be.
-   - Automatikusan generálja az image tag-et (pl. v.2025.001).
-   - Feltölti az image nevét artifactként.
-   - Törli a legrégebbi 5 image-et az ACR-ből.
-   - Létrehoz egy GitHub tag-et az aktuális image tag alapján.
+### 1. Infrastructure Provisioning (`infrastructure.yml`)
+- Manuálisan futtatandó, egyszer (vagy ha új környezet kell)
+- Létrehozza: Resource Group, SQL Server, SQL Database, App Service Plan (F1 Free)
+- Idempotens: ha már léteznek az erőforrások, nem hibázik
 
-2. **WebApp Deploy**
-   - Automatikusan indul, ha a build workflow sikeresen lefut.
-   - Letölti az image nevét artifactból.
-   - Létrehozza vagy frissíti az Azure Web App-ot az új image-dzsel.
-   - Beállítja az adatbázis connection stringet.
+### 2. Build and Push (`build-and-push.yml`)
+- Docker image build az `ASPNET` projektből
+- Push a GitHub Container Registry-be (ghcr.io) — **ingyenes**
+- Automatikusan generált image tag: `v.YYYY.NNN`
+- GitHub tag is létrejön ugyanezzel a névvel
 
-## Titkok (secrets)
-- `AZURE_CREDENTIALS`: Azure service principal JSON
-- `ACR_LOGIN_SERVER`: pl. profilpluszomsacr.azurecr.io
-- `ACR_USERNAME`, `ACR_PASSWORD`: ACR admin user
-- `SQL_ADMIN_USER`, `SQL_ADMIN_PASS`: SQL szerverhez
+### 3. Deploy (`deploy.yml`)
+- Automatikusan indul, ha a build workflow sikeresen lefut (master/main branch)
+- Vagy manuálisan indítható tetszőleges image tag-gel
+- Azure Web App-ot konfigurálja a GHCR image-dzsel
+- Beállítja az adatbázis connection stringet
+- A végén kiírja a publikus URL-t
+
+## Secrets lista
+
+Lásd: `docs/required-secrets-and-variables.md`
 
 ## Hibakeresés
-- Ha a deploy workflow nem indul el automatikusan, ellenőrizd:
-  - Mindkét workflow ugyanazon a branch-en van-e
-  - A workflow fájlok fent vannak-e a repositoryban
-  - A build workflow neve pontosan egyezik-e a triggerben
-  - A build workflow sikeresen lefutott-e
-- Ha az ACR image törlés nem működik, ellenőrizd az Azure login lépést és a titkokat.
 
-## Manuális parancsok
-- Docker image push: `docker push <acr>/<repo>:<tag>`
-- GitHub tag létrehozás: `git tag <tag>; git push origin <tag>`
-
-## Egyéb tippek
-- A workflow fájlok módosítása után mindig commitolj és pusholj!
-- Az image tag automatikusan generálódik, nem kell kézzel megadni.
-- Az artifactok 90 napig elérhetők GitHubon.
-
----
-
-Ha bővíteni szeretnéd, csak írd hozzá a további lépéseket, tapasztalatokat vagy parancsokat!
-
+- Ha a deploy nem indul automatikusan: ellenőrizd, hogy a build workflow neve pontosan `02 - Build and Push Docker Image`
+- Ha GHCR pull hibás: ellenőrizd a `GHCR_PAT` secret érvényességét
+- Ha SQL connection nem működik: futtasd az `azure-login-test.yml`-t a credentials ellenőrzéséhez
+- Cold start (F1 limitáció): az app demó előtt egyszer nyisd meg, hogy "felébredjen"

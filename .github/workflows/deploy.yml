@@ -1,0 +1,119 @@
+name: 03 - Deploy to Azure Web App
+
+on:
+  workflow_run:
+    workflows: ["02 - Build and Push Docker Image"]
+    types:
+      - completed
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment (dev, prod)'
+        required: false
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      image_tag:
+        description: 'Image tag to deploy (pl. v.2025.001, latest)'
+        required: false
+        default: ''
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'dev' }}
+
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set variables
+        run: |
+          ENV="${{ github.event.inputs.environment || 'dev' }}"
+          echo "ENVIRONMENT=$ENV" >> $GITHUB_ENV
+          echo "RESOURCE_GROUP=profilplusz-${ENV}-rg" >> $GITHUB_ENV
+          echo "WEBAPP_NAME=profilplusz-webapp-${ENV}" >> $GITHUB_ENV
+          echo "SQL_DB_NAME=profilplusz${ENV}db" >> $GITHUB_ENV
+          echo "SQL_ADMIN_USER=${{ secrets.SQL_ADMIN_USER }}" >> $GITHUB_ENV
+          echo "SQL_ADMIN_PASS=${{ secrets.SQL_ADMIN_PASS }}" >> $GITHUB_ENV
+
+      - name: Download image name artifact (workflow_run trigger)
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: image-name
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./artifact
+
+      - name: Read image name from artifact
+        if: ${{ github.event_name == 'workflow_run' }}
+        run: |
+          test -f ./artifact/image.txt || (echo "❌ artifact/image.txt not found" && exit 1)
+          echo "IMAGE_NAME=$(cat ./artifact/image.txt)" >> $GITHUB_ENV
+
+      - name: Set image name (manual dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            TAG="${{ github.event.inputs.image_tag }}"
+          else
+            echo "❌ image_tag is required for manual dispatch" && exit 1
+          fi
+          echo "IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/profilplusz-oms:$TAG" >> $GITHUB_ENV
+
+      - name: Get SQL FQDN from resource group
+        run: |
+          FQDN=$(az sql server list --resource-group $RESOURCE_GROUP \
+            --query "[0].fullyQualifiedDomainName" -o tsv 2>/dev/null || true)
+          if [ -z "$FQDN" ]; then
+            echo "❌ SQL server not found in $RESOURCE_GROUP. Run infrastructure workflow first." && exit 1
+          fi
+          echo "SQL_FQDN=$FQDN" >> $GITHUB_ENV
+
+      - name: Create Web App if not exists
+        run: |
+          APP_SERVICE_PLAN="profilplusz-${{ env.ENVIRONMENT }}-plan"
+          az webapp create \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --plan $APP_SERVICE_PLAN \
+            --deployment-container-image-name ${{ env.IMAGE_NAME }} \
+            || echo "Web App already exists, continuing..."
+
+      - name: Configure container (GHCR)
+        run: |
+          az webapp config container set \
+            --name $WEBAPP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --container-image-name ${{ env.IMAGE_NAME }} \
+            --container-registry-url https://ghcr.io \
+            --container-registry-user ${{ github.repository_owner }} \
+            --container-registry-password ${{ secrets.GHCR_PAT }}
+
+      - name: Set connection string
+        run: |
+          az webapp config connection-string set \
+            --resource-group $RESOURCE_GROUP \
+            --name $WEBAPP_NAME \
+            --settings DefaultConnection="Server=tcp:${{ env.SQL_FQDN }},1433;Initial Catalog=${{ env.SQL_DB_NAME }};Persist Security Info=False;User ID=${{ env.SQL_ADMIN_USER }};Password=${{ env.SQL_ADMIN_PASS }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" \
+            --connection-string-type SQLAzure
+
+      - name: Output deployed URL
+        run: |
+          URL=$(az webapp show --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP \
+            --query defaultHostName -o tsv)
+          echo "✅ Deployed: https://$URL"
