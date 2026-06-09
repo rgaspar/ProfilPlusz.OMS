@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Enums
 {
-    public enum Currency
+    public enum ProductStatus
     {
-        HUF = 1,
-        EUR = 2,
-        USD = 3
+        Active = 1,        // Aktív
+        Blocked = 2,       // Zárolt
+        Discontinued = 3   // Kifutó
     }
 }

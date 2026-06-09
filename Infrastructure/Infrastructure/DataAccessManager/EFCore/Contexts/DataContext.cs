@@ -53,8 +53,9 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
     public DbSet<Scrapping> Scrapping { get; set; }
 
     public DbSet<AnswerTemplate> AnswerTemplate { get; set; }
-
     public DbSet<ProcessedEmail> ProcessedEmail { get; set; }
+    public DbSet<Color> Color { get; set; }
+    public DbSet<Brand> Brand { get; set; }
 
 
 
@@ -69,7 +70,6 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
         modelBuilder.ApplyConfiguration(new CompanyConfiguration());
         modelBuilder.ApplyConfiguration(new FileImageConfiguration());
         modelBuilder.ApplyConfiguration(new FileDocumentConfiguration());
-
 
         modelBuilder.ApplyConfiguration(new NumberSequenceConfiguration());
         modelBuilder.ApplyConfiguration(new CustomerGroupConfiguration());
@@ -102,8 +102,9 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
         modelBuilder.ApplyConfiguration(new ScrappingConfiguration());
 
         modelBuilder.ApplyConfiguration(new AnswerTemplateConfiguration());
-
         modelBuilder.ApplyConfiguration(new AddressConfiguration());
+        modelBuilder.ApplyConfiguration(new ColorConfiguration());
+        modelBuilder.ApplyConfiguration(new BrandConfiguration());
     }
 
 }
