@@ -1,3 +1,32 @@
-﻿.vs/
-obj/
+﻿# Build
 bin/
+obj/
+Aspire/AppHost/bin/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / VS Code / VS
+.vs/
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Publish
+publish/
+
+# Environment variables
+.env
+
+# NuGet
+*.nupkg
+packages/

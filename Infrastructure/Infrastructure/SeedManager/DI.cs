@@ -79,6 +79,7 @@ public static class DI
         services.AddScoped<NegativeAdjustmentSeeder>();
         services.AddScoped<ScrappingSeeder>();
         services.AddScoped<StockCountSeeder>();
+        services.AddScoped<AnswerTemplateSeeder>();
         return services;
     }
     public static IHost SeedDemoData(this IHost host)
@@ -167,6 +168,8 @@ public static class DI
             var stockCountSeeder = serviceProvider.GetRequiredService<StockCountSeeder>();
             stockCountSeeder.GenerateDataAsync().Wait();
 
+            var answerTemplateSeeder = serviceProvider.GetRequiredService<AnswerTemplateSeeder>();
+            answerTemplateSeeder.GenerateDataAsync().Wait();
         }
         return host;
     }

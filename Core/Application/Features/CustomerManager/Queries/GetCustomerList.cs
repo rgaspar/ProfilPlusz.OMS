@@ -83,6 +83,7 @@ public class GetCustomerListHandler : IRequestHandler<GetCustomerListRequest, Ge
             .ApplyIsDeletedFilter(request.IsDeleted)
             .Include(x => x.CustomerGroup)
             .Include(x => x.CustomerCategory)
+            .Include(x => x.AddressList)
             .AsQueryable();
 
         var entities = await query.ToListAsync(cancellationToken);

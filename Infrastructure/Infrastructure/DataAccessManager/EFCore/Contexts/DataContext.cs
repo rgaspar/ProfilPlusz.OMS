@@ -52,6 +52,12 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
     public DbSet<PositiveAdjustment> PositiveAdjustment { get; set; }
     public DbSet<Scrapping> Scrapping { get; set; }
 
+    public DbSet<AnswerTemplate> AnswerTemplate { get; set; }
+
+    public DbSet<ProcessedEmail> ProcessedEmail { get; set; }
+
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -95,6 +101,9 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
         modelBuilder.ApplyConfiguration(new PositiveAdjustmentConfiguration());
         modelBuilder.ApplyConfiguration(new ScrappingConfiguration());
 
+        modelBuilder.ApplyConfiguration(new AnswerTemplateConfiguration());
+
+        modelBuilder.ApplyConfiguration(new AddressConfiguration());
     }
 
 }

@@ -2,6 +2,7 @@
 using Infrastructure.EmailManager;
 using Infrastructure.FileDocumentManager;
 using Infrastructure.FileImageManager;
+using Infrastructure.LocationManager;
 using Infrastructure.LogManager.Serilogs;
 using Infrastructure.SecurityManager.AspNetIdentity;
 using Infrastructure.SecurityManager.Tokens;
@@ -42,6 +43,10 @@ public static class DependencyInjection
 
         //>>> FileImageManager
         services.RegisterFileImageManager(configuration);
+
+        services.AddLocationManager();
+
+
 
         return services;
     }

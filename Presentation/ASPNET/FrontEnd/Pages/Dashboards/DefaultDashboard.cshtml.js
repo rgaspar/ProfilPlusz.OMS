@@ -24,6 +24,7 @@
         const customerCategoryChartRef = Vue.ref(null);
         const vendorCategoryChartRef = Vue.ref(null);
         const stockChartRef = Vue.ref(null);
+        const processedEmailsDailyChartRef = Vue.ref(null);
 
         const services = {
             getCardsData: async () => {
@@ -53,6 +54,18 @@
             getInventoryData: async () => {
                 try {
                     const response = await AxiosManager.get('/Dashboard/GetInventoryDashboard', {});
+                    return response;
+                } catch (error) {
+                    throw error;
+                }
+            },
+            getProcessedEmailStats: async () => {
+                try {
+                    const response = await AxiosManager.get(
+                        '/statistics/emails/processed/daily',
+                        {}
+                    );
+
                     return response;
                 } catch (error) {
                     throw error;
@@ -292,6 +305,46 @@
                     },
                     stockChartRef.value);
             },
+            populateProcessedEmailsChart: async () => {
+
+                const response = await services.getProcessedEmailStats();
+
+                const data = response?.data ?? [];
+
+                const chartData = [{
+                    type: 'Line',
+                    xName: 'date',
+                    yName: 'count',
+                    dataSource: data,
+                    marker: { visible: true }
+                }];
+
+                new ej.charts.Chart(
+                    {
+                        primaryXAxis: {
+                            valueType: 'Category',
+                            title: 'Date',
+                            labelRotation: -45
+                        },
+
+                        primaryYAxis: {
+                            title: 'Processed emails'
+                        },
+
+                        series: chartData,
+
+                        title: 'Processed Emails per Day',
+
+                        tooltip: {
+                            enable: true
+                        },
+
+                        palettes: ["#009CFF"]
+                    },
+
+                    processedEmailsDailyChartRef.value
+                );
+            },
         };
 
         Vue.onMounted(async () => {
@@ -304,7 +357,7 @@
                 await methods.populatePurchaseData();
                 await methods.populateInventoryData();
 
-                
+                await methods.populateProcessedEmailsChart();
 
             } catch (e) {
                 console.error('page init error:', e);
@@ -329,7 +382,8 @@
             vendorCategoryChartRef,
             stockChartRef,
             state,
-            methods
+            methods,
+            processedEmailsDailyChartRef
         };
     }
 };

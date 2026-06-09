@@ -9,7 +9,10 @@ public static class DI
     public static IServiceCollection RegisterEmailManager(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+        services.Configure<EmailServiceSettings>(configuration.GetSection("EmailService"));
         services.AddTransient<IEmailService, EmailService>();
+        services.AddScoped<IEmailReaderService, EmailReaderService>();
+        services.AddScoped<IEmailWriterService, EmailWriterService>();
 
         return services;
     }
