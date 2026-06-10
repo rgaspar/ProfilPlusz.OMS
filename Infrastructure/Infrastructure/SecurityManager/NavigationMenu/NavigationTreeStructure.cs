@@ -23,246 +23,246 @@ public static class NavigationTreeStructure
     [
         {
             "URL": "#",
-            "Name": "Dashboards",
+            "Name": "Irányítópultok",
             "IsModule": true,
             "Children": [
                 {
                     "URL": "/Dashboards/DefaultDashboard",
-                    "Name": "Default",
+                    "Name": "Alapértelmezett",
                     "IsModule": false
                 }
             ]
         },
         {
             "URL": "#",
-            "Name": "Sales",
+            "Name": "Értékesítés",
             "IsModule": true,
             "Children": [
                 {
                     "URL": "/CustomerGroups/CustomerGroupList",
-                    "Name": "Customer Group",
+                    "Name": "Ügyfélcsoport",
                     "IsModule": false
                 },
                 {
                     "URL": "/CustomerCategories/CustomerCategoryList",
-                    "Name": "Customer Category",
+                    "Name": "Ügyfélkategória",
                     "IsModule": false
                 },
                 {
                     "URL": "/Customers/CustomerList",
-                    "Name": "Customer",
+                    "Name": "Ügyfél",
                     "IsModule": false
                 },
                 {
                     "URL": "/CustomerContacts/CustomerContactList",
-                    "Name": "Customer Contact",
+                    "Name": "Ügyfél kapcsolattartó",
                     "IsModule": false
                 },
                 {
                     "URL": "/SalesOrders/SalesOrderList",
-                    "Name": "Sales Order",
+                    "Name": "Értékesítési rendelés",
                     "IsModule": false
                 },
                 {
                     "URL": "/SalesReports/SalesReportList",
-                    "Name": "Sales Report",
+                    "Name": "Értékesítési riport",
                     "IsModule": false
                 }
             ]
         },
         {
             "URL": "#",
-            "Name": "Purchase",
+            "Name": "Beszerzés",
             "IsModule": true,
             "Children": [
                 {
                     "URL": "/VendorGroups/VendorGroupList",
-                    "Name": "Vendor Group",
+                    "Name": "Szállítócsoport",
                     "IsModule": false
                 },
                 {
                     "URL": "/VendorCategories/VendorCategoryList",
-                    "Name": "Vendor Category",
+                    "Name": "Szállítókategória",
                     "IsModule": false
                 },
                 {
                     "URL": "/Vendors/VendorList",
-                    "Name": "Vendor",
+                    "Name": "Szállító",
                     "IsModule": false
                 },
                 {
                     "URL": "/VendorContacts/VendorContactList",
-                    "Name": "Vendor Contact",
+                    "Name": "Szállító kapcsolattartó",
                     "IsModule": false
                 },
                 {
                     "URL": "/PurchaseOrders/PurchaseOrderList",
-                    "Name": "Purchase Order",
+                    "Name": "Beszerzési rendelés",
                     "IsModule": false
                 },
                 {
                     "URL": "/PurchaseReports/PurchaseReportList",
-                    "Name": "Purchase Report",
+                    "Name": "Beszerzési riport",
                     "IsModule": false
                 }
             ]
         },
         {
             "URL": "#",
-            "Name": "Inventory",
+            "Name": "Készletkezelés",
             "IsModule": true,
             "Children": [
                 {
                     "URL": "/UnitMeasures/UnitMeasureList",
-                    "Name": "Unit Measure",
+                    "Name": "Mértékegység",
                     "IsModule": false
                 },
                 {
                     "URL": "/ProductGroups/ProductGroupList",
-                    "Name": "Product Group",
+                    "Name": "Termékcsoport",
                     "IsModule": false
                 },
                 {
                     "URL": "/Products/ProductList",
-                    "Name": "Product",
+                    "Name": "Termék",
                     "IsModule": false
                 },
                 {
                     "URL": "/Warehouses/WarehouseList",
-                    "Name": "Warehouse",
+                    "Name": "Raktár",
                     "IsModule": false
                 },
                 {
                     "URL": "/DeliveryOrders/DeliveryOrderList",
-                    "Name": "Delivery Order",
+                    "Name": "Kiszállítási megbízás",
                     "IsModule": false
                 },
                 {
                     "URL": "/SalesReturns/SalesReturnList",
-                    "Name": "Sales Return",
+                    "Name": "Értékesítési visszáru",
                     "IsModule": false
                 },
                 {
                     "URL": "/GoodsReceives/GoodsReceiveList",
-                    "Name": "Goods Receive",
+                    "Name": "Árubevételezés",
                     "IsModule": false
                 },
                 {
                     "URL": "/PurchaseReturns/PurchaseReturnList",
-                    "Name": "Purchase Return",
+                    "Name": "Beszerzési visszáru",
                     "IsModule": false
                 },
                 {
                     "URL": "/TransferOuts/TransferOutList",
-                    "Name": "Transfer Out",
+                    "Name": "Készletkivét",
                     "IsModule": false
                 },
                 {
                     "URL": "/TransferIns/TransferInList",
-                    "Name": "Transfer In",
+                    "Name": "Készletbetét",
                     "IsModule": false
                 },
                 {
                     "URL": "/PositiveAdjustments/PositiveAdjustmentList",
-                    "Name": "Positive Adjustment",
+                    "Name": "Pozitív korrekció",
                     "IsModule": false
                 },
                 {
                     "URL": "/NegativeAdjustments/NegativeAdjustmentList",
-                    "Name": "Negative Adjustment",
+                    "Name": "Negatív korrekció",
                     "IsModule": false
                 },
                 {
                     "URL": "/Scrappings/ScrappingList",
-                    "Name": "Scrapping",
+                    "Name": "Selejtezés",
                     "IsModule": false
                 },
                 {
                     "URL": "/StockCounts/StockCountList",
-                    "Name": "Stock Count",
+                    "Name": "Leltár",
                     "IsModule": false
                 },
                 {
                     "URL": "/TransactionReports/TransactionReportList",
-                    "Name": "Transaction Report",
+                    "Name": "Tranzakciós riport",
                     "IsModule": false
                 },
                 {
                     "URL": "/StockReports/StockReportList",
-                    "Name": "Stock Report",
+                    "Name": "Készletriport",
                     "IsModule": false
                 },
                 {
                     "URL": "/MovementReports/MovementReportList",
-                    "Name": "Movement Reports",
+                    "Name": "Mozgási riportok",
                     "IsModule": false
                 }
             ]
         },
         {
             "URL": "#",
-            "Name": "Utilities",
+            "Name": "Segédeszközök",
             "IsModule": true,
-            "Children": [   
+            "Children": [
                 {
                     "URL": "/Todos/TodoList",
-                    "Name": "Todo",
+                    "Name": "Teendő",
                     "IsModule": false
                 },
                 {
                     "URL": "/TodoItems/TodoItemList",
-                    "Name": "Todo Item",
+                    "Name": "Teendő elem",
                     "IsModule": false
                 }
             ]
         },
         {
             "URL": "#",
-            "Name": "Membership",
+            "Name": "Felhasználókezelés",
             "IsModule": true,
             "Children": [
                 {
                     "URL": "/Users/UserList",
-                    "Name": "Users",
+                    "Name": "Felhasználók",
                     "IsModule": false
                 },
                 {
                     "URL": "/Roles/RoleList",
-                    "Name": "Roles",
+                    "Name": "Szerepkörök",
                     "IsModule": false
                 }
             ]
         },
         {
             "URL": "#",
-            "Name": "Profiles",
+            "Name": "Profilok",
             "IsModule": true,
             "Children": [
                 {
                     "URL": "/Profiles/MyProfile",
-                    "Name": "My Profile",
+                    "Name": "Profilom",
                     "IsModule": false
                 }
             ]
         },
         {
             "URL": "#",
-            "Name": "Settings",
+            "Name": "Beállítások",
             "IsModule": true,
             "Children": [
                 {
                     "URL": "/Companies/MyCompany",
-                    "Name": "My Company",
+                    "Name": "Cégem",
                     "IsModule": false
                 },
                 {
                     "URL": "/Taxs/TaxList",
-                    "Name": "Tax",
+                    "Name": "Adók",
                     "IsModule": false
                 },
                 {
                     "URL": "/NumberSequences/NumberSequenceList",
-                    "Name": "Number Sequence",
+                    "Name": "Számsorozatok",
                     "IsModule": false
                 }
             ]
