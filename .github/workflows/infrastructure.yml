@@ -52,9 +52,13 @@ jobs:
 
       - name: Tag SQL Server resource
         run: |
-          SQL_ID=$(az sql server show --resource-group $RESOURCE_GROUP --name $SQL_SERVER_NAME --query id -o tsv)
-          az resource tag --ids "$SQL_ID" --tags provisioned_by=github_actions environment=$ENVIRONMENT \
-            || echo "Warning: tagging failed"
+          SQL_ID=$(az sql server show --resource-group $RESOURCE_GROUP --name $SQL_SERVER_NAME --query id -o tsv 2>/dev/null || true)
+          if [ -n "$SQL_ID" ]; then
+            az resource tag --ids "$SQL_ID" --tags provisioned_by=github_actions environment=$ENVIRONMENT \
+              || echo "Warning: tagging failed"
+          else
+            echo "Warning: SQL Server not found for tagging, skipping."
+          fi
 
       - name: Create SQL Database
         run: |
