@@ -116,4 +116,4 @@ jobs:
         run: az group delete --name $RESOURCE_GROUP --yes --no-wait
 
       - name: Output
-        run: echo "Rollback: Resource group $RESOURCE_GROUP deletion initiated."
+        run: echo "Rollback - Resource group $RESOURCE_GROUP deletion initiated."
