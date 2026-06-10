@@ -36,9 +36,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           CURRENT_RUN_ID: ${{ github.run_id }}
-          DAYS: ${{ github.event.inputs.days || '2' }}
-          WORKFLOW_NAME: '${{ github.event.inputs.workflow_name || '' }}'
-          DRY_RUN: '${{ github.event.inputs.dry_run || 'true' }}'
+          DAYS: ${{ github.event.inputs.days || '2' }}          
+          WORKFLOW_NAME: "${{ github.event.inputs.workflow_name || '' }}"
+          DRY_RUN: "${{ github.event.inputs.dry_run || 'true' }}"
         run: |
           set -euo pipefail
           echo "Repository: $REPO"
