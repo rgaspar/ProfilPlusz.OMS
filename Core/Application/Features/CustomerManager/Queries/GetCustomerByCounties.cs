@@ -49,7 +49,7 @@ public class GetCustomersByCountiesHandler
             .Include(x => x.AddressList)
             .Where(customer =>
                 customer.AddressList.Any(address =>
-                    address.Type == AddressType.Site &&
+                    address.Type == AddressType.Headquarters &&
                     !string.IsNullOrWhiteSpace(address.State) &&
                     normalizedCounties.Contains(address.State.Trim().ToLower())
                 ))
