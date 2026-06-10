@@ -104,14 +104,14 @@ public static class BackEndConfiguration
             host.SeedDemoData();
         }
 
-        if (environment.IsDevelopment())
-        {
+        //if (environment.IsDevelopment())
+        //{
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Indotalent V1");
             });
-        }
+        //}
 
         return app;
     }
