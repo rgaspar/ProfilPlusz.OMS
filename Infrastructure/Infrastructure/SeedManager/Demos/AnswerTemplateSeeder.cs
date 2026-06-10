@@ -24,8 +24,8 @@ public class AnswerTemplateSeeder
         {
             new AnswerTemplate
             {
-                Key = "EMAIL_PARTNER_RECOMMENDATION",
-                Path = "Email/EmailPartnerRecommendation.html",
+                Key = "EMAIL_CUSTOMER_RECOMMENDATION",
+                Path = "Email/EmailCustomerRecommendation.html",
                 Subject = "ProfilPlusz - Partner ajánlás a rendeléséhez",
                 DefaultRecipients = "joni9103@outlook.com"
             }
