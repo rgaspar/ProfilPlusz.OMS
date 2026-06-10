@@ -48,8 +48,8 @@ jobs:
             A deploy folyamat elindult.
 
             Környezet: ${{ github.event.inputs.environment || 'dev' }}
+            PR: ${{ github.event.workflow_run.head_commit.message || github.event.inputs.image_tag || '-' }}
             Indította: ${{ github.actor }}
-            Idő: ${{ github.event.repository.updated_at }}
 
             GitHub Actions: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
@@ -152,6 +152,7 @@ jobs:
             A deploy sikeresen befejezodott!
 
             Környezet: ${{ env.ENVIRONMENT }}
+            PR: ${{ github.event.workflow_run.head_commit.message || github.event.inputs.image_tag || '-' }}
             URL: ${{ env.WEBAPP_URL }}
             Image: ${{ env.IMAGE_NAME }}
             Indította: ${{ github.actor }}
@@ -173,6 +174,7 @@ jobs:
             A deploy sajnos sikertelen volt!
 
             Környezet: ${{ github.event.inputs.environment || 'dev' }}
+            PR: ${{ github.event.workflow_run.head_commit.message || github.event.inputs.image_tag || '-' }}
             Indította: ${{ github.actor }}
 
             Részletek: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
