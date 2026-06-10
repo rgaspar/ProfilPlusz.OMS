@@ -34,6 +34,25 @@ jobs:
       packages: read
 
     steps:
+      - name: Send start email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: joni9103@gmail.com,richardgaspar79@gmail.com
+          from: ProfilPlusz OMS Deploy <${{ secrets.MAIL_USERNAME }}>
+          subject: "🚀 Deploy elindult - ProfilPlusz OMS"
+          body: |
+            A deploy folyamat elindult.
+
+            Környezet: ${{ github.event.inputs.environment || 'dev' }}
+            Indította: ${{ github.actor }}
+            Idő: ${{ github.event.repository.updated_at }}
+
+            GitHub Actions: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -111,8 +130,49 @@ jobs:
             --settings DefaultConnection="Server=tcp:${{ env.SQL_FQDN }},1433;Initial Catalog=${{ env.SQL_DB_NAME }};Persist Security Info=False;User ID=${{ env.SQL_ADMIN_USER }};Password=${{ env.SQL_ADMIN_PASS }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" \
             --connection-string-type SQLAzure
 
-      - name: Output deployed URL
+      - name: Get deployed URL
         run: |
           URL=$(az webapp show --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP \
             --query defaultHostName -o tsv)
+          echo "WEBAPP_URL=https://$URL" >> $GITHUB_ENV
           echo "✅ Deployed: https://$URL"
+
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: joni9103@gmail.com,richardgaspar79@gmail.com
+          from: ProfilPlusz OMS Deploy <${{ secrets.MAIL_USERNAME }}>
+          subject: "✅ Deploy sikeres - ProfilPlusz OMS"
+          body: |
+            A deploy sikeresen befejezodott!
+
+            Környezet: ${{ env.ENVIRONMENT }}
+            URL: ${{ env.WEBAPP_URL }}
+            Image: ${{ env.IMAGE_NAME }}
+            Indította: ${{ github.actor }}
+
+            GitHub Actions: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: joni9103@gmail.com,richardgaspar79@gmail.com
+          from: ProfilPlusz OMS Deploy <${{ secrets.MAIL_USERNAME }}>
+          subject: "❌ Deploy sikertelen - ProfilPlusz OMS"
+          body: |
+            A deploy sajnos sikertelen volt!
+
+            Környezet: ${{ github.event.inputs.environment || 'dev' }}
+            Indította: ${{ github.actor }}
+
+            Részletek: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
