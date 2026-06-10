@@ -1,6 +1,9 @@
 name: 02 - Build and Push Docker Image
 
 on:
+  push:
+    branches:
+      - fejlesztes-20251007
   workflow_dispatch:
     inputs:
       environment:
