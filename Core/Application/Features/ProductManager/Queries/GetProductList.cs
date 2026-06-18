@@ -46,9 +46,17 @@ public record GetProductListDto
     public bool IsStockProduct { get; init; }
     public int? WarningStock { get; init; }
     public int? MinimumStock { get; init; }
+    public bool HasSerialNumber { get; init; }
 
     // fizikai adatok
     public decimal? Weight { get; init; }
+
+    // média
+    public string? Image1Url { get; init; }
+    public string? Image2Url { get; init; }
+    public string? Image3Url { get; init; }
+    public string? VideoUrl { get; init; }
+    public string? PdfUrl { get; init; }
 
     // státusz
     public ProductStatus Status { get; init; }
