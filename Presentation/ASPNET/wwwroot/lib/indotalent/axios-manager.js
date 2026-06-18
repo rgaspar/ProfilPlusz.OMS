@@ -80,11 +80,42 @@
         }
     };
 
+    const downloadBlob = (blob, filename) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const getFile = async (url, filename) => {
+        const response = await axiosInstance.get(url, { responseType: 'blob' });
+        downloadBlob(response.data, filename);
+    };
+
+    const postFile = async (url, formData, filename) => {
+        const response = await axiosInstance.post(url, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            responseType: 'blob',
+        });
+        if (response.data.type === 'application/json') {
+            const text = await response.data.text();
+            return JSON.parse(text);
+        }
+        downloadBlob(response.data, filename);
+        return null;
+    };
+
     return {
         request,
         get: (url, config = {}) => request('get', url, {}, config.headers, config.responseType),
         post: (url, data, config = {}) => request('post', url, data, config.headers, config.responseType),
         put: (url, data, config = {}) => request('put', url, data, config.headers, config.responseType),
         delete: (url, config = {}) => request('delete', url, {}, config.headers, config.responseType),
+        getFile,
+        postFile,
     };
 })();

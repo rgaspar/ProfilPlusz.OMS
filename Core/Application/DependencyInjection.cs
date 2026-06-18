@@ -4,6 +4,7 @@ using Application.Common.Mappings;
 using Application.Common.Repositories;
 using Application.Common.Services.AnswerTemplateManager;
 using Application.Common.Services.EmailManager;
+using Application.Common.Services.ExcelImport;
 using Application.Common.Services.Location;
 using Application.Common.Services.Statistics;
 using Application.Features.EmailCustomerRecommendation;
@@ -37,6 +38,7 @@ public static class DependencyInjection
             x.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
         });
 
+        services.AddScoped<ExcelImportService>();
         services.AddScoped<IAnswerTemplateService, AnswerTemplateService>();
         services.AddSingleton<IStateService, StateService>();
         services.AddScoped<IEmailCustomerRecommendationManager, EmailCustomerRecommendationManager>();

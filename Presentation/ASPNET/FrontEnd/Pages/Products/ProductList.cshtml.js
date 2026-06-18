@@ -521,6 +521,24 @@
                                 id: 'DeleteCustom',
                                 prefixIcon: 'e-delete'
 
+                            },
+
+                            { type: 'Separator' },
+
+                            {
+
+                                text: 'Import Excel',
+                                id: 'ImportExcel',
+                                prefixIcon: 'e-upload'
+
+                            },
+
+                            {
+
+                                text: 'Template',
+                                id: 'DownloadTemplate',
+                                prefixIcon: 'e-download'
+
                             }
 
                         ],
@@ -633,6 +651,18 @@
                                 state.mainTitle = 'Delete Product?';
 
                                 mainModal.obj.show();
+
+                            }
+
+                            if (args.item.id === 'ImportExcel') {
+
+                                document.getElementById('excelImportInput').click();
+
+                            }
+
+                            if (args.item.id === 'DownloadTemplate') {
+
+                                AxiosManager.getFile('/Product/GetProductImportTemplate', 'termek-import-template.xlsx');
 
                             }
 
@@ -761,6 +791,39 @@
 
 
             mainModal.create();
+
+            document.getElementById('excelImportInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                e.target.value = '';
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    const result = await AxiosManager.postFile(
+                        '/Product/ImportProductsFromExcel',
+                        formData,
+                        `import-hibak-${new Date().toISOString().slice(0, 10)}.xlsx`
+                    );
+
+                    if (result) {
+                        const successCount = result.content?.successCount ?? 0;
+                        const overwriteCount = result.content?.overwriteCount ?? 0;
+                        const msg = overwriteCount > 0
+                            ? `Import kész: ${successCount} sor betöltve, ebből ${overwriteCount} felülírva.`
+                            : `Import kész: ${successCount} sor sikeresen betöltve.`;
+                        alert(msg);
+                    } else {
+                        alert('Import kész. Hibák és/vagy felülírások a letöltött jelentésfájlban.');
+                    }
+
+                    await methods.populateMainData();
+                    mainGrid.refresh();
+                } catch (err) {
+                    alert('Import hiba: ' + (err?.response?.data?.message ?? err.message));
+                }
+            });
 
         });
 
