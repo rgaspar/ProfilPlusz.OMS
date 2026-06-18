@@ -1,10 +1,12 @@
-﻿using Application.Features.ProductManager.Commands;
+﻿using Application.Common.Services.ExcelImport;
+using Application.Features.ProductManager.Commands;
 using Application.Features.ProductManager.Queries;
 using ASPNET.BackEnd.Common.Base;
 using ASPNET.BackEnd.Common.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace ASPNET.BackEnd.Controllers;
@@ -12,8 +14,11 @@ namespace ASPNET.BackEnd.Controllers;
 [Route("api/[controller]")]
 public class ProductController : BaseApiController
 {
-    public ProductController(ISender sender) : base(sender)
+    private readonly ExcelImportService _excelImportService;
+
+    public ProductController(ISender sender, ExcelImportService excelImportService) : base(sender)
     {
+        _excelImportService = excelImportService;
     }
 
     [Authorize]
@@ -100,6 +105,68 @@ public class ProductController : BaseApiController
             Message = $"Success executing {nameof(DeleteProductAsync)}",
             Content = response
         });
+    }
+
+    [Authorize]
+    [HttpPost("ImportProductsFromExcel")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> ImportProductsFromExcelAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest("Nincs feltöltött fájl.");
+
+        if (!string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+            return BadRequest("Csak .xlsx fájl fogadható el.");
+
+        if (file.Length > 10 * 1024 * 1024)
+            return BadRequest("A fájl mérete nem haladhatja meg a 10 MB-ot.");
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        using var stream = file.OpenReadStream();
+
+        var request = new ImportProductsFromExcelRequest
+        {
+            ExcelStream = stream,
+            CreatedById = userId
+        };
+
+        var response = await _sender.Send(request, cancellationToken);
+
+        if (response.ErrorReportBytes.Length > 0)
+        {
+            return File(
+                response.ErrorReportBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"import-jelentes-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx");
+        }
+
+        var overwriteNote = response.OverwriteCount > 0
+            ? $" ({response.OverwriteCount} felülírva)"
+            : string.Empty;
+
+        return Ok(new ApiSuccessResult<ImportProductsFromExcelResult>
+        {
+            Code = StatusCodes.Status200OK,
+            Message = $"{response.SuccessCount} termék sikeresen importálva{overwriteNote}.",
+            Content = response
+        });
+    }
+
+    [Authorize]
+    [HttpGet("GetProductImportTemplate")]
+    public IActionResult GetProductImportTemplate()
+    {
+        var headers = new[]
+        {
+            "Szám", "Név", "GyárNeve", "Leírás",
+            "Egységár", "Mértékegység", "Termékcsoport", "Fizikai",
+            "Gyártó", "GyártóiSzám", "EAN",
+            "BeszerzésiPénznem", "ÉrtékesítésiPénznem", "Státusz"
+        };
+
+        var bytes = _excelImportService.GenerateTemplate(headers);
+        return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "termek-import-template.xlsx");
     }
 
     [Authorize]
