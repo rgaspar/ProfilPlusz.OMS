@@ -1,6 +1,6 @@
 ﻿@page
 @{
-    ViewData["Title"] = "Customer List";
+    ViewData["Title"] = "Ügyfél lista";
 }
 
 <div id="app" v-cloak>
@@ -24,35 +24,35 @@
                     <form id="MainForm">
                         <div class="card mb-3">
                             <div class="card-header">
-                                <h5>Main Info</h5>
+                                <h5>Alapadatok</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-2">
                                     <div class="col-md-6">
-                                        <label for="Name">Name</label>
+                                        <label for="Name">Név</label>
                                         <input ref="nameRef" v-model="state.name" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.name"></label>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="Number">Number</label>
+                                        <label for="Number">Szám</label>
                                         <input ref="numberRef" v-model="state.number" class="form-control" placeholder="" readonly />
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-md-6">
-                                        <label for="CustomerGroupId">Customer Group</label>
+                                        <label for="CustomerGroupId">Ügyfélcsoport</label>
                                         <div ref="customerGroupIdRef"></div>
                                         <label class="text-danger" v-text="state.errors.customerGroupId"></label>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="CustomerCategoryId">Customer Category</label>
+                                        <label for="CustomerCategoryId">Ügyfélkategória</label>
                                         <div ref="customerCategoryIdRef"></div>
                                         <label class="text-danger" v-text="state.errors.customerCategoryId"></label>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-12">
-                                        <label for="Description">Description</label>
+                                        <label for="Description">Leírás</label>
                                         <textarea v-model="state.description" class="form-control" rows="3" placeholder=""></textarea>
                                     </div>
                                 </div>
@@ -60,36 +60,36 @@
                         </div>
                         <div class="card mb-3">
                             <div class="card-header">
-                                <h5>Address</h5>
+                                <h5>Cím</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-2">
                                     <div class="col-md-6">
-                                        <label for="Street">Street</label>
+                                        <label for="Street">Utca</label>
                                         <input ref="streetRef" v-model="state.street" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.street"></label>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="City">City</label>
+                                        <label for="City">Város</label>
                                         <input ref="cityRef" v-model="state.city" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.city"></label>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-md-6">
-                                        <label for="State">State</label>
+                                        <label for="State">Megye</label>
                                         <input ref="stateRef" v-model="state.state" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.state"></label>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="ZipCode">Zip Code</label>
+                                        <label for="ZipCode">Irányítószám</label>
                                         <input ref="zipCodeRef" v-model="state.zipCode" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.zipCode"></label>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-md-6">
-                                        <label for="Country">Country</label>
+                                        <label for="Country">Ország</label>
                                         <input ref="countryRef" v-model="state.country" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.country"></label>
                                     </div>
@@ -98,29 +98,29 @@
                         </div>
                         <div class="card mb-3">
                             <div class="card-header">
-                                <h5>Communication</h5>
+                                <h5>Kommunikáció</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-2">
                                     <div class="col-md-6">
-                                        <label for="PhoneNumber">Phone Number</label>
+                                        <label for="PhoneNumber">Telefonszám</label>
                                         <input ref="phoneNumberRef" v-model="state.phoneNumber" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.phoneNumber"></label>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="FaxNumber">Fax Number</label>
+                                        <label for="FaxNumber">Faxszám</label>
                                         <input ref="faxNumberRef" v-model="state.faxNumber" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.faxNumber"></label>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-md-6">
-                                        <label for="EmailAddress">Email</label>
+                                        <label for="EmailAddress">E-mail</label>
                                         <input ref="emailAddressRef" v-model="state.emailAddress" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.emailAddress"></label>
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="Website">Website</label>
+                                        <label for="Website">Weboldal</label>
                                         <input ref="websiteRef" v-model="state.website" class="form-control" placeholder="" />
                                         <label class="text-danger" v-text="state.errors.website"></label>
                                     </div>
@@ -129,7 +129,7 @@
                         </div>
                         <div class="card mb-3">
                             <div class="card-header">
-                                <h5>Social Media</h5>
+                                <h5>Közösségi média</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-2">
@@ -171,7 +171,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bezárás</button>
                     <button type="button"
                             id="MainSaveButton"
                             class="btn"
@@ -179,8 +179,8 @@
                             v-on:click="handler.handleSubmit"
                             v-bind:disabled="state.isSubmitting">
                         <span class="spinner-border spinner-border-sm me-2" v-if="state.isSubmitting" role="status" aria-hidden="true"></span>
-                        <span v-if="!state.isSubmitting">{{ state.deleteMode ? 'Delete' : 'Save' }}</span>
-                        <span v-else>{{ state.deleteMode ? 'Deleting...' : 'Saving...' }}</span>
+                        <span v-if="!state.isSubmitting">{{ state.deleteMode ? 'Törlés' : 'Mentés' }}</span>
+                        <span v-else>{{ state.deleteMode ? 'Törlés...' : 'Mentés...' }}</span>
                     </button>
                 </div>
             </div>
@@ -200,7 +200,7 @@
                         <div class="col-md-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h5>Customer Contact</h5>
+                                    <h5>Ügyfél kapcsolattartó</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
