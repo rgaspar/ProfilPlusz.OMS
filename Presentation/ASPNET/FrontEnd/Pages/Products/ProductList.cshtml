@@ -1,6 +1,6 @@
 ﻿@page
 @{
-    ViewData["Title"] = "Product List";
+    ViewData["Title"] = "Termék lista";
 }
 
 <div id="app" v-cloak>
@@ -53,7 +53,7 @@
                         <div class="card mb-3">
 
                             <div class="card-header">
-                                <h5>Main Info</h5>
+                                <h5>Alapadatok</h5>
                             </div>
 
 
@@ -63,7 +63,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Name</label>
+                                        <label>Név</label>
 
                                         <input ref="nameRef"
                                                v-model="state.name"
@@ -78,10 +78,10 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Number</label>
+                                        <label>Szám</label>
 
                                         <input ref="numberRef"
-                                               v-model="state.number"                                               
+                                               v-model="state.number"
                                                class="form-control">
 
                                     </div>
@@ -94,7 +94,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Unit Price</label>
+                                        <label>Egységár</label>
 
                                         <input ref="unitPriceRef"
                                                v-model="state.unitPrice"
@@ -109,7 +109,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Unit Measure</label>
+                                        <label>Mértékegység</label>
 
                                         <div ref="unitMeasureIdRef"></div>
 
@@ -127,7 +127,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Product Group</label>
+                                        <label>Termékcsoport</label>
 
                                         <div ref="productGroupIdRef"></div>
 
@@ -147,7 +147,7 @@
                                                    class="form-check-input">
 
                                             <label class="form-check-label">
-                                                Physical product
+                                                Fizikai termék
                                             </label>
 
                                         </div>
@@ -162,7 +162,7 @@
 
                                     <div class="col-md-12">
 
-                                        <label>Description</label>
+                                        <label>Leírás</label>
 
                                         <textarea v-model="state.description"
                                               class="form-control"
@@ -184,7 +184,7 @@
                         <div class="card mb-3">
 
                             <div class="card-header">
-                                <h5>Manufacturer</h5>
+                                <h5>Gyártó</h5>
                             </div>
 
 
@@ -194,7 +194,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Factory name</label>
+                                        <label>Gyár neve</label>
 
                                         <input v-model="state.factoryName"
                                                class="form-control">
@@ -204,7 +204,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Manufacturer</label>
+                                        <label>Gyártó</label>
 
                                         <input v-model="state.manufacturer"
                                                class="form-control">
@@ -219,7 +219,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Manufacturer number</label>
+                                        <label>Gyártói szám</label>
 
                                         <input v-model="state.manufacturerNumber"
                                                class="form-control">
@@ -244,7 +244,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Brand</label>
+                                        <label>Márka</label>
 
                                         <div ref="brandIdRef"></div>
 
@@ -253,7 +253,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Color</label>
+                                        <label>Szín</label>
 
                                         <div ref="colorIdRef"></div>
 
@@ -272,7 +272,7 @@
                         <div class="card mb-3">
 
                             <div class="card-header">
-                                <h5>Quantities</h5>
+                                <h5>Mennyiségek</h5>
                             </div>
 
 
@@ -282,7 +282,7 @@
 
                                     <div class="col-md-3">
 
-                                        <label>Sales Qty</label>
+                                        <label>Értékesítési menny.</label>
 
                                         <input v-model="state.salesUnitQuantity"
                                                class="form-control">
@@ -292,7 +292,7 @@
 
                                     <div class="col-md-3">
 
-                                        <label>Min Sales Qty</label>
+                                        <label>Min. értékesítési menny.</label>
 
                                         <input v-model="state.minimumSalesQuantity"
                                                class="form-control">
@@ -302,7 +302,7 @@
 
                                     <div class="col-md-3">
 
-                                        <label>Order Step</label>
+                                        <label>Rendelési lépés</label>
 
                                         <input v-model="state.orderQuantityStep"
                                                class="form-control">
@@ -312,7 +312,7 @@
 
                                     <div class="col-md-3">
 
-                                        <label>Package Qty</label>
+                                        <label>Csomag menny.</label>
 
                                         <input v-model="state.packageQuantity"
                                                class="form-control">
@@ -327,7 +327,7 @@
 
                                     <div class="col-md-3">
 
-                                        <label>Weight</label>
+                                        <label>Súly</label>
 
                                         <input v-model="state.weight"
                                                class="form-control">
@@ -347,7 +347,7 @@
                         <div class="card mb-3">
 
                             <div class="card-header">
-                                <h5>Stock</h5>
+                                <h5>Készlet</h5>
                             </div>
 
 
@@ -364,7 +364,7 @@
                                                    class="form-check-input">
 
                                             <label class="form-check-label">
-                                                Stock product
+                                                Készletes termék
                                             </label>
 
                                         </div>
@@ -374,7 +374,7 @@
 
                                     <div class="col-md-3">
 
-                                        <label>Warning stock</label>
+                                        <label>Figyelmeztető készlet</label>
 
                                         <input v-model="state.warningStock"
                                                class="form-control">
@@ -384,7 +384,7 @@
 
                                     <div class="col-md-3">
 
-                                        <label>Minimum stock</label>
+                                        <label>Minimum készlet</label>
 
                                         <input v-model="state.minimumStock"
                                                class="form-control">
@@ -401,7 +401,7 @@
                                                    class="form-check-input">
 
                                             <label class="form-check-label">
-                                                Serial tracking
+                                                Sorozatszám követés
                                             </label>
 
                                         </div>
@@ -421,7 +421,7 @@
                         <div class="card mb-3">
 
                             <div class="card-header">
-                                <h5>Media</h5>
+                                <h5>Média</h5>
                             </div>
 
 
@@ -431,7 +431,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Image 1</label>
+                                        <label>1. kép</label>
 
                                         <input v-model="state.image1Url"
                                                class="form-control">
@@ -441,7 +441,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Image 2</label>
+                                        <label>2. kép</label>
 
                                         <input v-model="state.image2Url"
                                                class="form-control">
@@ -456,7 +456,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Image 3</label>
+                                        <label>3. kép</label>
 
                                         <input v-model="state.image3Url"
                                                class="form-control">
@@ -466,7 +466,7 @@
 
                                     <div class="col-md-6">
 
-                                        <label>Video</label>
+                                        <label>Videó</label>
 
                                         <input v-model="state.videoUrl"
                                                class="form-control">
@@ -501,7 +501,7 @@
                         <div class="card">
 
                             <div class="card-header">
-                                <h5>Finance</h5>
+                                <h5>Pénzügy</h5>
                             </div>
 
 
@@ -511,7 +511,7 @@
 
                                     <div class="col-md-4">
 
-                                        <label>Purchase currency</label>
+                                        <label>Beszerzési pénznem</label>
 
                                         <div ref="purchaseCurrencyRef"></div>
 
@@ -520,7 +520,7 @@
 
                                     <div class="col-md-4">
 
-                                        <label>Sales currency</label>
+                                        <label>Értékesítési pénznem</label>
 
                                         <div ref="salesCurrencyRef"></div>
 
@@ -529,7 +529,7 @@
 
                                     <div class="col-md-4">
 
-                                        <label>Status</label>
+                                        <label>Státusz</label>
 
                                         <div ref="statusRef"></div>
 
@@ -554,7 +554,7 @@
                             class="btn btn-secondary"
                             data-bs-dismiss="modal">
 
-                        Close
+                        Bezárás
 
                     </button>
 
@@ -572,13 +572,13 @@
 
                         <span v-if="!state.isSubmitting">
 
-                            {{ state.deleteMode ? 'Delete' : 'Save' }}
+                            {{ state.deleteMode ? 'Törlés' : 'Mentés' }}
 
                         </span>
 
                         <span v-else>
 
-                            {{ state.deleteMode ? 'Deleting...' : 'Saving...' }}
+                            {{ state.deleteMode ? 'Törlés...' : 'Mentés...' }}
 
                         </span>
 
