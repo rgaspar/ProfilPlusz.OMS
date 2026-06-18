@@ -25,7 +25,7 @@ public class ExcelImportServiceTests
         var result = await _service.ImportAsync(
             stream,
             new TestMapper(),
-            (_, _, _) => Task.FromResult<string?>(null),
+            (_, _, _, _) => Task.FromResult<string?>(null),
             default);
 
         Assert.Equal(2, result.SuccessCount);
@@ -41,7 +41,7 @@ public class ExcelImportServiceTests
         var result = await _service.ImportAsync(
             stream,
             new TestMapper(),
-            (_, _, _) => Task.FromResult<string?>("Érvénytelen adat"),
+            (_, _, _, _) => Task.FromResult<string?>("Érvénytelen adat"),
             default);
 
         Assert.Equal(0, result.SuccessCount);
@@ -58,7 +58,7 @@ public class ExcelImportServiceTests
         var result = await _service.ImportAsync(
             stream,
             new TestMapper(),
-            (_, _, _) => throw new InvalidOperationException("Váratlan hiba"),
+            (_, _, _, _) => throw new InvalidOperationException("Váratlan hiba"),
             default);
 
         Assert.Equal(0, result.SuccessCount);
@@ -77,7 +77,7 @@ public class ExcelImportServiceTests
         var result = await _service.ImportAsync(
             stream,
             new TestMapper(),
-            (req, _, _) => Task.FromResult<string?>(req.Name == "Error" ? "Bad row" : null),
+            (req, _, _, _) => Task.FromResult<string?>(req.Name == "Error" ? "Bad row" : null),
             default);
 
         Assert.Equal(2, result.SuccessCount);
@@ -93,7 +93,7 @@ public class ExcelImportServiceTests
         await _service.ImportAsync(
             stream,
             new TestMapper(),
-            (_, row, _) => { capturedRow = row; return Task.FromResult<string?>(null); },
+            (_, row, _, _) => { capturedRow = row; return Task.FromResult<string?>(null); },
             default);
 
         Assert.NotNull(capturedRow);
@@ -108,11 +108,44 @@ public class ExcelImportServiceTests
         var result = await _service.ImportAsync(
             stream,
             new TestMapper(),
-            (_, _, _) => Task.FromResult<string?>("hiba"),
+            (_, _, _, _) => Task.FromResult<string?>("hiba"),
             default);
 
         Assert.True(result.Errors[0].OriginalRow.ContainsKey("Name"));
         Assert.Equal("TestRow", result.Errors[0].OriginalRow["Name"]?.ToString());
+    }
+
+    [Fact]
+    public async Task ImportAsync_RowNumber_CorrectlyPassedToCallback()
+    {
+        var capturedRowNumbers = new List<int>();
+        using var stream = CreateExcelStream(
+            new Dictionary<string, object?> { ["Name"] = "Row1" },
+            new Dictionary<string, object?> { ["Name"] = "Row2" });
+
+        await _service.ImportAsync(
+            stream,
+            new TestMapper(),
+            (_, _, rowNumber, _) => { capturedRowNumbers.Add(rowNumber); return Task.FromResult<string?>(null); },
+            default);
+
+        Assert.Equal([2, 3], capturedRowNumbers);
+    }
+
+    [Fact]
+    public async Task ImportAsync_CorruptStream_ReturnsReadableError()
+    {
+        using var badStream = new MemoryStream([0x00, 0x01, 0x02]);
+
+        var result = await _service.ImportAsync(
+            badStream,
+            new TestMapper(),
+            (_, _, _, _) => Task.FromResult<string?>(null),
+            default);
+
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Equal(1, result.ErrorCount);
+        Assert.Contains("fájl nem olvasható", result.Errors[0].ErrorMessage);
     }
 
     [Fact]

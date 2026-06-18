@@ -1,6 +1,5 @@
 using Application.Common.Repositories;
 using Application.Common.Services.ExcelImport;
-using Application.Features.NumberSequenceManager;
 using Domain.Entities;
 using Domain.Enums;
 using FluentValidation;
@@ -28,7 +27,6 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
     private readonly ICommandRepository<Product> _productRepository;
     private readonly IEntityDbSet _db;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly NumberSequenceService _numberSequenceService;
     private readonly ExcelImportService _excelImportService;
     private readonly IValidator<CreateProductRequest> _validator;
 
@@ -36,14 +34,12 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
         ICommandRepository<Product> productRepository,
         IEntityDbSet db,
         IUnitOfWork unitOfWork,
-        NumberSequenceService numberSequenceService,
         ExcelImportService excelImportService,
         IValidator<CreateProductRequest> validator)
     {
         _productRepository = productRepository;
         _db = db;
         _unitOfWork = unitOfWork;
-        _numberSequenceService = numberSequenceService;
         _excelImportService = excelImportService;
         _validator = validator;
     }
@@ -60,42 +56,45 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
             .AsNoTracking()
             .ToDictionaryAsync(g => g.Name ?? string.Empty, g => g.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
+        var existingProductsByNumber = await _db.Product
+            .AsNoTracking()
+            .Where(p => p.Number != null)
+            .ToDictionaryAsync(p => p.Number!, p => p.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
         var unitMeasureNamesById = unitMeasures.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
         var productGroupNamesById = productGroups.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
 
         var mapper = new ProductExcelRowMapper(unitMeasures, productGroups);
         var overwriteWarnings = new List<ImportWarning>();
-        int rowCounter = 1;
 
         var result = await _excelImportService.ImportAsync<CreateProductRequest>(
             request.ExcelStream,
             mapper,
-            async (createRequest, originalRow, ct) =>
+            async (createRequest, originalRow, rowNumber, ct) =>
             {
-                rowCounter++;
-
                 var validation = await _validator.ValidateAsync(createRequest, ct);
                 if (!validation.IsValid)
                     return string.Join("; ", validation.Errors.Select(e => e.ErrorMessage));
 
-                var existing = await _db.Product
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Number == createRequest.Number, ct);
-
-                if (existing is not null)
+                if (createRequest.Number is not null
+                    && existingProductsByNumber.TryGetValue(createRequest.Number, out var existingId))
                 {
-                    var tracked = await _productRepository.GetAsync(existing.Id, ct);
+                    var existing = await _db.Product
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(p => p.Id == existingId, ct);
+
+                    var tracked = await _productRepository.GetAsync(existingId, ct);
                     if (tracked is null)
                         return "Nem található a termék frissítéshez.";
 
-                    var diff = BuildDiff(existing, createRequest, originalRow, unitMeasureNamesById, productGroupNamesById);
+                    var diff = BuildDiff(existing!, createRequest, originalRow, unitMeasureNamesById, productGroupNamesById);
                     UpdateEntity(tracked, createRequest, request.CreatedById);
                     _productRepository.Update(tracked);
                     await _unitOfWork.SaveAsync(ct);
 
                     overwriteWarnings.Add(new ImportWarning
                     {
-                        RowNumber = rowCounter,
+                        RowNumber = rowNumber,
                         OriginalRow = originalRow,
                         Details = diff
                     });

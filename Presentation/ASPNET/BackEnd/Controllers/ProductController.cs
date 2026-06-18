@@ -110,10 +110,17 @@ public class ProductController : BaseApiController
     [Authorize]
     [HttpPost("ImportProductsFromExcel")]
     [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
     public async Task<IActionResult> ImportProductsFromExcelAsync(IFormFile file, CancellationToken cancellationToken)
     {
         if (file is null || file.Length == 0)
             return BadRequest("Nincs feltöltött fájl.");
+
+        if (!string.Equals(Path.GetExtension(file.FileName), ".xlsx", StringComparison.OrdinalIgnoreCase))
+            return BadRequest("Csak .xlsx fájl fogadható el.");
+
+        if (file.Length > 10 * 1024 * 1024)
+            return BadRequest("A fájl mérete nem haladhatja meg a 10 MB-ot.");
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         using var stream = file.OpenReadStream();
