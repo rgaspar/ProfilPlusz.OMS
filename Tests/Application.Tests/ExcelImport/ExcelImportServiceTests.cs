@@ -243,6 +243,104 @@ public class ExcelImportServiceTests
         Assert.NotEmpty(result);
     }
 
+    // ImportWithValidationFirstAsync tests
+
+    [Fact]
+    public async Task ImportWithValidationFirstAsync_AllValid_RunsProcessAndReturnsSuccess()
+    {
+        using var stream = CreateExcelStream(
+            new Dictionary<string, object?> { ["Name"] = "Row1" },
+            new Dictionary<string, object?> { ["Name"] = "Row2" });
+
+        var result = await _service.ImportWithValidationFirstAsync(
+            stream,
+            new TestMapper(),
+            (_, _, _, _) => Task.FromResult<string?>(null),
+            (_, _, _, _) => Task.FromResult<string?>(null),
+            default);
+
+        Assert.Equal(2, result.SuccessCount);
+        Assert.Equal(0, result.ErrorCount);
+    }
+
+    [Fact]
+    public async Task ImportWithValidationFirstAsync_ValidationFails_ProcessNotCalled()
+    {
+        using var stream = CreateExcelStream(
+            new Dictionary<string, object?> { ["Name"] = "Valid" },
+            new Dictionary<string, object?> { ["Name"] = "Invalid" });
+
+        bool processCalled = false;
+
+        var result = await _service.ImportWithValidationFirstAsync(
+            stream,
+            new TestMapper(),
+            (req, _, _, _) => Task.FromResult<string?>(req.Name == "Invalid" ? "Validation failed" : null),
+            (_, _, _, _) => { processCalled = true; return Task.FromResult<string?>(null); },
+            default);
+
+        Assert.False(processCalled);
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Equal(1, result.ErrorCount);
+        Assert.Equal("Validation failed", result.Errors[0].ErrorMessage);
+    }
+
+    [Fact]
+    public async Task ImportWithValidationFirstAsync_AllValidationPass_AllProcessed()
+    {
+        using var stream = CreateExcelStream(
+            new Dictionary<string, object?> { ["Name"] = "A" },
+            new Dictionary<string, object?> { ["Name"] = "B" },
+            new Dictionary<string, object?> { ["Name"] = "C" });
+
+        var processed = new List<string>();
+
+        var result = await _service.ImportWithValidationFirstAsync(
+            stream,
+            new TestMapper(),
+            (_, _, _, _) => Task.FromResult<string?>(null),
+            (req, _, _, _) => { processed.Add(req.Name); return Task.FromResult<string?>(null); },
+            default);
+
+        Assert.Equal(3, result.SuccessCount);
+        Assert.Equal(0, result.ErrorCount);
+        Assert.Equal(["A", "B", "C"], processed);
+    }
+
+    [Fact]
+    public async Task ImportWithValidationFirstAsync_ValidationError_ReturnsErrors_WithOriginalRow()
+    {
+        using var stream = CreateExcelStream(new Dictionary<string, object?> { ["Name"] = "Bad" });
+
+        var result = await _service.ImportWithValidationFirstAsync(
+            stream,
+            new TestMapper(),
+            (_, _, _, _) => Task.FromResult<string?>("bad data"),
+            (_, _, _, _) => Task.FromResult<string?>(null),
+            default);
+
+        Assert.True(result.HasErrors);
+        Assert.Equal("bad data", result.Errors[0].ErrorMessage);
+        Assert.Equal("Bad", result.Errors[0].OriginalRow["Name"]?.ToString());
+    }
+
+    [Fact]
+    public async Task ImportWithValidationFirstAsync_CorruptStream_ReturnsReadableError()
+    {
+        using var badStream = new MemoryStream([0x00, 0x01, 0x02]);
+
+        var result = await _service.ImportWithValidationFirstAsync(
+            badStream,
+            new TestMapper(),
+            (_, _, _, _) => Task.FromResult<string?>(null),
+            (_, _, _, _) => Task.FromResult<string?>(null),
+            default);
+
+        Assert.Equal(0, result.SuccessCount);
+        Assert.Equal(1, result.ErrorCount);
+        Assert.Contains("fájl nem olvasható", result.Errors[0].ErrorMessage);
+    }
+
     private record TestRequest(string Name);
 
     private class TestMapper : IExcelRowMapper<TestRequest>

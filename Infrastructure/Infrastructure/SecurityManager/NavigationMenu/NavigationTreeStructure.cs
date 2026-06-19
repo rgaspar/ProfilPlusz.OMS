@@ -67,6 +67,11 @@ public static class NavigationTreeStructure
                     "URL": "/SalesReports/SalesReportList",
                     "Name": "Sales Report",
                     "IsModule": false
+                },
+                {
+                    "URL": "/PriceLists/PriceListList",
+                    "Name": "Price List",
+                    "IsModule": false
                 }
             ]
         },
