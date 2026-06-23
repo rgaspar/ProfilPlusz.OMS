@@ -56,6 +56,7 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
     public DbSet<ProcessedEmail> ProcessedEmail { get; set; }
     public DbSet<Color> Color { get; set; }
     public DbSet<Brand> Brand { get; set; }
+    public DbSet<PriceList> PriceList { get; set; }
 
 
 
@@ -105,6 +106,7 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
         modelBuilder.ApplyConfiguration(new AddressConfiguration());
         modelBuilder.ApplyConfiguration(new ColorConfiguration());
         modelBuilder.ApplyConfiguration(new BrandConfiguration());
+        modelBuilder.ApplyConfiguration(new PriceListConfiguration());
     }
 
 }

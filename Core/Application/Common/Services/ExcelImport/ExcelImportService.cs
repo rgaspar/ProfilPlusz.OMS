@@ -69,6 +69,87 @@ public class ExcelImportService
         };
     }
 
+    public async Task<ImportResult> ImportWithValidationFirstAsync<TRequest>(
+        Stream excelStream,
+        IExcelRowMapper<TRequest> mapper,
+        Func<TRequest, IDictionary<string, object>, int, CancellationToken, Task<string?>> validateRow,
+        Func<TRequest, IDictionary<string, object>, int, CancellationToken, Task<string?>> processRow,
+        CancellationToken cancellationToken)
+    {
+        IEnumerable<dynamic> rows;
+        try
+        {
+            rows = await MiniExcelLibs.MiniExcel.QueryAsync(excelStream, useHeaderRow: true);
+        }
+        catch (Exception ex)
+        {
+            return new ImportResult
+            {
+                SuccessCount = 0,
+                ErrorCount = 1,
+                Errors = [new ImportError { RowNumber = 0, OriginalRow = new Dictionary<string, object>(), ErrorMessage = $"A fájl nem olvasható: {ex.Message}" }]
+            };
+        }
+
+        var allRows = new List<(TRequest Request, IDictionary<string, object> Row, int RowNumber)>();
+        var errors = new List<ImportError>();
+        int rowNumber = 1;
+
+        try
+        {
+            foreach (IDictionary<string, object> row in rows)
+            {
+                rowNumber++;
+
+                try
+                {
+                    var request = await mapper.MapAsync(row, cancellationToken);
+                    var errorMessage = await validateRow(request, row, rowNumber, cancellationToken);
+
+                    if (errorMessage is null)
+                        allRows.Add((request, row, rowNumber));
+                    else
+                        errors.Add(new ImportError { RowNumber = rowNumber, OriginalRow = row, ErrorMessage = errorMessage });
+                }
+                catch (Exception ex)
+                {
+                    errors.Add(new ImportError { RowNumber = rowNumber, OriginalRow = row, ErrorMessage = ex.Message });
+                }
+            }
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            errors.Add(new ImportError
+            {
+                RowNumber = rowNumber,
+                OriginalRow = new Dictionary<string, object>(),
+                ErrorMessage = $"A fájl nem olvasható: {ex.Message}"
+            });
+        }
+
+        if (errors.Count > 0)
+            return new ImportResult { SuccessCount = 0, ErrorCount = errors.Count, Errors = errors };
+
+        int successCount = 0;
+        foreach (var (request, row, rn) in allRows)
+        {
+            try
+            {
+                var errorMessage = await processRow(request, row, rn, cancellationToken);
+                if (errorMessage is null)
+                    successCount++;
+                else
+                    errors.Add(new ImportError { RowNumber = rn, OriginalRow = row, ErrorMessage = errorMessage });
+            }
+            catch (Exception ex)
+            {
+                errors.Add(new ImportError { RowNumber = rn, OriginalRow = row, ErrorMessage = ex.Message });
+            }
+        }
+
+        return new ImportResult { SuccessCount = successCount, ErrorCount = errors.Count, Errors = errors };
+    }
+
     public byte[] GenerateCombinedReport(List<ImportError> errors, List<ImportWarning> warnings, string[] headers)
     {
         if (errors.Count == 0 && warnings.Count == 0)

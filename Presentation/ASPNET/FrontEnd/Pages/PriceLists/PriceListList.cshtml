@@ -1,0 +1,213 @@
+@page
+@{
+    ViewData["Title"] = "Árlista";
+}
+
+<input type="file" id="excelImportInput" accept=".xlsx" style="display:none" />
+
+<div id="app" v-cloak>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="grid-container">
+                <div ref="mainGridRef"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade"
+         ref="mainModalRef"
+         id="MainModal"
+         aria-hidden="true"
+         tabindex="-1"
+         data-bs-focus="false"
+         data-bs-backdrop="static">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        {{ state.mainTitle }}
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+                <div class="modal-body">
+
+                    <input type="hidden" v-model="state.id" />
+
+                    <form id="MainForm">
+
+                        <div class="card mb-3">
+
+                            <div class="card-header">
+                                <h5>Alapadatok</h5>
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="row mb-2">
+
+                                    <div class="col-md-6">
+
+                                        <label>Termék</label>
+
+                                        <div ref="productIdRef"></div>
+
+                                        <label class="text-danger">
+                                            {{ state.errors.productId }}
+                                        </label>
+
+                                    </div>
+
+                                    <div class="col-md-6">
+
+                                        <label>Vevő</label>
+
+                                        <div ref="customerIdRef"></div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="row mb-2">
+
+                                    <div class="col-md-6">
+
+                                        <label>ÁFA</label>
+
+                                        <div ref="taxIdRef"></div>
+
+                                    </div>
+
+                                    <div class="col-md-6">
+
+                                        <label>Nettó ár</label>
+
+                                        <input v-model="state.netPrice"
+                                               type="number"
+                                               step="0.01"
+                                               class="form-control">
+
+                                        <label class="text-danger">
+                                            {{ state.errors.netPrice }}
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="row mb-2">
+
+                                    <div class="col-md-6">
+
+                                        <label>Bruttó ár</label>
+
+                                        <input v-model="state.grossPrice"
+                                               type="number"
+                                               step="0.01"
+                                               class="form-control">
+
+                                    </div>
+
+                                    <div class="col-md-6">
+
+                                        <label>Mennyiségi kedvezmény</label>
+
+                                        <input v-model="state.quantityDiscount"
+                                               type="number"
+                                               step="0.01"
+                                               class="form-control">
+
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+
+                                    <div class="col-md-6">
+
+                                        <label>Kedvezménytől</label>
+
+                                        <input v-model="state.discountFrom"
+                                               type="date"
+                                               class="form-control">
+
+                                    </div>
+
+                                    <div class="col-md-6">
+
+                                        <label>Kedvezményig</label>
+
+                                        <input v-model="state.discountTo"
+                                               type="date"
+                                               class="form-control">
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Bezárás
+                    </button>
+
+                    <button type="button"
+                            id="MainSaveButton"
+                            class="btn"
+                            v-bind:class="state.deleteMode ? 'btn-danger' : 'btn-primary'"
+                            v-on:click="handler.handleSubmit"
+                            v-bind:disabled="state.isSubmitting">
+
+                        <span class="spinner-border spinner-border-sm me-2"
+                              v-if="state.isSubmitting">
+                        </span>
+
+                        <span v-if="!state.isSubmitting">
+                            {{ state.deleteMode ? 'Törlés' : 'Mentés' }}
+                        </span>
+
+                        <span v-else>
+                            {{ state.deleteMode ? 'Törlés...' : 'Mentés...' }}
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section scripts {
+
+    <script src="~/FrontEnd/Pages/PriceLists/PriceListList.cshtml.js"></script>
+
+}
