@@ -4,6 +4,7 @@ using Application.Common.Repositories;
 using Infrastructure.DataAccessManager.EFCore.Contexts;
 using Infrastructure.DataAccessManager.EFCore.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -48,16 +49,19 @@ public static class DI
                     options.UseSqlServer(connectionString)
                     .LogTo(Log.Information, LogLevel.Information)
                     .EnableSensitiveDataLogging()
+                    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
                 );
                 services.AddDbContext<CommandContext>(options =>
                     options.UseSqlServer(connectionString)
                     .LogTo(Log.Information, LogLevel.Information)
                     .EnableSensitiveDataLogging()
+                    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
                 );
                 services.AddDbContext<QueryContext>(options =>
                     options.UseSqlServer(connectionString)
                     .LogTo(Log.Information, LogLevel.Information)
                     .EnableSensitiveDataLogging()
+                    .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
                 );
                 break;
         }
@@ -65,6 +69,7 @@ public static class DI
 
         services.AddScoped<ICommandContext, CommandContext>();
         services.AddScoped<IQueryContext, QueryContext>();
+        services.AddScoped<IEntityDbSet>(provider => provider.GetRequiredService<DataContext>());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(ICommandRepository<>), typeof(CommandRepository<>));
         services.AddScoped<IAnswerTemplateRepository, AnswerTemplateRepository>();
@@ -79,9 +84,8 @@ public static class DI
         using var scope = host.Services.CreateScope();
         var serviceProvider = scope.ServiceProvider;
 
-        // Create database using DataContext
         var dataContext = serviceProvider.GetRequiredService<DataContext>();
-        dataContext.Database.EnsureCreated(); // Ensure database is created (development only)
+        dataContext.Database.Migrate();
 
         return host;
     }

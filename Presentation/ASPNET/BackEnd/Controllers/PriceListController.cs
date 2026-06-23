@@ -65,9 +65,10 @@ public class PriceListController(ISender sender, ExcelImportService excelImportS
     [HttpGet("GetPriceList")]
     public async Task<ActionResult<ApiSuccessResult<GetPriceListResult>>> GetPriceListAsync(
         CancellationToken cancellationToken,
-        [FromQuery] bool isDeleted = false)
+        [FromQuery] bool isDeleted = false,
+        [FromQuery] string? productId = null)
     {
-        var request = new GetPriceListRequest { IsDeleted = isDeleted };
+        var request = new GetPriceListRequest { IsDeleted = isDeleted, ProductId = productId };
         var response = await _sender.Send(request, cancellationToken);
 
         return Ok(new ApiSuccessResult<GetPriceListResult>

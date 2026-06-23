@@ -71,6 +71,8 @@ public record GetProductListDto
 
     // dátum
     public DateTime? CreatedAtUtc { get; init; }
+
+    public bool HasPriceList { get; init; }
 }
 
 public class GetProductListProfile : Profile
@@ -105,7 +107,9 @@ public class GetProductListProfile : Profile
                 opt => opt.MapFrom(src =>
                     src.Color != null
                         ? src.Color.Name
-                        : null));
+                        : null))
+
+            .ForMember(dest => dest.HasPriceList, opt => opt.Ignore());
     }
 }
 
@@ -148,7 +152,16 @@ public class GetProductListHandler : IRequestHandler<GetProductListRequest, GetP
 
         var entities = await query.ToListAsync(cancellationToken);
 
-        var dtos = _mapper.Map<List<GetProductListDto>>(entities);
+        var priceListProductIds = (await _context.PriceList
+            .AsNoTracking()
+            .Where(pl => !pl.IsDeleted && pl.ProductId != null)
+            .Select(pl => pl.ProductId!)
+            .ToListAsync(cancellationToken))
+            .ToHashSet();
+
+        var dtos = _mapper.Map<List<GetProductListDto>>(entities)
+            .Select(dto => dto with { HasPriceList = priceListProductIds.Contains(dto.Id ?? string.Empty) })
+            .ToList();
 
         return new GetProductListResult
         {

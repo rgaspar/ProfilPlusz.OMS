@@ -68,6 +68,7 @@ public class GetPriceListResult
 public class GetPriceListRequest : IRequest<GetPriceListResult>
 {
     public bool IsDeleted { get; init; } = false;
+    public string? ProductId { get; init; }
 }
 
 public class GetPriceListHandler(IMapper mapper, IQueryContext context)
@@ -77,14 +78,19 @@ public class GetPriceListHandler(IMapper mapper, IQueryContext context)
         GetPriceListRequest request,
         CancellationToken cancellationToken)
     {
-        var entities = await context
+        var query = context
             .PriceList
             .AsNoTracking()
             .ApplyIsDeletedFilter(request.IsDeleted)
             .Include(pl => pl.Product)
             .Include(pl => pl.Customer)
-            .Include(pl => pl.Tax)
-            .ToListAsync(cancellationToken);
+            .Include(pl => pl.Tax);
+
+        var filtered = string.IsNullOrEmpty(request.ProductId)
+            ? query
+            : query.Where(pl => pl.ProductId == request.ProductId);
+
+        var entities = await filtered.ToListAsync(cancellationToken);
 
         return new GetPriceListResult
         {

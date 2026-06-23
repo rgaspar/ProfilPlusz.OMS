@@ -86,7 +86,27 @@
                 errorCount: 0,
                 overwriteCount: 0,
                 errors: []
-            }
+            },
+
+            selectedProductId: null,
+            selectedProductName: null,
+
+            priceListData: [],
+            customerListLookupData: [],
+            taxListLookupData: [],
+
+            plId: '',
+            plProductId: null,
+            plCustomerId: null,
+            plTaxId: null,
+            plNetPrice: 0,
+            plGrossPrice: null,
+            plQuantityDiscount: null,
+            plDiscountFrom: null,
+            plDiscountTo: null,
+            plDeleteMode: false,
+            plEditTitle: '',
+            plIsSubmitting: false
 
         });
 
@@ -95,6 +115,11 @@
         const mainGridRef = Vue.ref(null);
         const mainModalRef = Vue.ref(null);
         const importResultModalRef = Vue.ref(null);
+        const priceListModalRef = Vue.ref(null);
+        const priceListEditModalRef = Vue.ref(null);
+        const priceListGridRef = Vue.ref(null);
+        const plCustomerIdRef = Vue.ref(null);
+        const plTaxIdRef = Vue.ref(null);
 
         const productGroupIdRef = Vue.ref(null);
         const unitMeasureIdRef = Vue.ref(null);
@@ -233,7 +258,22 @@
                 AxiosManager.get('/Brand/GetBrandList'),
 
             getColorList: () =>
-                AxiosManager.get('/Color/GetColorList')
+                AxiosManager.get('/Color/GetColorList'),
+
+            getPriceListByProduct: productId =>
+                AxiosManager.get(`/PriceList/GetPriceList?productId=${encodeURIComponent(productId)}`),
+
+            updatePriceList: data =>
+                AxiosManager.post('/PriceList/UpdatePriceList', data),
+
+            deletePriceList: (id, userId) =>
+                AxiosManager.post('/PriceList/DeletePriceList', { id, deletedById: userId }),
+
+            getCustomerList: () =>
+                AxiosManager.get('/Customer/GetCustomerList'),
+
+            getTaxList: () =>
+                AxiosManager.get('/Tax/GetTaxList')
 
         };
 
@@ -273,6 +313,19 @@
                     (await services.getColorList())
                         .data.content.data;
 
+                const [customers, taxes] = await Promise.all([
+                    services.getCustomerList(),
+                    services.getTaxList()
+                ]);
+                state.customerListLookupData = customers?.data?.content?.data ?? [];
+                state.taxListLookupData = taxes?.data?.content?.data ?? [];
+
+            },
+
+            loadPriceList: async (productId) => {
+                const response = await services.getPriceListByProduct(productId);
+                state.priceListData = response?.data?.content?.data ?? [];
+                return state.priceListData;
             }
 
         };
@@ -388,6 +441,42 @@
 
                 }
 
+            },
+
+            handlePriceListSubmit: async () => {
+                try {
+                    state.plIsSubmitting = true;
+                    const userId = StorageManager.getUserId();
+
+                    if (state.plDeleteMode) {
+                        await services.deletePriceList(state.plId, userId);
+                    } else {
+                        await services.updatePriceList({
+                            id: state.plId,
+                            productId: state.plProductId,
+                            customerId: state.plCustomerId,
+                            taxId: state.plTaxId,
+                            netPrice: parseFloat(state.plNetPrice) || 0,
+                            grossPrice: state.plGrossPrice ? parseFloat(state.plGrossPrice) : null,
+                            quantityDiscount: state.plQuantityDiscount ? parseFloat(state.plQuantityDiscount) : null,
+                            discountFrom: state.plDiscountFrom || null,
+                            discountTo: state.plDiscountTo || null,
+                            updatedById: userId
+                        });
+                    }
+
+                    const data = await methods.loadPriceList(state.selectedProductId);
+                    priceListGrid.obj.setProperties({ dataSource: data });
+
+                    await methods.populateMainData();
+                    mainGrid.refresh();
+
+                    priceListEditModal.obj.hide();
+                } catch (e) {
+                    Swal.fire({ icon: 'error', title: 'Hiba', text: e?.response?.data?.message ?? e.message });
+                } finally {
+                    state.plIsSubmitting = false;
+                }
             }
 
         };
@@ -493,6 +582,13 @@
                                 headerText: 'Created',
                                 format: 'yyyy-MM-dd HH:mm',
                                 width: 150
+                            },
+
+                            {
+                                headerText: '',
+                                width: 100,
+                                textAlign: 'Center',
+                                template: '${if(hasPriceList)}<button class="btn btn-sm btn-outline-primary py-0" onclick="window.__openProductPriceList(\'${id}\', \'${name}\')">Árlista</button>${/if}'
                             }
 
                         ],
@@ -547,7 +643,8 @@
                                 id: 'DownloadTemplate',
                                 prefixIcon: 'e-download'
 
-                            }
+                            },
+
 
                         ],
 
@@ -674,6 +771,7 @@
 
                             }
 
+
                         }
 
                     });
@@ -728,6 +826,95 @@
 
             show: () => importResultModal.obj.show()
 
+        };
+
+        const priceListModal = {
+            obj: null,
+            create: () => {
+                priceListModal.obj = new bootstrap.Modal(priceListModalRef.value, { backdrop: 'static', keyboard: false });
+            }
+        };
+
+        const priceListEditModal = {
+            obj: null,
+            create: () => {
+                priceListEditModal.obj = new bootstrap.Modal(priceListEditModalRef.value, { backdrop: 'static', keyboard: false });
+            }
+        };
+
+        let plCustomerDropdown = null;
+        let plTaxDropdown = null;
+
+        const priceListGrid = {
+            obj: null,
+            create: () => {
+                priceListGrid.obj = new ej.grids.Grid({
+                    height: '350px',
+                    dataSource: [],
+                    allowSorting: true,
+                    allowFiltering: true,
+                    allowPaging: true,
+                    toolbar: [
+                        {
+                            text: 'Szerkesztés',
+                            id: 'PlEdit',
+                            prefixIcon: 'e-edit'
+                        },
+                        {
+                            text: 'Törlés',
+                            id: 'PlDelete',
+                            prefixIcon: 'e-delete'
+                        }
+                    ],
+                    columns: [
+                        { field: 'customerName', headerText: 'Vevő', width: 180 },
+                        { field: 'taxName', headerText: 'ÁFA', width: 100 },
+                        { field: 'taxPercentage', headerText: 'ÁFA%', width: 80, format: 'N2' },
+                        { field: 'netPrice', headerText: 'Nettó ár', width: 120, format: 'N2' },
+                        { field: 'grossPrice', headerText: 'Bruttó ár', width: 120, format: 'N2' },
+                        { field: 'quantityDiscount', headerText: 'Kedvezmény%', width: 120, format: 'N2' },
+                        { field: 'discountFrom', headerText: 'Tól', width: 110, format: 'yyyy-MM-dd', type: 'date' },
+                        { field: 'discountTo', headerText: 'Ig', width: 110, format: 'yyyy-MM-dd', type: 'date' }
+                    ],
+                    dataBound: () => {
+                        priceListGrid.obj.toolbarModule.enableItems(['PlEdit', 'PlDelete'], false);
+                    },
+                    rowSelected: () => {
+                        priceListGrid.obj.toolbarModule.enableItems(['PlEdit', 'PlDelete'], true);
+                    },
+                    rowDeselected: () => {
+                        priceListGrid.obj.toolbarModule.enableItems(['PlEdit', 'PlDelete'], false);
+                    },
+                    toolbarClick: args => {
+                        const r = priceListGrid.obj.getSelectedRecords()[0];
+                        if (!r) return;
+
+                        state.plId = r.id;
+                        state.plProductId = r.productId;
+                        state.plCustomerId = r.customerId;
+                        state.plTaxId = r.taxId;
+                        state.plNetPrice = r.netPrice;
+                        state.plGrossPrice = r.grossPrice;
+                        state.plQuantityDiscount = r.quantityDiscount;
+                        state.plDiscountFrom = r.discountFrom ? new Date(r.discountFrom).toISOString().slice(0, 10) : null;
+                        state.plDiscountTo = r.discountTo ? new Date(r.discountTo).toISOString().slice(0, 10) : null;
+
+                        if (args.item.id === 'PlEdit') {
+                            state.plDeleteMode = false;
+                            state.plEditTitle = 'Árlista szerkesztése';
+                        } else if (args.item.id === 'PlDelete') {
+                            state.plDeleteMode = true;
+                            state.plEditTitle = 'Árlista törlése';
+                        }
+
+                        if (plCustomerDropdown) plCustomerDropdown.value = r.customerId ?? null;
+                        if (plTaxDropdown) plTaxDropdown.value = r.taxId ?? null;
+
+                        priceListEditModal.obj.show();
+                    }
+                });
+                priceListGrid.obj.appendTo(priceListGridRef.value);
+            }
         };
 
 
@@ -810,8 +997,35 @@
             );
 
 
+            window.__openProductPriceList = async (productId, productName) => {
+                state.selectedProductId = productId;
+                state.selectedProductName = productName;
+                const data = await methods.loadPriceList(productId);
+                priceListGrid.obj.setProperties({ dataSource: data });
+                priceListModal.obj.show();
+            };
+
             mainModal.create();
             importResultModal.create();
+            priceListModal.create();
+            priceListEditModal.create();
+            priceListGrid.create();
+
+            plCustomerDropdown = createDropdown(
+                plCustomerIdRef,
+                state.customerListLookupData,
+                'id',
+                'name',
+                v => state.plCustomerId = v
+            );
+
+            plTaxDropdown = createDropdown(
+                plTaxIdRef,
+                state.taxListLookupData,
+                'id',
+                'name',
+                v => state.plTaxId = v
+            );
 
             document.getElementById('excelImportInput').addEventListener('change', async (e) => {
                 const file = e.target.files[0];
@@ -853,6 +1067,11 @@
             mainGridRef,
             mainModalRef,
             importResultModalRef,
+            priceListModalRef,
+            priceListEditModalRef,
+            priceListGridRef,
+            plCustomerIdRef,
+            plTaxIdRef,
 
             productGroupIdRef,
             unitMeasureIdRef,

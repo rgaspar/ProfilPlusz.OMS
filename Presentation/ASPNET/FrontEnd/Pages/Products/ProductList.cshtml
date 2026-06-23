@@ -671,6 +671,111 @@
 
     </div>
 
+    <!-- Price List Modal -->
+    <div class="modal fade"
+         ref="priceListModalRef"
+         id="PriceListModal"
+         aria-hidden="true"
+         tabindex="-1"
+         data-bs-focus="false"
+         data-bs-backdrop="static">
+
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Árlista - {{ state.selectedProductName }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div ref="priceListGridRef"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bezárás</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Price List Edit Modal -->
+    <div class="modal fade"
+         ref="priceListEditModalRef"
+         id="PriceListEditModal"
+         aria-hidden="true"
+         tabindex="-1"
+         data-bs-focus="false"
+         data-bs-backdrop="static">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ state.plEditTitle }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div v-show="state.plDeleteMode" class="alert alert-danger">
+                        Biztosan törölni szeretné ezt az árlistarekordot?
+                    </div>
+
+                    <div v-show="!state.plDeleteMode">
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>Vevő</label>
+                                <div ref="plCustomerIdRef"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label>ÁFA</label>
+                                <div ref="plTaxIdRef"></div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6">
+                                <label>Nettó ár</label>
+                                <input v-model="state.plNetPrice" type="number" step="0.01" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Bruttó ár</label>
+                                <input v-model="state.plGrossPrice" type="number" step="0.01" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <label>Mennyiségi kedvezmény (%)</label>
+                                <input v-model="state.plQuantityDiscount" type="number" step="0.01" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Kedvezménytől</label>
+                                <input v-model="state.plDiscountFrom" type="date" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label>Kedvezményig</label>
+                                <input v-model="state.plDiscountTo" type="date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mégse</button>
+                    <button type="button"
+                            :class="state.plDeleteMode ? 'btn btn-danger' : 'btn btn-primary'"
+                            :disabled="state.plIsSubmitting"
+                            v-on:click="handler.handlePriceListSubmit">
+                        {{ state.plDeleteMode ? 'Törlés' : 'Mentés' }}
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </div>
 
 

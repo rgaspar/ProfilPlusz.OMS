@@ -16,18 +16,18 @@
             let isValid = true;
 
             if (!state.email) {
-                state.errors.email = 'Email is required.';
+                state.errors.email = 'Az email cím megadása kötelező.';
                 isValid = false;
             } else if (!/\S+@\S+\.\S+/.test(state.email)) {
-                state.errors.email = 'Please enter a valid email address.';
+                state.errors.email = 'Kérjük, adjon meg egy érvényes email címet.';
                 isValid = false;
             }
 
             if (!state.password) {
-                state.errors.password = 'Password is required.';
+                state.errors.password = 'A jelszó megadása kötelező.';
                 isValid = false;
             } else if (state.password.length < 6) {
-                state.errors.password = 'Password must be at least 6 characters.';
+                state.errors.password = 'A jelszónak legalább 6 karakterből kell állnia.';
                 isValid = false;
             }
 
@@ -35,7 +35,6 @@
         };
 
         const handleSubmit = async () => {
-
             try {
                 state.isSubmitting = true;
                 await new Promise(resolve => setTimeout(resolve, 300));
@@ -53,8 +52,8 @@
                     StorageManager.saveLoginResult(response.data);
                     Swal.fire({
                         icon: 'success',
-                        title: 'Login Successful',
-                        text: 'You are being redirected...',
+                        title: 'Sikeres bejelentkezés',
+                        text: 'Tovább a fő oldalra...',
                         timer: 2000,
                         showConfirmButton: false
                     });
@@ -65,16 +64,16 @@
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Login Failed',
-                        text: response.data.message || 'Please check your credentials.',
-                        confirmButtonText: 'Try Again'
+                        title: 'Sikertelen bejelentkezés',
+                        text: response.data.message || 'Kérjük, ellenőrizze az adatait.',
+                        confirmButtonText: 'Újra próbálom'
                     });
                 }
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'An Error Occurred',
-                    text: error.response?.data?.message || 'Please try again.',
+                    title: 'Hiba történt',
+                    text: error.response?.data?.message || 'Próbáld újra.',
                     confirmButtonText: 'OK'
                 });
             } finally {

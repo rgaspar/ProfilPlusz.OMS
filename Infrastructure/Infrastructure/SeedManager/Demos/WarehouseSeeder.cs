@@ -21,9 +21,9 @@ namespace Infrastructure.SeedManager.Demos
         {
             var warehouses = new List<Warehouse>
             {
-                new Warehouse { Name = "New York" },
+                /*new Warehouse { Name = "New York" },
                 new Warehouse { Name = "San Francisco" },
-                new Warehouse { Name = "Chicago" },
+                new Warehouse { Name = "Chicago" },*/
                 new Warehouse { Name = "Los Angeles" }
             };
 
