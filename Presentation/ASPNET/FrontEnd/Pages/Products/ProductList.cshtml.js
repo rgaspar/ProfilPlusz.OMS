@@ -79,7 +79,14 @@
 
             },
 
-            isSubmitting: false
+            isSubmitting: false,
+
+            importResult: {
+                successCount: 0,
+                errorCount: 0,
+                overwriteCount: 0,
+                errors: []
+            }
 
         });
 
@@ -87,6 +94,7 @@
 
         const mainGridRef = Vue.ref(null);
         const mainModalRef = Vue.ref(null);
+        const importResultModalRef = Vue.ref(null);
 
         const productGroupIdRef = Vue.ref(null);
         const unitMeasureIdRef = Vue.ref(null);
@@ -710,6 +718,18 @@
 
         };
 
+        const importResultModal = {
+
+            obj: null,
+
+            create: () => {
+                importResultModal.obj = new bootstrap.Modal(importResultModalRef.value, { backdrop: 'static', keyboard: false });
+            },
+
+            show: () => importResultModal.obj.show()
+
+        };
+
 
 
         Vue.onMounted(async () => {
@@ -791,6 +811,7 @@
 
 
             mainModal.create();
+            importResultModal.create();
 
             document.getElementById('excelImportInput').addEventListener('change', async (e) => {
                 const file = e.target.files[0];
@@ -807,16 +828,14 @@
                         `import-hibak-${new Date().toISOString().slice(0, 10)}.xlsx`
                     );
 
-                    if (result) {
-                        const successCount = result.content?.successCount ?? 0;
-                        const overwriteCount = result.content?.overwriteCount ?? 0;
-                        const msg = overwriteCount > 0
-                            ? `Import kész: ${successCount} sor betöltve, ebből ${overwriteCount} felülírva.`
-                            : `Import kész: ${successCount} sor sikeresen betöltve.`;
-                        alert(msg);
-                    } else {
-                        alert('Import kész. Hibák és/vagy felülírások a letöltött jelentésfájlban.');
-                    }
+                    const content = result?.content ?? {};
+                    state.importResult = {
+                        successCount: content.successCount ?? 0,
+                        errorCount: content.errorCount ?? 0,
+                        overwriteCount: content.overwriteCount ?? 0,
+                        errors: content.errors ?? []
+                    };
+                    importResultModal.show();
 
                     await methods.populateMainData();
                     mainGrid.refresh();
@@ -833,6 +852,7 @@
 
             mainGridRef,
             mainModalRef,
+            importResultModalRef,
 
             productGroupIdRef,
             unitMeasureIdRef,
