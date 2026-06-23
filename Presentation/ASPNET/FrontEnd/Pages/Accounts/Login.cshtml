@@ -1,6 +1,6 @@
-﻿@page
+@page
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Bejelentkezés";
 }
 
 <div id="app" class="container-fluid" v-cloak>
@@ -29,7 +29,7 @@
                        name="Password"
                        type="password"
                        class="form-control"
-                       placeholder="Password"
+                       placeholder="Jelszó"
                        v-model="state.password"
                        v-on:input="state.errors.password = ''">
                 <div class="input-group-append">
@@ -44,11 +44,10 @@
                     <div class="icheck-primary">
                         <input type="checkbox">
                         <label for="remember">
-                            Remember Me
+                            Emlékezz rám
                         </label>
                     </div>
                 </div>
-                <!-- /.col -->
                 <div class="col-4">
                     <button type="submit"
                             v-bind:disabled="state.isSubmitting"
@@ -57,29 +56,14 @@
                               v-if="state.isSubmitting"
                               role="status"
                               aria-hidden="true"></span>
-                        <span>{{ state.isSubmitting ? '...' : 'Log In' }}</span>
+                        <span>{{ state.isSubmitting ? '...' : 'Bejelentkezés' }}</span>
                     </button>
                 </div>
-                <!-- /.col -->
             </div>
         </form>
 
-        <div class="social-auth-links text-center mb-3">
-            <p>- OR -</p>
-            <a href="#" class="btn btn-block btn-primary">
-                <i class="fab fa-facebook mr-2"></i> Sign in using Facebook
-            </a>
-            <a href="#" class="btn btn-block btn-danger">
-                <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
-            </a>
-        </div>
-        <!-- /.social-auth-links -->
-
         <p class="mb-1">
-            <a asp-page="/Accounts/ForgotPassword">Forgot Password</a>
-        </p>
-        <p class="mb-0">
-            <a asp-page="/Accounts/Register" class="text-center">Register a new membership</a>
+            <a asp-page="/Accounts/ForgotPassword">Elfelejtett jelszó</a>
         </p>
     </div>
 
