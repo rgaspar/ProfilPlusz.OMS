@@ -45,6 +45,8 @@ public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
 
+    public string? ContactPersonName { get; set; }
+
     public string? TaxNumber { get; set; }
     public string? EuTaxNumber { get; set; }
     public string? BankAccountNumber { get; set; }
@@ -135,6 +137,8 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         entity.Instagram = request.Instagram;
         entity.TwitterX = request.TwitterX;
         entity.TikTok = request.TikTok;
+
+        entity.ContactPersonName = request.ContactPersonName;
 
         entity.TaxNumber = request.TaxNumber;
         entity.EuTaxNumber = request.EuTaxNumber;

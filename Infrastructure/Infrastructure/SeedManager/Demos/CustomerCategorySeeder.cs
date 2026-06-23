@@ -21,11 +21,8 @@ public class CustomerCategorySeeder
     {
         var customerCategories = new List<CustomerCategory>
         {
-            new CustomerCategory { Name = "Enterprise" },
-            new CustomerCategory { Name = "Medium" },
-            new CustomerCategory { Name = "Small" },
-            new CustomerCategory { Name = "Startup" },
-            new CustomerCategory { Name = "Micro" }
+            new CustomerCategory { Name = "Beszállító" },
+            new CustomerCategory { Name = "Vevő" }
         };
 
         foreach (var category in customerCategories)

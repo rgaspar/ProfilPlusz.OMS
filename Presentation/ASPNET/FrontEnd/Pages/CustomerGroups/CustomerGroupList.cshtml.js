@@ -72,7 +72,7 @@
             obj: null,
             create: () => {
                 nameText.obj = new ej.inputs.TextBox({
-                    placeholder: 'Enter Name',
+                    placeholder: 'Adja meg a nevet',
                 });
                 nameText.obj.appendTo(nameRef.value);
             },
@@ -101,7 +101,7 @@
 
                     // name validation
                     if (!state.name) {
-                        state.errors.name = 'Name is required.';
+                        state.errors.name = 'Név megadása kötelező.';
                         isValid = false;
                     }
 
@@ -119,8 +119,8 @@
 
                         Swal.fire({
                             icon: 'success',
-                            title: state.deleteMode ? 'Delete Successful' : 'Save Successful',
-                            text: 'Form will be closed...',
+                            title: state.deleteMode ? 'Törölve' : 'Mentve',
+                            text: 'Az ablak bezárul...',
                             timer: 2000,
                             showConfirmButton: false
                         });
@@ -131,17 +131,17 @@
                     } else {
                         Swal.fire({
                             icon: 'error',
-                            title: state.deleteMode ? 'Delete Failed' : 'Save Failed',
-                            text: response.data.message ?? 'Please check your data.',
-                            confirmButtonText: 'Try Again'
+                            title: state.deleteMode ? 'Törlés sikertelen' : 'Mentés sikertelen',
+                            text: response.data.message ?? 'Kérjük ellenőrizze az adatokat.',
+                            confirmButtonText: 'Újra'
                         });
                     }
 
                 } catch (error) {
                     Swal.fire({
                         icon: 'error',
-                        title: 'An Error Occurred',
-                        text: error.response?.data?.message ?? 'Please try again.',
+                        title: 'Hiba történt',
+                        text: error.response?.data?.message ?? 'Kérjük próbálja újra.',
                         confirmButtonText: 'OK'
                     });
                 } finally {
@@ -185,16 +185,16 @@
                         {
                             field: 'id', isPrimaryKey: true, headerText: 'Id', visible: false
                         },
-                        { field: 'name', headerText: 'Name', width: 200, minWidth: 200 },
-                        { field: 'description', headerText: 'Description', width: 400, minWidth: 400 },
-                        { field: 'createdAtUtc', headerText: 'Created At UTC', width: 150, format: 'yyyy-MM-dd HH:mm' }
+                        { field: 'name', headerText: 'Név', width: 200, minWidth: 200 },
+                        { field: 'description', headerText: 'Leírás', width: 400, minWidth: 400 },
+                        { field: 'createdAtUtc', headerText: 'Létrehozva', width: 150, format: 'yyyy-MM-dd HH:mm' }
                     ],
                     toolbar: [
                         'ExcelExport', 'Search',
                         { type: 'Separator' },
-                        { text: 'Add', tooltipText: 'Add', prefixIcon: 'e-add', id: 'AddCustom' },
-                        { text: 'Edit', tooltipText: 'Edit', prefixIcon: 'e-edit', id: 'EditCustom' },
-                        { text: 'Delete', tooltipText: 'Delete', prefixIcon: 'e-delete', id: 'DeleteCustom' },
+                        { text: 'Hozzáadás', tooltipText: 'Hozzáadás', prefixIcon: 'e-add', id: 'AddCustom' },
+                        { text: 'Szerkesztés', tooltipText: 'Szerkesztés', prefixIcon: 'e-edit', id: 'EditCustom' },
+                        { text: 'Törlés', tooltipText: 'Törlés', prefixIcon: 'e-delete', id: 'DeleteCustom' },
                         { type: 'Separator' },
                     ],
                     beforeDataBound: () => { },
@@ -229,7 +229,7 @@
 
                         if (args.item.id === 'AddCustom') {
                             state.deleteMode = false;
-                            state.mainTitle = 'Add Customer Group';
+                            state.mainTitle = 'Ügyfélcsoport hozzáadása';
                             resetFormState();
                             mainModal.obj.show();
                         }
@@ -238,7 +238,7 @@
                             state.deleteMode = false;
                             if (mainGrid.obj.getSelectedRecords().length) {
                                 const selectedRecord = mainGrid.obj.getSelectedRecords()[0];
-                                state.mainTitle = 'Edit Customer Group';
+                                state.mainTitle = 'Ügyfélcsoport szerkesztése';
                                 state.id = selectedRecord.id ?? '';
                                 state.name = selectedRecord.name ?? '';
                                 state.description = selectedRecord.description ?? '';
@@ -250,7 +250,7 @@
                             state.deleteMode = true;
                             if (mainGrid.obj.getSelectedRecords().length) {
                                 const selectedRecord = mainGrid.obj.getSelectedRecords()[0];
-                                state.mainTitle = 'Delete Customer Group?';
+                                state.mainTitle = 'Ügyfélcsoport törlése?';
                                 state.id = selectedRecord.id ?? '';
                                 state.name = selectedRecord.name ?? '';
                                 state.description = selectedRecord.description ?? '';

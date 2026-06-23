@@ -25,8 +25,10 @@ public class Customer : BaseEntity
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
 
+    public string? ContactPersonName { get; set; }
+
     public string? TaxNumber { get; set; }
-    public string? EuTaxNumber { get; set; }    
+    public string? EuTaxNumber { get; set; }
     public string? BankAccountNumber { get; set; }
     public InvoiceType? InvoiceType { get; set; }
     public PaymentMethod? PaymentMethod { get; set; }

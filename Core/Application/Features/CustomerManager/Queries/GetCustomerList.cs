@@ -1,7 +1,8 @@
-﻿using Application.Common.CQS.Queries;
+using Application.Common.CQS.Queries;
 using Application.Common.Extensions;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,14 +14,15 @@ public record GetCustomerListDto
     public string? Name { get; set; }
     public string? Number { get; set; }
     public string? Description { get; set; }
-    public string? Street { get; set; }
-    public string? City { get; set; }
-    public string? State { get; set; }
-    public string? ZipCode { get; set; }
-    public string? Country { get; set; }
+
     public string? PhoneNumber { get; set; }
     public string? FaxNumber { get; set; }
+
     public string? EmailAddress { get; set; }
+    public string? EmailAddressOrderConfirmation { get; set; }
+    public string? EmailAddressInvoice { get; set; }
+    public string? EmailAddressPurchaseOrder { get; set; }
+
     public string? Website { get; set; }
     public string? WhatsApp { get; set; }
     public string? LinkedIn { get; set; }
@@ -28,10 +30,30 @@ public record GetCustomerListDto
     public string? Instagram { get; set; }
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
+
+    public string? ContactPersonName { get; set; }
+
+    public string? TaxNumber { get; set; }
+    public string? EuTaxNumber { get; set; }
+    public string? BankAccountNumber { get; set; }
+
+    public InvoiceType? InvoiceType { get; set; }
+    public PaymentMethod? PaymentMethod { get; set; }
+    public int? PaymentDeadlineDays { get; set; }
+    public Currency? Currency { get; set; }
+
+    // cím az első Address bejegyzésből
+    public string? Street { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public string? ZipCode { get; set; }
+    public string? Country { get; set; }
+
     public string? CustomerGroupId { get; set; }
     public string? CustomerGroupName { get; set; }
     public string? CustomerCategoryId { get; set; }
     public string? CustomerCategoryName { get; set; }
+
     public string? CreatedById { get; init; }
     public DateTime? CreatedAtUtc { get; init; }
 }
@@ -43,13 +65,25 @@ public class GetCustomerListProfile : Profile
         CreateMap<Customer, GetCustomerListDto>()
             .ForMember(
                 dest => dest.CustomerGroupName,
-                opt => opt.MapFrom(src => src.CustomerGroup != null ? src.CustomerGroup.Name : string.Empty)
-            )
+                opt => opt.MapFrom(src => src.CustomerGroup != null ? src.CustomerGroup.Name : string.Empty))
             .ForMember(
                 dest => dest.CustomerCategoryName,
-                opt => opt.MapFrom(src => src.CustomerCategory != null ? src.CustomerCategory.Name : string.Empty)
-            );
-
+                opt => opt.MapFrom(src => src.CustomerCategory != null ? src.CustomerCategory.Name : string.Empty))
+            .ForMember(
+                dest => dest.Street,
+                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.Street : null))
+            .ForMember(
+                dest => dest.City,
+                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.City : null))
+            .ForMember(
+                dest => dest.State,
+                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.State : null))
+            .ForMember(
+                dest => dest.ZipCode,
+                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.ZipCode : null))
+            .ForMember(
+                dest => dest.Country,
+                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.Country : null));
     }
 }
 
@@ -62,7 +96,6 @@ public class GetCustomerListRequest : IRequest<GetCustomerListResult>
 {
     public bool IsDeleted { get; init; } = false;
 }
-
 
 public class GetCustomerListHandler : IRequestHandler<GetCustomerListRequest, GetCustomerListResult>
 {
@@ -95,9 +128,4 @@ public class GetCustomerListHandler : IRequestHandler<GetCustomerListRequest, Ge
             Data = dtos
         };
     }
-
-
 }
-
-
-

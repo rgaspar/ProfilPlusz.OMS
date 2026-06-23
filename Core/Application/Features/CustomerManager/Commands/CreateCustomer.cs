@@ -44,6 +44,8 @@ public class CreateCustomerRequest : IRequest<CreateCustomerResult>
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
 
+    public string? ContactPersonName { get; set; }
+
     public string? TaxNumber { get; set; }
     public string? EuTaxNumber { get; set; }
     public string? BankAccountNumber { get; set; }
@@ -130,6 +132,8 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerRequest, Crea
             Instagram = request.Instagram,
             TwitterX = request.TwitterX,
             TikTok = request.TikTok,
+
+            ContactPersonName = request.ContactPersonName,
 
             TaxNumber = request.TaxNumber,
             EuTaxNumber = request.EuTaxNumber,
