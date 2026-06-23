@@ -124,6 +124,27 @@ public class ExcelImportService
         return stream.ToArray();
     }
 
+    public byte[] GenerateTemplateWithReferenceSheet(
+        string[] headers,
+        IDictionary<string, object?> sampleRow,
+        List<Dictionary<string, object?>> referenceRows)
+    {
+        var mainData = new List<Dictionary<string, object?>>
+        {
+            headers.ToDictionary(h => h, h => sampleRow.TryGetValue(h, out var v) ? v : null)
+        };
+
+        var sheets = new Dictionary<string, object>
+        {
+            ["Sablon"] = mainData,
+            ["Referencia"] = referenceRows
+        };
+
+        using var stream = new MemoryStream();
+        stream.SaveAs(sheets);
+        return stream.ToArray();
+    }
+
     private static Dictionary<string, object?> BuildReportRow(
         IDictionary<string, object> originalRow,
         string[] headers,
