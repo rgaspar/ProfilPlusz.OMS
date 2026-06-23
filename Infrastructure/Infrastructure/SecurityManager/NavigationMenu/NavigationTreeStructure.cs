@@ -70,7 +70,7 @@ public static class NavigationTreeStructure
                 },
                 {
                     "URL": "/PriceLists/PriceListList",
-                    "Name": "Price List",
+                    "Name": "Árlista",
                     "IsModule": false
                 }
             ]

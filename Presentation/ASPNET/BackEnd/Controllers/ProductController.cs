@@ -133,22 +133,10 @@ public class ProductController : BaseApiController
 
         var response = await _sender.Send(request, cancellationToken);
 
-        if (response.ErrorReportBytes.Length > 0)
-        {
-            return File(
-                response.ErrorReportBytes,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"import-jelentes-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx");
-        }
-
-        var overwriteNote = response.OverwriteCount > 0
-            ? $" ({response.OverwriteCount} felülírva)"
-            : string.Empty;
-
         return Ok(new ApiSuccessResult<ImportProductsFromExcelResult>
         {
             Code = StatusCodes.Status200OK,
-            Message = $"{response.SuccessCount} termék sikeresen importálva{overwriteNote}.",
+            Message = $"Import kész: {response.SuccessCount} sikeres, {response.ErrorCount} hibás, {response.OverwriteCount} felülírva.",
             Content = response
         });
     }
@@ -165,7 +153,33 @@ public class ProductController : BaseApiController
             "BeszerzésiPénznem", "ÉrtékesítésiPénznem", "Státusz"
         };
 
-        var bytes = _excelImportService.GenerateTemplate(headers);
+        var sampleRow = new Dictionary<string, object?>
+        {
+            ["Szám"] = "P001",
+            ["Név"] = "Példa termék",
+            ["GyárNeve"] = "Gyári név",
+            ["Leírás"] = "Termék leírása",
+            ["Egységár"] = 1000,
+            ["Mértékegység"] = "db",
+            ["Termékcsoport"] = "Általános",
+            ["Fizikai"] = "true",
+            ["Gyártó"] = "Gyártó neve",
+            ["GyártóiSzám"] = "MFG-001",
+            ["EAN"] = "5901234123457",
+            ["BeszerzésiPénznem"] = "HUF",
+            ["ÉrtékesítésiPénznem"] = "HUF",
+            ["Státusz"] = "Active"
+        };
+
+        var referenceRows = new List<Dictionary<string, object?>>
+        {
+            new() { ["Mező"] = "Fizikai", ["Lehetséges értékek"] = "true, false", ["Megjegyzés"] = "Fizikai termék-e (raktározható)" },
+            new() { ["Mező"] = "BeszerzésiPénznem", ["Lehetséges értékek"] = "HUF, EUR, USD", ["Megjegyzés"] = string.Empty },
+            new() { ["Mező"] = "ÉrtékesítésiPénznem", ["Lehetséges értékek"] = "HUF, EUR, USD", ["Megjegyzés"] = string.Empty },
+            new() { ["Mező"] = "Státusz", ["Lehetséges értékek"] = "Active, Blocked, Discontinued", ["Megjegyzés"] = "Active=Aktív, Blocked=Zárolt, Discontinued=Kifutó" },
+        };
+
+        var bytes = _excelImportService.GenerateTemplateWithReferenceSheet(headers, sampleRow, referenceRows);
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "termek-import-template.xlsx");
     }
 

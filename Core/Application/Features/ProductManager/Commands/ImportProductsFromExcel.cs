@@ -8,12 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.ProductManager.Commands;
 
+public class ImportProductsFromExcelErrorDto
+{
+    public int RowNumber { get; init; }
+    public string ErrorMessage { get; init; } = string.Empty;
+}
+
 public class ImportProductsFromExcelResult
 {
     public int SuccessCount { get; init; }
     public int ErrorCount { get; init; }
     public int OverwriteCount { get; init; }
-    public byte[] ErrorReportBytes { get; init; } = [];
+    public List<ImportProductsFromExcelErrorDto> Errors { get; init; } = [];
 }
 
 public class ImportProductsFromExcelRequest : IRequest<ImportProductsFromExcelResult>
@@ -109,16 +115,14 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
             },
             cancellationToken);
 
-        var reportBytes = result.HasErrors || overwriteWarnings.Count > 0
-            ? _excelImportService.GenerateCombinedReport(result.Errors, overwriteWarnings, mapper.TemplateHeaders)
-            : [];
-
         return new ImportProductsFromExcelResult
         {
             SuccessCount = result.SuccessCount,
             ErrorCount = result.ErrorCount,
             OverwriteCount = overwriteWarnings.Count,
-            ErrorReportBytes = reportBytes
+            Errors = result.Errors
+                .Select(e => new ImportProductsFromExcelErrorDto { RowNumber = e.RowNumber, ErrorMessage = e.ErrorMessage })
+                .ToList()
         };
     }
 
