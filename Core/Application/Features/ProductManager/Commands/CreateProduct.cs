@@ -71,10 +71,12 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
             .NotEmpty();
 
         RuleFor(x => x.UnitMeasureId)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage("A 'Mértékegység' kötelező és a Referencia lapon szereplő értékek egyikének kell lennie.");
 
         RuleFor(x => x.ProductGroupId)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage("A 'Termékcsoport' kötelező és a Referencia lapon szereplő értékek egyikének kell lennie.");
 
         RuleFor(x => x.PurchaseCurrency)
             .IsInEnum();

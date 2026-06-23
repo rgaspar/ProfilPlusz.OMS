@@ -48,11 +48,13 @@ public static class DependencyInjection
         services.Configure<TemplateSettings>(configuration.GetSection("EmailTemplates"));
         services.Configure<EmailCustomerRecommendationSettings>(configuration.GetSection("EmailPartnerRecommendation"));
 
-        //>>> Register services in Application.Features 
+        //>>> Register services in Application.Features
         var assembly = Assembly.GetExecutingAssembly();
+        var excelRowMapperType = typeof(IExcelRowMapper<>);
         var featureTypes = assembly.GetTypes()
             .Where(type => type.IsClass && !type.IsAbstract)
-            .Where(type => type.Namespace != null && type.Namespace.StartsWith("Application.Features"));
+            .Where(type => type.Namespace != null && type.Namespace.StartsWith("Application.Features"))
+            .Where(type => !type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == excelRowMapperType));
 
         foreach (var type in featureTypes)
         {

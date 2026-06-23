@@ -46,7 +46,7 @@ public class CustomerSeeder
 
         var customers = new List<Customer>
         {
-            new Customer { Name = "Citadel LLC" },
+            /*new Customer { Name = "Citadel LLC" },
             new Customer { Name = "Ironclad LLC" },
             new Customer { Name = "Armada LLC" },
             new Customer { Name = "Shield LLC" },
@@ -64,7 +64,7 @@ public class CustomerSeeder
             new Customer { Name = "Serenity LLC" },
             new Customer { Name = "Oasis LLC" },
             new Customer { Name = "Grandeur LLC" },
-            new Customer { Name = "Bright LLC" },
+            new Customer { Name = "Bright LLC" },*/
             new Customer { Name = "Stellar LLC" }
         };
 

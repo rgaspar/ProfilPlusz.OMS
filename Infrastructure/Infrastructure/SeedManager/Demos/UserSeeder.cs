@@ -15,7 +15,7 @@ public class UserSeeder
 
     public async Task GenerateDataAsync()
     {
-        var userNames = new List<string>
+        /*var userNames = new List<string>
         {
             "Alex", "Taylor", "Jordan", "Morgan", "Riley",
             "Casey", "Peyton", "Cameron", "Jamie", "Drew",
@@ -45,6 +45,6 @@ public class UserSeeder
                     await _userManager.AddToRoleAsync(applicationUser, role);
                 }
             }
-        }
+        }*/
     }
 }

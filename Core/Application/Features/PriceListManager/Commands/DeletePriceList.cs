@@ -27,9 +27,10 @@ public class DeletePriceListHandler(
         var entity = await repository.GetAsync(request.Id ?? string.Empty, cancellationToken)
             ?? throw new Exception("Price list entry not found.");
 
+        entity.IsDeleted = true;
         entity.UpdatedById = request.DeletedById;
 
-        repository.Delete(entity);
+        repository.Update(entity);
         await unitOfWork.SaveAsync(cancellationToken);
 
         return new DeletePriceListResult { Data = entity };

@@ -2,8 +2,11 @@
 using ASPNET.BackEnd.Common.Handlers;
 using Infrastructure;
 using Infrastructure.DataAccessManager.EFCore;
+using Infrastructure.DataAccessManager.EFCore.Contexts;
 using Infrastructure.SeedManager;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 
 namespace ASPNET.BackEnd;
@@ -75,12 +78,37 @@ public static class BackEndConfiguration
             x.SuppressModelStateInvalidFilter = true;
         });
 
+        services.AddHealthChecks()
+            .AddDbContextCheck<DataContext>(name: "database", tags: ["ready"]);
+
         return services;
     }
 
     public static IEndpointRouteBuilder MapBackEndRoutes(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapControllers();
+
+        endpoints.MapHealthChecks("/health/live", new HealthCheckOptions
+        {
+            Predicate = _ => false,
+            ResultStatusCodes =
+            {
+                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Degraded] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+            }
+        });
+
+        endpoints.MapHealthChecks("/health/ready", new HealthCheckOptions
+        {
+            Predicate = check => check.Tags.Contains("ready"),
+            ResultStatusCodes =
+            {
+                [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                [HealthStatus.Degraded] = StatusCodes.Status200OK,
+                [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+            }
+        });
 
         return endpoints;
     }

@@ -43,7 +43,7 @@ public class VendorSeeder
 
         var vendors = new List<Vendor>
         {
-            new Vendor { Name = "Quantum Industries" },
+            /*new Vendor { Name = "Quantum Industries" },
             new Vendor { Name = "Apex Ventures" },
             new Vendor { Name = "Horizon Enterprises" },
             new Vendor { Name = "Nova Innovations" },
@@ -61,7 +61,7 @@ public class VendorSeeder
             new Vendor { Name = "Sovereign Solutions" },
             new Vendor { Name = "Spectrum Corporation" },
             new Vendor { Name = "Elysium Enterprises" },
-            new Vendor { Name = "Infinity Holdings" },
+            new Vendor { Name = "Infinity Holdings" },*/
             new Vendor { Name = "Momentum Ventures" }
         };
 

@@ -24,30 +24,22 @@ public class UserAdminSeeder
         var adminEmail = _identitySettings.DefaultAdmin.Email;
         var adminPassword = _identitySettings.DefaultAdmin.Password;
 
-        if (await _userManager.FindByEmailAsync(adminEmail) == null)
+        var applicationUser = await _userManager.FindByEmailAsync(adminEmail);
+
+        if (applicationUser == null)
         {
-            var applicationUser = new ApplicationUser(
-                adminEmail,
-                "Root",
-                "Admin"
-                );
-
+            applicationUser = new ApplicationUser(adminEmail, "Root", "Admin");
             applicationUser.EmailConfirmed = true;
-
-            //create user Root Admin
             await _userManager.CreateAsync(applicationUser, adminPassword);
+        }
 
-            //add Admin role to Root Admin
-            var roles = RoleHelper.GetAdminRoles();
-            foreach (var role in roles)
+        var roles = RoleHelper.GetAdminRoles();
+        foreach (var role in roles)
+        {
+            if (!await _userManager.IsInRoleAsync(applicationUser, role))
             {
-                if (!await _userManager.IsInRoleAsync(applicationUser, role))
-                {
-                    await _userManager.AddToRoleAsync(applicationUser, role);
-                }
-
+                await _userManager.AddToRoleAsync(applicationUser, role);
             }
-
         }
     }
 }
