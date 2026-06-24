@@ -1,48 +1,38 @@
-﻿@{
-    var userEmail = "Loading...";
-    var avatarUrl = "/noimage.png";
-    var appName = "WMS";
-}
+<aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Menü">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Brand Logo -->
-    <a asp-area="" asp-page="/Dashboards/DefaultDashboard" class="brand-link d-flex justify-content-center align-items-center">
-        <span class="brand-text font-weight-light">@appName</span>
-    </a>
+        <h1 class="navbar-brand navbar-brand-autodark">
+            <a asp-area="" asp-page="/Dashboards/DefaultDashboard">
+                <span class="fw-bold">ProfilPlusz</span>
+            </a>
+        </h1>
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <!-- Sidebar user (optional) -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
-                <img id="AvatarImageSide" src="@avatarUrl" class="img-circle elevation-2" alt="User Image" style="width: 40px; height: 40px;">
-            </div>
-            <div class="info">
-                <a asp-area="" asp-page="/Profiles/MyProfile" class="d-block" id="userEmail">@userEmail</a>
-            </div>
-        </div>
-
-
-        <!-- Sidebar Menu -->
-        <nav class="mt-2">
-            <div id="navbarnav" class="navbar-nav w-100">
-                <div id="mainMenuContainer">
-                    <div id="mainMenu"></div>
+        <div class="collapse navbar-collapse" id="sidebar-menu">
+            <div class="navbar-nav mb-3 mt-3">
+                <div class="nav-item d-flex align-items-center gap-2 px-2">
+                    <span class="avatar avatar-sm">
+                        <img id="AvatarImageSide" src="/noimage.png" alt="Avatar" style="border-radius: 50%; width: 32px; height: 32px; object-fit: cover;">
+                    </span>
+                    <div>
+                        <a asp-area="" asp-page="/Profiles/MyProfile" class="nav-link py-0 text-white" id="userEmail" style="font-size: 0.85rem;"></a>
+                    </div>
                 </div>
             </div>
-        </nav>
-        <!-- /.sidebar-menu -->
+
+            <ul class="navbar-nav pt-lg-2" id="mainMenu"></ul>
+        </div>
     </div>
-    <!-- /.sidebar -->
 </aside>
 
-@* _sidebar.cshtml *@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         try {
             const email = StorageManager.getEmail();
-            const userEmail = `${email}`;
-            document.getElementById('userEmail').textContent = userEmail;
+            const emailEl = document.getElementById('userEmail');
+            if (emailEl) emailEl.textContent = email ?? '';
 
             const currentUrl = window.location.pathname;
             const firstSegment = currentUrl.split('/')[1];
@@ -50,67 +40,75 @@
             function filterMenu(menuData, userRoles) {
                 const childMenus = menuData.filter(menu => {
                     if (menu.navURL) {
-                        const firstSegment = menu.navURL.split('/')[1];
-                        return userRoles.some(role => role.toLowerCase() === firstSegment.toLowerCase());
+                        const seg = menu.navURL.split('/')[1];
+                        return userRoles.some(role => role.toLowerCase() === seg.toLowerCase());
                     }
                     return false;
                 });
-
-                const validChildIds = new Set(childMenus.map(menu => menu.id));
-                const parentIds = new Set(childMenus.map(menu => menu.pid));
-                return menuData.filter(menu => validChildIds.has(menu.id) || parentIds.has(menu.id));
+                const validChildIds = new Set(childMenus.map(m => m.id));
+                const parentIds = new Set(childMenus.map(m => m.pid));
+                return menuData.filter(m => validChildIds.has(m.id) || parentIds.has(m.id));
             }
 
             function updateMenuSelection(menuData, segment) {
                 const parentMap = {};
-                menuData.forEach(item => {
-                    parentMap[item.id] = item;
-                });
-
+                menuData.forEach(item => { parentMap[item.id] = item; });
                 menuData.forEach(item => {
                     item.isSelected = false;
                     item.expanded = false;
-                    if (item.navURL && item.navURL.includes(`/${segment}`)) {
+                    if (item.navURL && item.navURL.toLowerCase().includes('/' + segment.toLowerCase())) {
                         item.isSelected = true;
                         let parentId = item.pid;
                         while (parentId) {
                             const parent = parentMap[parentId];
-                            if (parent) {
-                                parent.expanded = true;
-                                parentId = parent.pid;
-                            } else {
-                                break;
-                            }
+                            if (parent) { parent.expanded = true; parentId = parent.pid; }
+                            else break;
                         }
                     }
                 });
-
                 return menuData;
+            }
+
+            function buildMenu(menuData) {
+                const parents = menuData.filter(m => !m.pid);
+                const childrenOf = id => menuData.filter(m => String(m.pid) === String(id));
+
+                let html = '';
+                parents.forEach(parent => {
+                    const children = childrenOf(parent.id);
+                    const anySelected = children.some(c => c.isSelected) || parent.isSelected;
+                    const collapseId = `nav-${parent.id}`;
+
+                    if (children.length === 0) {
+                        html += `<li class="nav-item">
+                            <a class="nav-link${parent.isSelected ? ' active' : ''}" href="${parent.navURL || '#'}">
+                                <span class="nav-link-title">${parent.name}</span>
+                            </a>
+                        </li>`;
+                    } else {
+                        html += `<li class="nav-item${anySelected ? ' active' : ''}">
+                            <a class="nav-link dropdown-toggle${anySelected ? '' : ' collapsed'}" href="#${collapseId}" data-bs-toggle="collapse" role="button" aria-expanded="${anySelected}">
+                                <span class="nav-link-title">${parent.name}</span>
+                            </a>
+                            <div class="nav-submenu collapse${anySelected ? ' show' : ''}" id="${collapseId}">
+                                ${children.map(c => `<a class="nav-link${c.isSelected ? ' active' : ''}" href="${c.navURL || '#'}">${c.name}</a>`).join('')}
+                            </div>
+                        </li>`;
+                    }
+                });
+                return html;
             }
 
             const userRoles = StorageManager.getUserRoles();
             let menuData = StorageManager.getMenuNavigation();
-            const filteredMenu = filterMenu(menuData, userRoles);
-            menuData = updateMenuSelection(filteredMenu, firstSegment);
+            const filtered = filterMenu(menuData, userRoles);
+            const withSelection = updateMenuSelection(filtered, firstSegment);
 
-            const mainMenu = new ej.navigations.TreeView({
-                fullRowNavigable: true,
-                fields: {
-                    dataSource: menuData,
-                    id: 'id',
-                    text: 'name',
-                    selected: 'isSelected',
-                    parentID: 'pid',
-                    hasChildren: 'hasChild',
-                    expanded: 'expanded',
-                    navigateUrl: 'navURL',
-                },
-                enablePersistence: false,
-            });
-            mainMenu.appendTo('#mainMenu');
+            const mainMenu = document.getElementById('mainMenu');
+            if (mainMenu) mainMenu.innerHTML = buildMenu(withSelection);
 
         } catch (error) {
-            console.error('Error fetching data from StorageManager:', error);
+            console.error('Sidebar menu error:', error);
         }
     });
 </script>

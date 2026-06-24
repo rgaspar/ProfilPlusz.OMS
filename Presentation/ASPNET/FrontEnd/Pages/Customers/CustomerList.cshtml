@@ -23,175 +23,199 @@
                     <input type="hidden" v-model="state.id" />
                     <form id="MainForm">
 
-                        <!-- ALAPADATOK -->
-                        <div class="card mb-3">
-                            <div class="card-header"><h5>Alapadatok</h5></div>
-                            <div class="card-body">
-                                <div class="row mb-2">
+                        <ul class="nav nav-tabs mb-3" id="customerTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-alapadatok" type="button">Alapadatok</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-kapcsolattarto" type="button">Kapcsolattartó</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-adozas" type="button">Adózás</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-email" type="button">E-mail</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cim" type="button">Cím</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-penzugy" type="button">Pénzügy</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-egyeb" type="button">Egyéb</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+
+                            <!-- ALAPADATOK -->
+                            <div class="tab-pane fade show active" id="tab-alapadatok">
+                                <div class="row mb-3">
                                     <div class="col-md-4">
-                                        <label>Ügyfél kód</label>
-                                        <input ref="numberRef" v-model="state.number" class="form-control" readonly />
+                                        <label class="form-label">Ügyfél kód</label>
+                                        <input v-model="state.number" class="form-control" readonly />
                                     </div>
                                     <div class="col-md-4">
-                                        <label>Ügyfél neve <span class="text-danger">*</span></label>
-                                        <input ref="nameRef" v-model="state.name" class="form-control" />
-                                        <label class="text-danger" v-text="state.errors.name"></label>
+                                        <label class="form-label">Ügyfél neve <span class="text-danger">*</span></label>
+                                        <input v-model="state.name" class="form-control" />
+                                        <div class="form-text text-danger" v-text="state.errors.name"></div>
                                     </div>
                                     <div class="col-md-4">
-                                        <label>Leírás</label>
+                                        <label class="form-label">Leírás</label>
                                         <input v-model="state.description" class="form-control" />
                                     </div>
                                 </div>
-                                <div class="row mb-2">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label>Ügyfélcsoport <span class="text-danger">*</span></label>
+                                        <label class="form-label">Ügyfélcsoport <span class="text-danger">*</span></label>
                                         <div ref="customerGroupIdRef"></div>
-                                        <label class="text-danger" v-text="state.errors.customerGroupId"></label>
+                                        <div class="form-text text-danger" v-text="state.errors.customerGroupId"></div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label>Ügyfélkategória <span class="text-danger">*</span></label>
+                                        <label class="form-label">Ügyfélkategória <span class="text-danger">*</span></label>
                                         <div ref="customerCategoryIdRef"></div>
-                                        <label class="text-danger" v-text="state.errors.customerCategoryId"></label>
+                                        <div class="form-text text-danger" v-text="state.errors.customerCategoryId"></div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- KAPCSOLATTARTÓ -->
-                        <div class="card mb-3">
-                            <div class="card-header"><h5>Kapcsolattartó</h5></div>
-                            <div class="card-body">
-                                <div class="row mb-2">
+                            <!-- KAPCSOLATTARTÓ -->
+                            <div class="tab-pane fade" id="tab-kapcsolattarto">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label>Kapcsolattartó neve</label>
+                                        <label class="form-label">Kapcsolattartó neve</label>
                                         <input v-model="state.contactPersonName" class="form-control" />
                                     </div>
                                     <div class="col-md-6">
-                                        <label>Kapcsolattartó telefonszáma</label>
+                                        <label class="form-label">Kapcsolattartó telefonszáma</label>
                                         <input v-model="state.phoneNumber" class="form-control" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- ADÓZÁS -->
-                        <div class="card mb-3">
-                            <div class="card-header"><h5>Adózás</h5></div>
-                            <div class="card-body">
-                                <div class="row mb-2">
+                            <!-- ADÓZÁS -->
+                            <div class="tab-pane fade" id="tab-adozas">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label>Adószám</label>
+                                        <label class="form-label">Adószám</label>
                                         <input v-model="state.taxNumber" class="form-control" />
                                     </div>
                                     <div class="col-md-6">
-                                        <label>Közösségi adószám</label>
+                                        <label class="form-label">Közösségi adószám</label>
                                         <input v-model="state.euTaxNumber" class="form-control" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- EMAIL CÍMEK -->
-                        <div class="card mb-3">
-                            <div class="card-header"><h5>E-mail címek</h5></div>
-                            <div class="card-body">
-                                <div class="row mb-2">
+                            <!-- EMAIL -->
+                            <div class="tab-pane fade" id="tab-email">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label>E-mail (általános) <span class="text-danger">*</span></label>
-                                        <input v-model="state.emailAddress" class="form-control" />
-                                        <label class="text-danger" v-text="state.errors.emailAddress"></label>
+                                        <label class="form-label">E-mail (általános) <span class="text-danger">*</span></label>
+                                        <input v-model="state.emailAddress" class="form-control" type="email" />
+                                        <div class="form-text text-danger" v-text="state.errors.emailAddress"></div>
                                     </div>
                                     <div class="col-md-6">
-                                        <label>E-mail – rendelés visszaigazolás</label>
-                                        <input v-model="state.emailAddressOrderConfirmation" class="form-control" />
+                                        <label class="form-label">E-mail - rendelés visszaigazolás</label>
+                                        <input v-model="state.emailAddressOrderConfirmation" class="form-control" type="email" />
                                     </div>
                                 </div>
-                                <div class="row mb-2">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label>E-mail – számlázás</label>
-                                        <input v-model="state.emailAddressInvoice" class="form-control" />
+                                        <label class="form-label">E-mail - számlázás</label>
+                                        <input v-model="state.emailAddressInvoice" class="form-control" type="email" />
                                     </div>
                                     <div class="col-md-6">
-                                        <label>E-mail – beszerzési rendelés</label>
-                                        <input v-model="state.emailAddressPurchaseOrder" class="form-control" />
+                                        <label class="form-label">E-mail - beszerzési rendelés</label>
+                                        <input v-model="state.emailAddressPurchaseOrder" class="form-control" type="email" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- CÍM -->
-                        <div class="card mb-3">
-                            <div class="card-header"><h5>Számlázási / szállítási cím</h5></div>
-                            <div class="card-body">
-                                <div class="row mb-2">
+                            <!-- CÍM -->
+                            <div class="tab-pane fade" id="tab-cim">
+                                <div class="row mb-3">
                                     <div class="col-md-3">
-                                        <label>Ország</label>
+                                        <label class="form-label">Ország</label>
                                         <input v-model="state.country" class="form-control" />
                                     </div>
                                     <div class="col-md-3">
-                                        <label>Irányítószám</label>
+                                        <label class="form-label">Irányítószám</label>
                                         <input v-model="state.zipCode" class="form-control" />
                                     </div>
                                     <div class="col-md-3">
-                                        <label>Település</label>
+                                        <label class="form-label">Település</label>
                                         <input v-model="state.city" class="form-control" />
                                     </div>
                                     <div class="col-md-3">
-                                        <label>Utca, házszám</label>
+                                        <label class="form-label">Utca, házszám</label>
                                         <input v-model="state.street" class="form-control" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- PÉNZÜGY -->
-                        <div class="card mb-3">
-                            <div class="card-header"><h5>Pénzügyi adatok</h5></div>
-                            <div class="card-body">
-                                <div class="row mb-2">
+                            <!-- PÉNZÜGY -->
+                            <div class="tab-pane fade" id="tab-penzugy">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label>Bankszámlaszám</label>
+                                        <label class="form-label">Bankszámlaszám</label>
                                         <input v-model="state.bankAccountNumber" class="form-control" />
                                     </div>
                                     <div class="col-md-6">
-                                        <label>Számla típusa</label>
-                                        <div ref="invoiceTypeRef"></div>
+                                        <label class="form-label">Számla típusa</label>
+                                        <select v-model="state.invoiceType" class="form-select">
+                                            <option :value="null">-- válassz --</option>
+                                            <option :value="1">Elektronikus</option>
+                                            <option :value="2">Papír</option>
+                                        </select>
                                     </div>
                                 </div>
-                                <div class="row mb-2">
+                                <div class="row mb-3">
                                     <div class="col-md-4">
-                                        <label>Fizetés módja</label>
-                                        <div ref="paymentMethodRef"></div>
+                                        <label class="form-label">Fizetés módja</label>
+                                        <select v-model="state.paymentMethod" class="form-select">
+                                            <option :value="null">-- válassz --</option>
+                                            <option :value="1">Átutalás</option>
+                                            <option :value="2">Készpénz</option>
+                                        </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label>Fizetési határidő</label>
-                                        <div ref="paymentDeadlineDaysRef"></div>
+                                        <label class="form-label">Fizetési határidő</label>
+                                        <select v-model="state.paymentDeadlineDays" class="form-select">
+                                            <option :value="null">-- válassz --</option>
+                                            <option :value="8">8 nap</option>
+                                            <option :value="15">15 nap</option>
+                                            <option :value="30">30 nap</option>
+                                        </select>
                                     </div>
                                     <div class="col-md-4">
-                                        <label>Pénznem</label>
-                                        <div ref="currencyRef"></div>
+                                        <label class="form-label">Pénznem</label>
+                                        <select v-model="state.currency" class="form-select">
+                                            <option :value="null">-- válassz --</option>
+                                            <option :value="1">HUF</option>
+                                            <option :value="2">EUR</option>
+                                            <option :value="3">USD</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- EGYÉB KOMMUNIKÁCIÓ -->
-                        <div class="card mb-3">
-                            <div class="card-header"><h5>Egyéb kommunikáció</h5></div>
-                            <div class="card-body">
-                                <div class="row mb-2">
+                            <!-- EGYÉB -->
+                            <div class="tab-pane fade" id="tab-egyeb">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label>Weboldal</label>
+                                        <label class="form-label">Weboldal</label>
                                         <input v-model="state.website" class="form-control" />
                                     </div>
                                     <div class="col-md-6">
-                                        <label>Faxszám</label>
+                                        <label class="form-label">Faxszám</label>
                                         <input v-model="state.faxNumber" class="form-control" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -222,9 +246,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
-                                <div class="card-header">
-                                    <h5>Ügyfél kapcsolattartó</h5>
-                                </div>
+                                <div class="card-header"><h5>Ügyfél kapcsolattartó</h5></div>
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-12">

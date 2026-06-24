@@ -1,6 +1,6 @@
-﻿@page
+@page
 @{
-    ViewData["Title"] = "Ügyfél kapcsolattartó lista";
+    ViewData["Title"] = "Kapcsolattartó lista";
 }
 
 <div id="app" v-cloak>
@@ -20,60 +20,71 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" v-model="state.id" id="Id" name="Id" />
+                    <input type="hidden" v-model="state.id" />
                     <form id="MainForm">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5>Alapadatok</h5>
+
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-alapadatok" type="button">Alapadatok</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-kapcsolat" type="button">Elérhetőség</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+
+                            <!-- ALAPADATOK -->
+                            <div class="tab-pane fade show active" id="tab-alapadatok">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Név <span class="text-danger">*</span></label>
+                                        <input v-model="state.name" class="form-control" />
+                                        <div class="form-text text-danger" v-text="state.errors.name"></div>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="row mb-2">
-                                            <div class="col-md-6">
-                                                <label for="Name">Név</label>
-                                                <input ref="nameRef" v-model="state.name" class="form-control" placeholder="" />
-                                                <label class="text-danger" v-text="state.errors.name"></label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label for="Number">Szám</label>
-                                                <input ref="numberRef" v-model="state.number" class="form-control" placeholder="" readonly />
-                                            </div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-6">
-                                                <label for="PhoneNumber">Telefonszám</label>
-                                                <input ref="phoneNumberRef" v-model="state.phoneNumber" class="form-control" placeholder="" />
-                                                <label class="text-danger" v-text="state.errors.phoneNumber"></label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label for="EmailAddress">E-mail</label>
-                                                <input ref="emailAddressRef" v-model="state.emailAddress" class="form-control" placeholder="" />
-                                                <label class="text-danger" v-text="state.errors.emailAddress"></label>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-6">
-                                                <label for="JobTitle">Munkakör</label>
-                                                <input ref="jobTitleRef" v-model="state.jobTitle" class="form-control" placeholder="" />
-                                                <label class="text-danger" v-text="state.errors.jobTitle"></label>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label for="CustomerId">Ügyfél</label>
-                                                <div ref="customerIdRef"></div>
-                                                <label class="text-danger" v-text="state.errors.customerId"></label>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-12">
-                                                <label for="Description">Leírás</label>
-                                                <textarea v-model="state.description" id="Description" name="Description" class="form-control" rows="3" placeholder=""></textarea>
-                                            </div>
-                                        </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Kód</label>
+                                        <input v-model="state.number" class="form-control" readonly />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Munkakör <span class="text-danger">*</span></label>
+                                        <input v-model="state.jobTitle" class="form-control" />
+                                        <div class="form-text text-danger" v-text="state.errors.jobTitle"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Ügyfél <span class="text-danger">*</span></label>
+                                        <div ref="customerIdRef"></div>
+                                        <div class="form-text text-danger" v-text="state.errors.customerId"></div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label">Leírás</label>
+                                        <textarea v-model="state.description" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- ELÉRHETŐSÉG -->
+                            <div class="tab-pane fade" id="tab-kapcsolat">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Telefonszám <span class="text-danger">*</span></label>
+                                        <input v-model="state.phoneNumber" class="form-control" type="tel" />
+                                        <div class="form-text text-danger" v-text="state.errors.phoneNumber"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">E-mail <span class="text-danger">*</span></label>
+                                        <input v-model="state.emailAddress" class="form-control" type="email" />
+                                        <div class="form-text text-danger" v-text="state.errors.emailAddress"></div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
