@@ -53,6 +53,9 @@ public class ProductConfiguration : BaseEntityConfiguration<Product>
         builder.Property(x => x.Weight)
             .HasPrecision(18, 4);
 
+        builder.Property(x => x.Length)
+            .HasPrecision(18, 4);
+
 
         // média
         builder.Property(x => x.Image1Url)

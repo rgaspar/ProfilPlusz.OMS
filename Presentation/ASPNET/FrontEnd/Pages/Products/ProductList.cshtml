@@ -1,4 +1,4 @@
-﻿@page
+@page
 @{
     ViewData["Title"] = "Termék lista";
 }
@@ -29,563 +29,262 @@
             <div class="modal-content">
 
                 <div class="modal-header">
-
-                    <h5 class="modal-title">
-                        {{ state.mainTitle }}
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
-
+                    <h5 class="modal-title">{{ state.mainTitle }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
 
                 <div class="modal-body">
 
-                    <input type="hidden"
-                           v-model="state.id" />
-
+                    <input type="hidden" v-model="state.id" />
 
                     <form id="MainForm">
 
-                        <!-- BASIC -->
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-alapadatok" type="button">Alapadatok</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-gyarto" type="button">Gyártó</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-mennyiseg" type="button">Mennyiségek</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-keszlet" type="button">Készlet</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-media" type="button">Média</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-penzugy" type="button">Pénzügy</button>
+                            </li>
+                        </ul>
 
-                        <div class="card mb-3">
+                        <div class="tab-content">
 
-                            <div class="card-header">
-                                <h5>Alapadatok</h5>
-                            </div>
-
-
-                            <div class="card-body">
-
-                                <div class="row mb-2">
-
+                            <!-- ALAPADATOK -->
+                            <div class="tab-pane fade show active" id="tab-alapadatok">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-
-                                        <label>Név</label>
-
-                                        <input ref="nameRef"
-                                               v-model="state.name"
-                                               class="form-control">
-
-                                        <label class="text-danger">
-                                            {{ state.errors.name }}
-                                        </label>
-
+                                        <label class="form-label">Név <span class="text-danger">*</span></label>
+                                        <input ref="nameRef" v-model="state.name" class="form-control" />
+                                        <div class="form-text text-danger" v-text="state.errors.name"></div>
                                     </div>
-
-
                                     <div class="col-md-6">
-
-                                        <label>Szám</label>
-
-                                        <input ref="numberRef"
-                                               v-model="state.number"
-                                               class="form-control">
-
+                                        <label class="form-label">Kód</label>
+                                        <input ref="numberRef" v-model="state.number" class="form-control" />
                                     </div>
-
                                 </div>
-
-
-
-                                <div class="row mb-2">
-
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-
-                                        <label>Egységár</label>
-
-                                        <input ref="unitPriceRef"
-                                               v-model="state.unitPrice"
-                                               class="form-control">
-
-                                        <label class="text-danger">
-                                            {{ state.errors.unitPrice }}
-                                        </label>
-
+                                        <label class="form-label">Egységár <span class="text-danger">*</span></label>
+                                        <input ref="unitPriceRef" v-model="state.unitPrice" class="form-control" />
+                                        <div class="form-text text-danger" v-text="state.errors.unitPrice"></div>
                                     </div>
-
-
                                     <div class="col-md-6">
-
-                                        <label>Mértékegység</label>
-
+                                        <label class="form-label">Mértékegység <span class="text-danger">*</span></label>
                                         <div ref="unitMeasureIdRef"></div>
-
-                                        <label class="text-danger">
-                                            {{ state.errors.unitMeasureId }}
-                                        </label>
-
+                                        <div class="form-text text-danger" v-text="state.errors.unitMeasureId"></div>
                                     </div>
-
                                 </div>
-
-
-
-                                <div class="row mb-2">
-
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-
-                                        <label>Termékcsoport</label>
-
+                                        <label class="form-label">Termékcsoport <span class="text-danger">*</span></label>
                                         <div ref="productGroupIdRef"></div>
-
-                                        <label class="text-danger">
-                                            {{ state.errors.productGroupId }}
-                                        </label>
-
+                                        <div class="form-text text-danger" v-text="state.errors.productGroupId"></div>
                                     </div>
-
-
-                                    <div class="col-md-6">
-
-                                        <div class="form-check mt-4">
-
-                                            <input v-model="state.physical"
-                                                   type="checkbox"
-                                                   class="form-check-input">
-
-                                            <label class="form-check-label">
-                                                Fizikai termék
-                                            </label>
-
-                                        </div>
-
-                                    </div>
-
+                                    <div class="col-md-6"></div>
                                 </div>
-
-
-
-                                <div class="row">
-
+                                <div class="row mb-3">
                                     <div class="col-md-12">
-
-                                        <label>Leírás</label>
-
-                                        <textarea v-model="state.description"
-                                              class="form-control"
-                                                  rows="3">
-                                        </textarea>
-
+                                        <label class="form-label">Leírás</label>
+                                        <textarea v-model="state.description" class="form-control" rows="3"></textarea>
                                     </div>
-
                                 </div>
-
                             </div>
 
-                        </div>
-
-
-
-                        <!-- MANUFACTURER -->
-
-                        <div class="card mb-3">
-
-                            <div class="card-header">
-                                <h5>Gyártó</h5>
+                            <!-- GYÁRTÓ -->
+                            <div class="tab-pane fade" id="tab-gyarto">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gyár neve</label>
+                                        <input v-model="state.factoryName" class="form-control" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gyártó</label>
+                                        <input v-model="state.manufacturer" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Gyártói szám</label>
+                                        <input v-model="state.manufacturerNumber" class="form-control" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">EAN</label>
+                                        <input v-model="state.ean" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Márka</label>
+                                        <select v-model="state.brandId" class="form-select">
+                                            <option :value="null">-- válassz --</option>
+                                            <option v-for="b in state.brandListLookupData" :key="b.id" :value="b.id">{{ b.name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Szín</label>
+                                        <select v-model="state.colorId" class="form-select">
+                                            <option :value="null">-- válassz --</option>
+                                            <option v-for="c in state.colorListLookupData" :key="c.id" :value="c.id">{{ c.name }}</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
-
-                            <div class="card-body">
-
-                                <div class="row mb-2">
-
-                                    <div class="col-md-6">
-
-                                        <label>Gyár neve</label>
-
-                                        <input v-model="state.factoryName"
-                                               class="form-control">
-
+                            <!-- MENNYISÉGEK -->
+                            <div class="tab-pane fade" id="tab-mennyiseg">
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Értékesítési menny.</label>
+                                        <input v-model="state.salesUnitQuantity" class="form-control" />
                                     </div>
-
-
-                                    <div class="col-md-6">
-
-                                        <label>Gyártó</label>
-
-                                        <input v-model="state.manufacturer"
-                                               class="form-control">
-
+                                    <div class="col-md-3">
+                                        <label class="form-label">Min. értékesítési menny.</label>
+                                        <input v-model="state.minimumSalesQuantity" class="form-control" />
                                     </div>
-
+                                    <div class="col-md-3">
+                                        <label class="form-label">Rendelési lépés</label>
+                                        <input v-model="state.orderQuantityStep" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Csomag menny.</label>
+                                        <input v-model="state.packageQuantity" class="form-control" />
+                                    </div>
                                 </div>
-
-
-
-                                <div class="row mb-2">
-
-                                    <div class="col-md-6">
-
-                                        <label>Gyártói szám</label>
-
-                                        <input v-model="state.manufacturerNumber"
-                                               class="form-control">
-
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Súly</label>
+                                        <input v-model="state.weight" class="form-control" />
                                     </div>
-
-
-                                    <div class="col-md-6">
-
-                                        <label>EAN</label>
-
-                                        <input v-model="state.ean"
-                                               class="form-control">
-
+                                    <div class="col-md-3">
+                                        <label class="form-label">Hossz</label>
+                                        <input v-model="state.length" class="form-control" />
                                     </div>
-
                                 </div>
-
-
-
-                                <div class="row">
-
-                                    <div class="col-md-6">
-
-                                        <label>Márka</label>
-
-                                        <div ref="brandIdRef"></div>
-
-                                    </div>
-
-
-                                    <div class="col-md-6">
-
-                                        <label>Szín</label>
-
-                                        <div ref="colorIdRef"></div>
-
-                                    </div>
-
-                                </div>
-
                             </div>
 
-                        </div>
-
-
-
-                        <!-- QUANTITY -->
-
-                        <div class="card mb-3">
-
-                            <div class="card-header">
-                                <h5>Mennyiségek</h5>
-                            </div>
-
-
-                            <div class="card-body">
-
-                                <div class="row mb-2">
-
-                                    <div class="col-md-3">
-
-                                        <label>Értékesítési menny.</label>
-
-                                        <input v-model="state.salesUnitQuantity"
-                                               class="form-control">
-
-                                    </div>
-
-
-                                    <div class="col-md-3">
-
-                                        <label>Min. értékesítési menny.</label>
-
-                                        <input v-model="state.minimumSalesQuantity"
-                                               class="form-control">
-
-                                    </div>
-
-
-                                    <div class="col-md-3">
-
-                                        <label>Rendelési lépés</label>
-
-                                        <input v-model="state.orderQuantityStep"
-                                               class="form-control">
-
-                                    </div>
-
-
-                                    <div class="col-md-3">
-
-                                        <label>Csomag menny.</label>
-
-                                        <input v-model="state.packageQuantity"
-                                               class="form-control">
-
-                                    </div>
-
-                                </div>
-
-
-
-                                <div class="row">
-
-                                    <div class="col-md-3">
-
-                                        <label>Súly</label>
-
-                                        <input v-model="state.weight"
-                                               class="form-control">
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <!-- STOCK -->
-
-                        <div class="card mb-3">
-
-                            <div class="card-header">
-                                <h5>Készlet</h5>
-                            </div>
-
-
-                            <div class="card-body">
-
-                                <div class="row mb-2">
-
-                                    <div class="col-md-3">
-
-                                        <div class="form-check mt-4">
-
-                                            <input v-model="state.isStockProduct"
-                                                   type="checkbox"
-                                                   class="form-check-input">
-
-                                            <label class="form-check-label">
-                                                Készletes termék
-                                            </label>
-
+                            <!-- KÉSZLET -->
+                            <div class="tab-pane fade" id="tab-keszlet">
+                                <div class="row mb-3">
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <div class="form-check mb-1">
+                                            <input v-model="state.isStockProduct" type="checkbox" class="form-check-input" id="chkStockProduct" />
+                                            <label class="form-check-label" for="chkStockProduct">Készletes termék</label>
                                         </div>
-
                                     </div>
-
-
                                     <div class="col-md-3">
-
-                                        <label>Figyelmeztető készlet</label>
-
-                                        <input v-model="state.warningStock"
-                                               class="form-control">
-
+                                        <label class="form-label">Figyelmeztető készlet</label>
+                                        <input v-model="state.warningStock" class="form-control" />
                                     </div>
-
-
                                     <div class="col-md-3">
-
-                                        <label>Minimum készlet</label>
-
-                                        <input v-model="state.minimumStock"
-                                               class="form-control">
-
+                                        <label class="form-label">Minimum készlet</label>
+                                        <input v-model="state.minimumStock" class="form-control" />
                                     </div>
-
-
-                                    <div class="col-md-3">
-
-                                        <div class="form-check mt-4">
-
-                                            <input v-model="state.hasSerialNumber"
-                                                   type="checkbox"
-                                                   class="form-check-input">
-
-                                            <label class="form-check-label">
-                                                Sorozatszám követés
-                                            </label>
-
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <div class="form-check mb-1">
+                                            <input v-model="state.hasSerialNumber" type="checkbox" class="form-check-input" id="chkSerialNumber" />
+                                            <label class="form-check-label" for="chkSerialNumber">Sorozatszám követés</label>
                                         </div>
-
                                     </div>
-
                                 </div>
-
                             </div>
 
-                        </div>
-
-
-
-                        <!-- MEDIA -->
-
-                        <div class="card mb-3">
-
-                            <div class="card-header">
-                                <h5>Média</h5>
-                            </div>
-
-
-                            <div class="card-body">
-
-                                <div class="row mb-2">
-
+                            <!-- MÉDIA -->
+                            <div class="tab-pane fade" id="tab-media">
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-
-                                        <label>1. kép</label>
-
-                                        <input v-model="state.image1Url"
-                                               class="form-control">
-
+                                        <label class="form-label">1. kép</label>
+                                        <input v-model="state.image1Url" class="form-control" />
                                     </div>
-
-
                                     <div class="col-md-6">
-
-                                        <label>2. kép</label>
-
-                                        <input v-model="state.image2Url"
-                                               class="form-control">
-
+                                        <label class="form-label">2. kép</label>
+                                        <input v-model="state.image2Url" class="form-control" />
                                     </div>
-
                                 </div>
-
-
-
-                                <div class="row mb-2">
-
+                                <div class="row mb-3">
                                     <div class="col-md-6">
-
-                                        <label>3. kép</label>
-
-                                        <input v-model="state.image3Url"
-                                               class="form-control">
-
+                                        <label class="form-label">3. kép</label>
+                                        <input v-model="state.image3Url" class="form-control" />
                                     </div>
-
-
                                     <div class="col-md-6">
-
-                                        <label>Videó</label>
-
-                                        <input v-model="state.videoUrl"
-                                               class="form-control">
-
+                                        <label class="form-label">Videó</label>
+                                        <input v-model="state.videoUrl" class="form-control" />
                                     </div>
-
                                 </div>
-
-
-
-                                <div class="row">
-
+                                <div class="row mb-3">
                                     <div class="col-md-12">
-
-                                        <label>PDF</label>
-
-                                        <input v-model="state.pdfUrl"
-                                               class="form-control">
-
+                                        <label class="form-label">PDF</label>
+                                        <input v-model="state.pdfUrl" class="form-control" />
                                     </div>
-
                                 </div>
+                            </div>
 
+                            <!-- PÉNZÜGY -->
+                            <div class="tab-pane fade" id="tab-penzugy">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Beszerzési pénznem</label>
+                                        <select v-model="state.purchaseCurrency" class="form-select">
+                                            <option value="HUF">HUF</option>
+                                            <option value="EUR">EUR</option>
+                                            <option value="USD">USD</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Értékesítési pénznem</label>
+                                        <select v-model="state.salesCurrency" class="form-select">
+                                            <option value="HUF">HUF</option>
+                                            <option value="EUR">EUR</option>
+                                            <option value="USD">USD</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Státusz</label>
+                                        <select v-model="state.status" class="form-select">
+                                            <option value="Active">Aktív</option>
+                                            <option value="Inactive">Inaktív</option>
+                                            <option value="Blocked">Blokkolt</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
-
-
-
-                        <!-- FINANCE -->
-
-                        <div class="card">
-
-                            <div class="card-header">
-                                <h5>Pénzügy</h5>
-                            </div>
-
-
-                            <div class="card-body">
-
-                                <div class="row">
-
-                                    <div class="col-md-4">
-
-                                        <label>Beszerzési pénznem</label>
-
-                                        <div ref="purchaseCurrencyRef"></div>
-
-                                    </div>
-
-
-                                    <div class="col-md-4">
-
-                                        <label>Értékesítési pénznem</label>
-
-                                        <div ref="salesCurrencyRef"></div>
-
-                                    </div>
-
-
-                                    <div class="col-md-4">
-
-                                        <label>Státusz</label>
-
-                                        <div ref="statusRef"></div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
 
                     </form>
 
                 </div>
 
-
-
                 <div class="modal-footer">
-
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bezárás</button>
                     <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-
-                        Bezárás
-
+                            class="btn btn-outline-primary me-auto"
+                            v-if="state.id !== '' && !state.deleteMode"
+                            v-on:click="handler.handleOpenPriceList">
+                        Árlista
                     </button>
-
-
                     <button type="button"
                             id="MainSaveButton"
                             class="btn"
                             v-bind:class="state.deleteMode ? 'btn-danger' : 'btn-primary'"
                             v-on:click="handler.handleSubmit"
                             v-bind:disabled="state.isSubmitting">
-
-                        <span class="spinner-border spinner-border-sm me-2"
-                              v-if="state.isSubmitting">
-                        </span>
-
-                        <span v-if="!state.isSubmitting">
-
-                            {{ state.deleteMode ? 'Törlés' : 'Mentés' }}
-
-                        </span>
-
-                        <span v-else>
-
-                            {{ state.deleteMode ? 'Törlés...' : 'Mentés...' }}
-
-                        </span>
-
+                        <span class="spinner-border spinner-border-sm me-2" v-if="state.isSubmitting"></span>
+                        <span v-if="!state.isSubmitting">{{ state.deleteMode ? 'Törlés' : 'Mentés' }}</span>
+                        <span v-else>{{ state.deleteMode ? 'Törlés...' : 'Mentés...' }}</span>
                     </button>
-
                 </div>
 
             </div>
@@ -726,36 +425,36 @@
                     <div v-show="!state.plDeleteMode">
                         <div class="row mb-2">
                             <div class="col-md-6">
-                                <label>Vevő</label>
+                                <label class="form-label">Vevő</label>
                                 <div ref="plCustomerIdRef"></div>
                             </div>
                             <div class="col-md-6">
-                                <label>ÁFA</label>
+                                <label class="form-label">ÁFA</label>
                                 <div ref="plTaxIdRef"></div>
                             </div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-6">
-                                <label>Nettó ár</label>
-                                <input v-model="state.plNetPrice" type="number" step="0.01" class="form-control">
+                                <label class="form-label">Nettó ár</label>
+                                <input v-model="state.plNetPrice" type="number" step="0.01" class="form-control" />
                             </div>
                             <div class="col-md-6">
-                                <label>Bruttó ár</label>
-                                <input v-model="state.plGrossPrice" type="number" step="0.01" class="form-control">
+                                <label class="form-label">Bruttó ár</label>
+                                <input v-model="state.plGrossPrice" type="number" step="0.01" class="form-control" />
                             </div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-md-4">
-                                <label>Mennyiségi kedvezmény (%)</label>
-                                <input v-model="state.plQuantityDiscount" type="number" step="0.01" class="form-control">
+                                <label class="form-label">Mennyiségi kedvezmény (%)</label>
+                                <input v-model="state.plQuantityDiscount" type="number" step="0.01" class="form-control" />
                             </div>
                             <div class="col-md-4">
-                                <label>Kedvezménytől</label>
-                                <input v-model="state.plDiscountFrom" type="date" class="form-control">
+                                <label class="form-label">Kedvezménytől</label>
+                                <input v-model="state.plDiscountFrom" type="date" class="form-control" />
                             </div>
                             <div class="col-md-4">
-                                <label>Kedvezményig</label>
-                                <input v-model="state.plDiscountTo" type="date" class="form-control">
+                                <label class="form-label">Kedvezményig</label>
+                                <input v-model="state.plDiscountTo" type="date" class="form-control" />
                             </div>
                         </div>
                     </div>

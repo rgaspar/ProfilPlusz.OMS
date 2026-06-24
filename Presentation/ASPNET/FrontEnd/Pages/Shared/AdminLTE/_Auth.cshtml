@@ -1,60 +1,46 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="hu" data-bs-theme="light">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@ViewData["Title"]</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>@ViewData["Title"] - ProfilPlusz</title>
 
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="~/adminlte/plugins/fontawesome-free/css/all.min.css">
-    <!-- icheck bootstrap -->
-    <link rel="stylesheet" href="~/adminlte/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="~/adminlte/css/adminlte.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.0.0/dist/css/tabler.min.css">
 
     @await RenderSectionAsync("styles", required: false)
 
-    
     <style>
-        [v-cloak] {
-            display: none !important;
-        }
+        [v-cloak] { display: none !important; }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 
-    @* vue *@
     <script src="~/lib/vue/vue.global.prod.js"></script>
-
-    <!-- JavaScript Libraries -->
-    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js" defer></script>
     <script src="~/lib/axios/axios.min.js" defer></script>
     <script src="~/lib/sweetalert/sweetalert2v11.js" defer></script>
     <script src="~/lib/indotalent/storage-manager.js" defer></script>
     <script src="~/lib/indotalent/security-manager.js" defer></script>
     <script src="~/lib/indotalent/axios-manager.js" defer></script>
-
-
 </head>
-<body class="hold-transition login-page">
-    <div class="login-box">
-        <div class="login-logo">
-            <a asp-area="" asp-page="/Index"><b>ProfilPlusz</b> Kft.</a>
-        </div>
-        <!-- /.login-logo -->
-        <div class="card">
-            @RenderBody()
-            <!-- /.login-card-body -->
+<body class="d-flex flex-column antialiased">
+    <div class="page page-center">
+        <div class="container container-tight py-4">
+            <div class="text-center mb-4">
+                <a href="/" class="navbar-brand navbar-brand-autodark">
+                    <span class="fw-bold fs-2">ProfilPlusz</span> <span class="text-muted fs-5">Kft.</span>
+                </a>
+            </div>
+            <div class="card card-md shadow-sm">
+                <div class="card-body">
+                    @RenderBody()
+                </div>
+            </div>
         </div>
     </div>
-    <!-- /.login-box -->
-    <!-- jQuery -->
-    <script src="~/adminlte/plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="~/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="~/adminlte/js/adminlte.min.js"></script>
 
-     @await RenderSectionAsync("scripts", required: false)
+    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@@1.0.0/dist/js/tabler.min.js" defer></script>
+    @await RenderSectionAsync("scripts", required: false)
 </body>
 </html>

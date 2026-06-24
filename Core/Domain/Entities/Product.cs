@@ -39,6 +39,7 @@ public class Product : BaseEntity
     public string? ColorId { get; set; }                                        // Szín
     public Color? Color { get; set; }
     public decimal? Weight { get; set; }                                        // Súly
+    public decimal? Length { get; set; }                                        // Hossz
 
     // média
     public string? Image1Url { get; set; }                                      // Fénykép 1

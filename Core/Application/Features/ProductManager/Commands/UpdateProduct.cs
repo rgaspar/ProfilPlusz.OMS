@@ -45,6 +45,7 @@ public class UpdateProductRequest : IRequest<UpdateProductResult>
     public bool HasSerialNumber { get; init; }
 
     public decimal? Weight { get; init; }
+    public decimal? Length { get; init; }
 
     public string? Image1Url { get; init; }
     public string? Image2Url { get; init; }
@@ -158,6 +159,7 @@ public class UpdateProductHandler : IRequestHandler<UpdateProductRequest, Update
         entity.HasSerialNumber = request.HasSerialNumber;
 
         entity.Weight = request.Weight;
+        entity.Length = request.Length;
 
         entity.Image1Url = request.Image1Url;
         entity.Image2Url = request.Image2Url;

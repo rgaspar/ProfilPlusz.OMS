@@ -35,6 +35,7 @@
             orderQuantityStep: null,
             packageQuantity: null,
             weight: null,
+            length: null,
 
             isStockProduct: true,
             warningStock: null,
@@ -123,12 +124,6 @@
 
         const productGroupIdRef = Vue.ref(null);
         const unitMeasureIdRef = Vue.ref(null);
-        const brandIdRef = Vue.ref(null);
-        const colorIdRef = Vue.ref(null);
-
-        const purchaseCurrencyRef = Vue.ref(null);
-        const salesCurrencyRef = Vue.ref(null);
-        const statusRef = Vue.ref(null);
 
         const nameRef = Vue.ref(null);
         const numberRef = Vue.ref(null);
@@ -147,28 +142,28 @@
 
             if (!state.name) {
 
-                state.errors.name = 'Required';
+                state.errors.name = 'Kötelező mező.';
                 valid = false;
 
             }
 
             if (!state.unitPrice) {
 
-                state.errors.unitPrice = 'Required';
+                state.errors.unitPrice = 'Kötelező mező.';
                 valid = false;
 
             }
 
             if (!state.productGroupId) {
 
-                state.errors.productGroupId = 'Required';
+                state.errors.productGroupId = 'Kötelező mező.';
                 valid = false;
 
             }
 
             if (!state.unitMeasureId) {
 
-                state.errors.unitMeasureId = 'Required';
+                state.errors.unitMeasureId = 'Kötelező mező.';
                 valid = false;
 
             }
@@ -191,6 +186,7 @@
 
                 unitPrice: 0,
                 physical: true,
+                length: null,
 
                 productGroupId: null,
                 unitMeasureId: null,
@@ -410,8 +406,8 @@
 
                             icon: 'success',
                             title: state.deleteMode
-                                ? 'Deleted'
-                                : 'Saved',
+                                ? 'Törölve'
+                                : 'Mentve',
 
                             timer: 1500,
                             showConfirmButton: false
@@ -429,8 +425,9 @@
                     Swal.fire({
 
                         icon: 'error',
-                        title: 'Error',
-                        text: e.message
+                        title: 'Hiba történt',
+                        text: e?.response?.data?.message ?? e.message,
+                        confirmButtonText: 'OK'
 
                     });
 
@@ -441,6 +438,10 @@
 
                 }
 
+            },
+
+            handleOpenPriceList: async () => {
+                await window.__openProductPriceList(state.id, state.name);
             },
 
             handlePriceListSubmit: async () => {
@@ -536,59 +537,34 @@
 
                             {
                                 field: 'number',
-                                headerText: 'Number',
+                                headerText: 'Kód',
                                 width: 150
                             },
 
                             {
                                 field: 'name',
-                                headerText: 'Name',
+                                headerText: 'Név',
                                 width: 200
                             },
 
                             {
                                 field: 'productGroupName',
-                                headerText: 'Group',
-                                width: 150
-                            },
-
-                            {
-                                field: 'brandName',
-                                headerText: 'Brand',
-                                width: 150
-                            },
-
-                            {
-                                field: 'colorName',
-                                headerText: 'Color',
+                                headerText: 'Termékcsoport',
                                 width: 150
                             },
 
                             {
                                 field: 'unitPrice',
-                                headerText: 'Price',
+                                headerText: 'Egységár',
                                 format: 'N2',
                                 width: 120
-                            },
-
-                            {
-                                field: 'status',
-                                headerText: 'Status',
-                                width: 120
-                            },
-
-                            {
-                                field: 'createdAtUtc',
-                                headerText: 'Created',
-                                format: 'yyyy-MM-dd HH:mm',
-                                width: 150
                             },
 
                             {
                                 headerText: '',
                                 width: 100,
                                 textAlign: 'Center',
-                                template: '${if(hasPriceList)}<button class="btn btn-sm btn-outline-primary py-0" onclick="window.__openProductPriceList(\'${id}\', \'${name}\')">Árlista</button>${/if}'
+                                template: '${if(hasPriceList)}<span class="badge bg-blue-lt">Egyedi árak</span>${/if}'
                             }
 
                         ],
@@ -605,7 +581,8 @@
 
                             {
 
-                                text: 'Add',
+                                text: 'Hozzáadás',
+                                tooltipText: 'Hozzáadás',
                                 id: 'AddCustom',
                                 prefixIcon: 'e-add'
 
@@ -613,7 +590,8 @@
 
                             {
 
-                                text: 'Edit',
+                                text: 'Szerkesztés',
+                                tooltipText: 'Szerkesztés',
                                 id: 'EditCustom',
                                 prefixIcon: 'e-edit'
 
@@ -621,7 +599,8 @@
 
                             {
 
-                                text: 'Delete',
+                                text: 'Törlés',
+                                tooltipText: 'Törlés',
                                 id: 'DeleteCustom',
                                 prefixIcon: 'e-delete'
 
@@ -631,7 +610,8 @@
 
                             {
 
-                                text: 'Import Excel',
+                                text: 'Excel import',
+                                tooltipText: 'Excel import',
                                 id: 'ImportExcel',
                                 prefixIcon: 'e-upload'
 
@@ -639,7 +619,8 @@
 
                             {
 
-                                text: 'Template',
+                                text: 'Sablon letöltés',
+                                tooltipText: 'Sablon letöltés',
                                 id: 'DownloadTemplate',
                                 prefixIcon: 'e-download'
 
@@ -660,6 +641,8 @@
                                     false
 
                                 );
+
+                            mainGrid.obj.autoFitColumns(['number', 'name', 'productGroupName', 'unitPrice']);
 
                         },
 
@@ -711,7 +694,7 @@
 
                                 state.deleteMode = false;
 
-                                state.mainTitle = 'Add Product';
+                                state.mainTitle = 'Termék hozzáadása';
 
                                 mainModal.obj.show();
 
@@ -729,7 +712,7 @@
 
                                 state.deleteMode = false;
 
-                                state.mainTitle = 'Edit Product';
+                                state.mainTitle = 'Termék módosítása';
 
                                 Object.assign(state, r);
 
@@ -753,7 +736,7 @@
 
                                 state.name = r.name;
 
-                                state.mainTitle = 'Delete Product?';
+                                state.mainTitle = 'Termék törlése?';
 
                                 mainModal.obj.show();
 
@@ -952,51 +935,6 @@
             );
 
 
-            createDropdown(
-                brandIdRef,
-                state.brandListLookupData,
-                'id',
-                'name',
-                v => state.brandId = v
-            );
-
-
-            createDropdown(
-                colorIdRef,
-                state.colorListLookupData,
-                'id',
-                'name',
-                v => state.colorId = v
-            );
-
-
-            createDropdown(
-                purchaseCurrencyRef,
-                state.currencyListLookupData,
-                'value',
-                'text',
-                v => state.purchaseCurrency = v
-            );
-
-
-            createDropdown(
-                salesCurrencyRef,
-                state.currencyListLookupData,
-                'value',
-                'text',
-                v => state.salesCurrency = v
-            );
-
-
-            createDropdown(
-                statusRef,
-                state.statusListLookupData,
-                'value',
-                'text',
-                v => state.status = v
-            );
-
-
             window.__openProductPriceList = async (productId, productName) => {
                 state.selectedProductId = productId;
                 state.selectedProductName = productName;
@@ -1075,12 +1013,6 @@
 
             productGroupIdRef,
             unitMeasureIdRef,
-            brandIdRef,
-            colorIdRef,
-
-            purchaseCurrencyRef,
-            salesCurrencyRef,
-            statusRef,
 
             nameRef,
             numberRef,
