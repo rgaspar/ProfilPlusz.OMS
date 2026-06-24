@@ -1,4 +1,4 @@
-﻿@page
+@page
 @{
     ViewData["Title"] = "Ügyfélkategória lista";
 }
@@ -20,31 +20,16 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" v-model="state.id" id="Id" name="Id" />
+                    <input type="hidden" v-model="state.id" />
                     <form id="MainForm">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5>Alapadatok</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row mb-2">
-                                            <div class="col-md-6">
-                                                <label for="Name">Név</label>
-                                                <input ref="nameRef" v-model="state.name" />
-                                                <label class="text-danger" v-text="state.errors.name"></label>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-12">
-                                                <label for="Description">Leírás</label>
-                                                <textarea class="form-control" rows="3" v-model="state.description"></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Név <span class="text-danger">*</span></label>
+                            <input v-model="state.name" class="form-control" placeholder="Adja meg a nevet" />
+                            <div class="form-text text-danger" v-text="state.errors.name"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Leírás</label>
+                            <textarea class="form-control" rows="3" v-model="state.description"></textarea>
                         </div>
                     </form>
                 </div>

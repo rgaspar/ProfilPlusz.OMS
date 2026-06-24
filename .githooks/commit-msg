@@ -1,0 +1,14 @@
+#!/bin/sh
+# Kinyeri a ticketszámot a branch névből és hozzáfűzi a commit üzenethez #szám formátumban.
+# Támogatott branch formátumok: feature/123-leiras, OMS-123-leiras, 123-leiras
+
+MSG_FILE="$1"
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+TICKET=$(echo "$BRANCH" | grep -oE '[0-9]+' | head -1)
+
+if [ -n "$TICKET" ]; then
+    if ! grep -qE "#${TICKET}" "$MSG_FILE"; then
+        sed -i "1s/$/ #${TICKET}/" "$MSG_FILE"
+    fi
+fi
