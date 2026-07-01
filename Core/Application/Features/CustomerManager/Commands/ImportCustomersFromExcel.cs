@@ -30,6 +30,7 @@ public class ImportCustomersFromExcelRequest : IRequest<ImportCustomersFromExcel
 
 public class ImportCustomersFromExcelHandler(
     ICommandRepository<Customer> repository,
+    ICommandRepository<CustomerContact> contactRepository,
     IEntityDbSet db,
     IUnitOfWork unitOfWork,
     ExcelImportService excelImportService,
@@ -51,28 +52,91 @@ public class ImportCustomersFromExcelHandler(
             .Where(c => !c.IsDeleted)
             .ToDictionaryAsync(c => c.Name ?? string.Empty, c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
+        var existingCustomersByName = await db.Customer
+            .AsNoTracking()
+            .Where(c => !c.IsDeleted)
+            .ToDictionaryAsync(c => c.Name ?? string.Empty, c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
+        var allContacts = await contactRepository.GetQuery()
+            .Where(c => !c.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        var contactsByCustomer = allContacts
+            .Where(c => c.CustomerId != null)
+            .GroupBy(c => c.CustomerId!)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToDictionary(c => c.Name ?? string.Empty, c => c, StringComparer.OrdinalIgnoreCase));
+
+        static string? RowGet(IDictionary<string, object> row, string key) =>
+            row.TryGetValue(key, out var val) && !string.IsNullOrWhiteSpace(val?.ToString()) ? val.ToString() : null;
+
         var mapper = new CustomerExcelRowMapper(customerGroups, customerCategories);
 
         var result = await excelImportService.ImportAsync<CreateCustomerRequest>(
             request.ExcelStream,
             mapper,
-            async (createRequest, _, _, ct) =>
+            async (createRequest, row, _, ct) =>
             {
+                var contactName = RowGet(row, "Kapcsolattartó neve");
+                var contactPhone = RowGet(row, "Telefon");
+                var contactEmailOC = RowGet(row, "E-mail - visszaigazolás");
+                var contactEmailInv = RowGet(row, "E-mail - számlázás");
+                var contactEmailPO = RowGet(row, "E-mail - beszerzés");
+
+                var customerName = createRequest.Name?.Trim() ?? string.Empty;
+
+                if (existingCustomersByName.TryGetValue(customerName, out var existingCustomerId))
+                {
+                    if (!string.IsNullOrWhiteSpace(contactName))
+                    {
+                        contactsByCustomer.TryGetValue(existingCustomerId, out var customerContacts);
+
+                        if (customerContacts != null && customerContacts.TryGetValue(contactName, out var existingContact))
+                        {
+                            existingContact.PhoneNumber = contactPhone ?? existingContact.PhoneNumber;
+                            existingContact.EmailAddressOrderConfirmation = contactEmailOC ?? existingContact.EmailAddressOrderConfirmation;
+                            existingContact.EmailAddressInvoice = contactEmailInv ?? existingContact.EmailAddressInvoice;
+                            existingContact.EmailAddressPurchaseOrder = contactEmailPO ?? existingContact.EmailAddressPurchaseOrder;
+                            existingContact.UpdatedById = request.CreatedById;
+                            contactRepository.Update(existingContact);
+                        }
+                        else
+                        {
+                            var newContact = new CustomerContact
+                            {
+                                CustomerId = existingCustomerId,
+                                Name = contactName,
+                                PhoneNumber = contactPhone,
+                                EmailAddressOrderConfirmation = contactEmailOC,
+                                EmailAddressInvoice = contactEmailInv,
+                                EmailAddressPurchaseOrder = contactEmailPO,
+                                CreatedById = request.CreatedById
+                            };
+                            await contactRepository.CreateAsync(newContact, ct);
+
+                            if (!contactsByCustomer.ContainsKey(existingCustomerId))
+                                contactsByCustomer[existingCustomerId] = new Dictionary<string, CustomerContact>(StringComparer.OrdinalIgnoreCase);
+                            contactsByCustomer[existingCustomerId][contactName] = newContact;
+                        }
+
+                        await unitOfWork.SaveAsync(ct);
+                    }
+
+                    return null;
+                }
+
                 var validation = await validator.ValidateAsync(createRequest, ct);
                 if (!validation.IsValid)
                     return string.Join("; ", validation.Errors.Select(e => e.ErrorMessage));
+
                 var entity = new Customer
                 {
                     CreatedById = request.CreatedById,
                     Number = numberSequenceService.GenerateNumber(nameof(Customer), "", "CST"),
                     Name = createRequest.Name,
                     Description = createRequest.Description,
-                    PhoneNumber = createRequest.PhoneNumber,
                     EmailAddress = createRequest.EmailAddress,
-                    EmailAddressOrderConfirmation = createRequest.EmailAddressOrderConfirmation,
-                    EmailAddressInvoice = createRequest.EmailAddressInvoice,
-                    EmailAddressPurchaseOrder = createRequest.EmailAddressPurchaseOrder,
-                    ContactPersonName = createRequest.ContactPersonName,
                     TaxNumber = createRequest.TaxNumber,
                     EuTaxNumber = createRequest.EuTaxNumber,
                     BankAccountNumber = createRequest.BankAccountNumber,
@@ -99,8 +163,24 @@ public class ImportCustomersFromExcelHandler(
                     }
                 }
 
+                if (!string.IsNullOrWhiteSpace(contactName))
+                {
+                    entity.CustomerContactList.Add(new CustomerContact
+                    {
+                        Name = contactName,
+                        PhoneNumber = contactPhone,
+                        EmailAddressOrderConfirmation = contactEmailOC,
+                        EmailAddressInvoice = contactEmailInv,
+                        EmailAddressPurchaseOrder = contactEmailPO,
+                        CreatedById = request.CreatedById
+                    });
+                }
+
                 await repository.CreateAsync(entity, ct);
                 await unitOfWork.SaveAsync(ct);
+
+                existingCustomersByName[customerName] = entity.Id;
+
                 return null;
             },
             cancellationToken);
@@ -170,11 +250,6 @@ internal sealed class CustomerExcelRowMapper : IExcelRowMapper<CreateCustomerReq
             CustomerCategoryId = string.IsNullOrEmpty(categoryId) ? null : categoryId,
             TaxNumber = GetOrNull(row, "Adószám"),
             EuTaxNumber = GetOrNull(row, "Közösségi adószám"),
-            ContactPersonName = GetOrNull(row, "Kapcsolattartó neve"),
-            EmailAddressOrderConfirmation = GetOrNull(row, "E-mail - visszaigazolás"),
-            EmailAddressInvoice = GetOrNull(row, "E-mail - számlázás"),
-            EmailAddressPurchaseOrder = GetOrNull(row, "E-mail - beszerzés"),
-            PhoneNumber = GetOrNull(row, "Telefon"),
             BankAccountNumber = GetOrNull(row, "Bankszámlaszám"),
             InvoiceType = ParseInvoiceType(Get(row, "Számla típusa")),
             PaymentMethod = ParsePaymentMethod(Get(row, "Fizetés módja")),

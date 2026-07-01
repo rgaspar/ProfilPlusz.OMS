@@ -12,6 +12,15 @@ public class UpdateCustomerResult
     public Customer? Data { get; set; }
 }
 
+public class UpdateCustomerContactDto
+{
+    public string? Name { get; set; }
+    public string? JobTitle { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? EmailAddress { get; set; }
+    public string? Description { get; set; }
+}
+
 public class UpdateAddressDto
 {
     public string? Street { get; set; }
@@ -30,13 +39,9 @@ public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
     public string? Name { get; set; }
     public string? Description { get; set; }
 
-    public string? PhoneNumber { get; set; }
     public string? FaxNumber { get; set; }
 
     public string? EmailAddress { get; set; }
-    public string? EmailAddressOrderConfirmation { get; set; }
-    public string? EmailAddressInvoice { get; set; }
-    public string? EmailAddressPurchaseOrder { get; set; }
 
     public string? Website { get; set; }
     public string? WhatsApp { get; set; }
@@ -45,8 +50,6 @@ public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
     public string? Instagram { get; set; }
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
-
-    public string? ContactPersonName { get; set; }
 
     public string? TaxNumber { get; set; }
     public string? EuTaxNumber { get; set; }
@@ -61,6 +64,7 @@ public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
     public string? CustomerCategoryId { get; set; }
 
     public List<UpdateAddressDto>? Addresses { get; set; }
+    public List<UpdateCustomerContactDto>? Contacts { get; set; }
 
     public string? UpdatedById { get; init; }
 }
@@ -100,15 +104,18 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
 {
     private readonly ICommandRepository<Customer> _repository;
     private readonly ICommandRepository<Address> _addressRepository;
+    private readonly ICommandRepository<CustomerContact> _contactRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateCustomerHandler(
         ICommandRepository<Customer> repository,
         ICommandRepository<Address> addressRepository,
+        ICommandRepository<CustomerContact> contactRepository,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _addressRepository = addressRepository;
+        _contactRepository = contactRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -132,13 +139,9 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         entity.Name = request.Name;
         entity.Description = request.Description;
 
-        entity.PhoneNumber = request.PhoneNumber;
         entity.FaxNumber = request.FaxNumber;
 
         entity.EmailAddress = request.EmailAddress;
-        entity.EmailAddressOrderConfirmation = request.EmailAddressOrderConfirmation;
-        entity.EmailAddressInvoice = request.EmailAddressInvoice;
-        entity.EmailAddressPurchaseOrder = request.EmailAddressPurchaseOrder;
 
         entity.Website = request.Website;
         entity.WhatsApp = request.WhatsApp;
@@ -147,8 +150,6 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         entity.Instagram = request.Instagram;
         entity.TwitterX = request.TwitterX;
         entity.TikTok = request.TikTok;
-
-        entity.ContactPersonName = request.ContactPersonName;
 
         entity.TaxNumber = request.TaxNumber;
         entity.EuTaxNumber = request.EuTaxNumber;
@@ -175,6 +176,29 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
                     ZipCode = addr.ZipCode,
                     Country = addr.Country,
                     Type = addr.Type
+                }, cancellationToken);
+            }
+        }
+
+        var existingContacts = await _contactRepository.GetQuery()
+            .Where(c => c.CustomerId == entity.Id)
+            .ToListAsync(cancellationToken);
+        foreach (var c in existingContacts)
+            _contactRepository.Purge(c);
+
+        if (request.Contacts != null && request.Contacts.Count > 0)
+        {
+            foreach (var contact in request.Contacts)
+            {
+                if (string.IsNullOrWhiteSpace(contact.Name)) continue;
+                await _contactRepository.CreateAsync(new CustomerContact
+                {
+                    CustomerId = entity.Id,
+                    Name = contact.Name,
+                    JobTitle = contact.JobTitle,
+                    PhoneNumber = contact.PhoneNumber,
+                    EmailAddress = contact.EmailAddress,
+                    Description = contact.Description
                 }, cancellationToken);
             }
         }

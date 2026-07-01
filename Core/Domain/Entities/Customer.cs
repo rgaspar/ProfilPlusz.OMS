@@ -9,13 +9,9 @@ public class Customer : BaseEntity
     public string? Name { get; set; }
     public string? Number { get; set; }
     public string? Description { get; set; }
-    public string? PhoneNumber { get; set; }
     public string? FaxNumber { get; set; }
 
-    public string? EmailAddress { get; set; }                                   //Default
-    public string? EmailAddressOrderConfirmation { get; set; }                 //Rendelés visszaigazolás
-    public string? EmailAddressInvoice { get; set; }                           //Számlázási
-    public string? EmailAddressPurchaseOrder { get; set; }                     //Beszerzési
+    public string? EmailAddress { get; set; }
 
     public string? Website { get; set; }
     public string? WhatsApp { get; set; }
@@ -24,8 +20,6 @@ public class Customer : BaseEntity
     public string? Instagram { get; set; }
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
-
-    public string? ContactPersonName { get; set; }
 
     public string? TaxNumber { get; set; }
     public string? EuTaxNumber { get; set; }

@@ -17,6 +17,9 @@ public class UpdateCustomerContactRequest : IRequest<UpdateCustomerContactResult
     public string? JobTitle { get; set; }
     public string? PhoneNumber { get; set; }
     public string? EmailAddress { get; set; }
+    public string? EmailAddressOrderConfirmation { get; set; }
+    public string? EmailAddressInvoice { get; set; }
+    public string? EmailAddressPurchaseOrder { get; set; }
     public string? Description { get; set; }
     public string? CustomerId { get; set; }
     public string? UpdatedById { get; init; }
@@ -64,6 +67,9 @@ public class UpdateCustomerContactHandler : IRequestHandler<UpdateCustomerContac
         entity.JobTitle = request.JobTitle;
         entity.PhoneNumber = request.PhoneNumber;
         entity.EmailAddress = request.EmailAddress;
+        entity.EmailAddressOrderConfirmation = request.EmailAddressOrderConfirmation;
+        entity.EmailAddressInvoice = request.EmailAddressInvoice;
+        entity.EmailAddressPurchaseOrder = request.EmailAddressPurchaseOrder;
         entity.Description = request.Description;
         entity.CustomerId = request.CustomerId;
 
