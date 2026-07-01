@@ -107,14 +107,6 @@ public class PriceListController(ISender sender, ExcelImportService excelImportS
 
         var response = await _sender.Send(request, cancellationToken);
 
-        if (response.ErrorReportBytes.Length > 0)
-        {
-            return File(
-                response.ErrorReportBytes,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"arlista-import-hibak-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx");
-        }
-
         return Ok(new ApiSuccessResult<ImportPriceListFromExcelResult>
         {
             Code = StatusCodes.Status200OK,

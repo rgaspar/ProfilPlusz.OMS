@@ -32,13 +32,21 @@ const App = {
                 netPrice: ''
             },
 
-            isSubmitting: false
+            isSubmitting: false,
+
+            importResult: {
+                successCount: 0,
+                errorCount: 0,
+                overwriteCount: 0,
+                errors: []
+            }
 
         });
 
 
         const mainGridRef = Vue.ref(null);
         const mainModalRef = Vue.ref(null);
+        const importResultModalRef = Vue.ref(null);
 
         const productIdRef = Vue.ref(null);
         const customerIdRef = Vue.ref(null);
@@ -361,6 +369,14 @@ const App = {
 
         };
 
+        const importResultModal = {
+            obj: null,
+            create: () => {
+                importResultModal.obj = new bootstrap.Modal(importResultModalRef.value, { backdrop: 'static', keyboard: false });
+            },
+            show: () => importResultModal.obj.show()
+        };
+
 
         Vue.onMounted(async () => {
 
@@ -397,6 +413,7 @@ const App = {
             );
 
             mainModal.create();
+            importResultModal.create();
 
             document.getElementById('excelImportInput').addEventListener('change', async (e) => {
 
@@ -414,15 +431,18 @@ const App = {
                         formData,
                         `arlista-import-hibak-${new Date().toISOString().slice(0, 10)}.xlsx`
                     );
-
-                    if (result) {
-                        alert(`Import kész: ${result.content?.successCount ?? 0} sor sikeresen betöltve.`);
-                    } else {
-                        alert('Import kész. Hibák a letöltött fájlban.');
+                    const content = result?.content ?? {};
+                    state.importResult = {
+                        successCount: content.successCount ?? 0,
+                        errorCount: content.errorCount ?? 0,
+                        overwriteCount: content.overwriteCount ?? 0,
+                        errors: content.errors ?? []
+                    };
+                    importResultModal.show();
+                    if ((content.successCount ?? 0) > 0) {
+                        await methods.populateMainData();
+                        mainGrid.refresh();
                     }
-
-                    await methods.populateMainData();
-                    mainGrid.refresh();
 
                 } catch (err) {
                     alert('Import hiba: ' + (err?.response?.data?.message ?? err.message));
@@ -437,6 +457,7 @@ const App = {
 
             mainGridRef,
             mainModalRef,
+            importResultModalRef,
 
             productIdRef,
             customerIdRef,

@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Enums;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.CustomerManager.Commands;
 
@@ -98,13 +99,16 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerRequest>
 public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, UpdateCustomerResult>
 {
     private readonly ICommandRepository<Customer> _repository;
+    private readonly ICommandRepository<Address> _addressRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateCustomerHandler(
         ICommandRepository<Customer> repository,
+        ICommandRepository<Address> addressRepository,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
+        _addressRepository = addressRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -116,6 +120,12 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         {
             throw new Exception($"Customer not found: {request.Id}");
         }
+
+        var existingAddresses = await _addressRepository.GetQuery()
+            .Where(a => a.CustomerId == entity.Id)
+            .ToListAsync(cancellationToken);
+        foreach (var addr in existingAddresses)
+            _addressRepository.Purge(addr);
 
         entity.UpdatedById = request.UpdatedById;
 
@@ -152,30 +162,21 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         entity.CustomerGroupId = request.CustomerGroupId;
         entity.CustomerCategoryId = request.CustomerCategoryId;
 
-        // címek teljes cseréje
-        entity.AddressList.Clear();
-
         if (request.Addresses != null && request.Addresses.Count > 0)
         {
             foreach (var addr in request.Addresses)
             {
-                entity.AddressList.Add(new Address
+                await _addressRepository.CreateAsync(new Address
                 {
+                    CustomerId = entity.Id,
                     Street = addr.Street,
                     City = addr.City,
                     State = addr.State,
                     ZipCode = addr.ZipCode,
                     Country = addr.Country,
                     Type = addr.Type
-                });
+                }, cancellationToken);
             }
-        }
-        else
-        {
-            entity.AddressList.Add(new Address
-            {
-                Type = AddressType.Headquarters
-            });
         }
 
         _repository.Update(entity);

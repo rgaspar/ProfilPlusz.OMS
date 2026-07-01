@@ -8,6 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.CustomerManager.Queries;
 
+public record AddressListItemDto
+{
+    public string? Street { get; set; }
+    public string? City { get; set; }
+    public string? State { get; set; }
+    public string? ZipCode { get; set; }
+    public string? Country { get; set; }
+    public int Type { get; set; }
+}
+
 public record GetCustomerListDto
 {
     public string? Id { get; init; }
@@ -42,12 +52,9 @@ public record GetCustomerListDto
     public int? PaymentDeadlineDays { get; set; }
     public Currency? Currency { get; set; }
 
-    // cím az első Address bejegyzésből
-    public string? Street { get; set; }
     public string? City { get; set; }
-    public string? State { get; set; }
-    public string? ZipCode { get; set; }
-    public string? Country { get; set; }
+
+    public List<AddressListItemDto>? Addresses { get; set; }
 
     public string? CustomerGroupId { get; set; }
     public string? CustomerGroupName { get; set; }
@@ -62,6 +69,9 @@ public class GetCustomerListProfile : Profile
 {
     public GetCustomerListProfile()
     {
+        CreateMap<Address, AddressListItemDto>()
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
+
         CreateMap<Customer, GetCustomerListDto>()
             .ForMember(
                 dest => dest.CustomerGroupName,
@@ -70,20 +80,11 @@ public class GetCustomerListProfile : Profile
                 dest => dest.CustomerCategoryName,
                 opt => opt.MapFrom(src => src.CustomerCategory != null ? src.CustomerCategory.Name : string.Empty))
             .ForMember(
-                dest => dest.Street,
-                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.Street : null))
-            .ForMember(
                 dest => dest.City,
                 opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.City : null))
             .ForMember(
-                dest => dest.State,
-                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.State : null))
-            .ForMember(
-                dest => dest.ZipCode,
-                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.ZipCode : null))
-            .ForMember(
-                dest => dest.Country,
-                opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.Country : null));
+                dest => dest.Addresses,
+                opt => opt.MapFrom(src => src.AddressList));
     }
 }
 

@@ -27,10 +27,7 @@ const App = {
             paymentMethod: null,
             paymentDeadlineDays: null,
             currency: null,
-            street: '',
-            city: '',
-            zipCode: '',
-            country: '',
+            addresses: [],
             customerGroupId: null,
             customerCategoryId: null,
             customerGroupListLookupData: [],
@@ -41,12 +38,19 @@ const App = {
                 emailAddress: '',
                 customerGroupId: '',
                 customerCategoryId: ''
+            },
+
+            importResult: {
+                successCount: 0,
+                errorCount: 0,
+                errors: []
             }
         });
 
         const mainGridRef = Vue.ref(null);
         const mainModalRef = Vue.ref(null);
         const manageContactModalRef = Vue.ref(null);
+        const importResultModalRef = Vue.ref(null);
         const secondaryGridRef = Vue.ref(null);
         const customerGroupIdRef = Vue.ref(null);
         const customerCategoryIdRef = Vue.ref(null);
@@ -96,7 +100,7 @@ const App = {
                 website: '', taxNumber: '', euTaxNumber: '', bankAccountNumber: '',
                 invoiceType: null, paymentMethod: null,
                 paymentDeadlineDays: null, currency: null,
-                street: '', city: '', zipCode: '', country: '',
+                addresses: [],
                 customerGroupId: null, customerCategoryId: null,
                 errors: { name: '', emailAddress: '', customerGroupId: '', customerCategoryId: '' }
             });
@@ -125,10 +129,7 @@ const App = {
                 paymentMethod: r.paymentMethod ?? null,
                 paymentDeadlineDays: r.paymentDeadlineDays ?? null,
                 currency: r.currency ?? null,
-                street: r.street ?? '',
-                city: r.city ?? '',
-                zipCode: r.zipCode ?? '',
-                country: r.country ?? '',
+                addresses: (r.addresses ?? []).map(a => ({ type: a.type ?? 1, street: a.street ?? '', city: a.city ?? '', zipCode: a.zipCode ?? '', country: a.country ?? '' })),
                 customerGroupId: r.customerGroupId ?? null,
                 customerCategoryId: r.customerCategoryId ?? null,
             });
@@ -140,6 +141,12 @@ const App = {
         let customerCategoryDropdown = null;
 
         const handler = {
+            addAddress: () => {
+                state.addresses.push({ type: 1, street: '', city: '', zipCode: '', country: '' });
+            },
+            removeAddress: (index) => {
+                state.addresses.splice(index, 1);
+            },
             handleSubmit: async function () {
                 try {
                     state.isSubmitting = true;
@@ -177,13 +184,13 @@ const App = {
                         currency: state.currency,
                         customerGroupId: state.customerGroupId,
                         customerCategoryId: state.customerCategoryId,
-                        addresses: [{
-                            street: state.street,
-                            city: state.city,
-                            zipCode: state.zipCode,
-                            country: state.country,
-                            type: 1
-                        }],
+                        addresses: state.addresses.map(a => ({
+                            street: a.street,
+                            city: a.city,
+                            zipCode: a.zipCode,
+                            country: a.country,
+                            type: a.type
+                        })),
                         createdById: StorageManager.getUserId(),
                         updatedById: StorageManager.getUserId(),
                         deletedById: StorageManager.getUserId(),
@@ -268,6 +275,9 @@ const App = {
                         { text: 'Szerkesztés', tooltipText: 'Szerkesztés', prefixIcon: 'e-edit', id: 'EditCustom' },
                         { text: 'Törlés', tooltipText: 'Törlés', prefixIcon: 'e-delete', id: 'DeleteCustom' },
                         { type: 'Separator' },
+                        { text: 'Excel import', tooltipText: 'Excel import', prefixIcon: 'e-upload', id: 'ImportExcel' },
+                        { text: 'Sablon letöltés', tooltipText: 'Sablon letöltés', prefixIcon: 'e-download', id: 'DownloadTemplate' },
+                        { type: 'Separator' },
                     ],
                     dataBound: function () {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], false);
@@ -284,6 +294,14 @@ const App = {
                     },
                     toolbarClick: async (args) => {
                         if (args.item.id === 'MainGrid_excelexport') mainGrid.obj.excelExport();
+
+                        if (args.item.id === 'ImportExcel') {
+                            document.getElementById('excelImportInput').click();
+                        }
+
+                        if (args.item.id === 'DownloadTemplate') {
+                            AxiosManager.getFile('/Customer/GetCustomerImportTemplate', 'vevo-import-sablon.xlsx');
+                        }
 
                         if (args.item.id === 'AddCustom') {
                             state.deleteMode = false;
@@ -328,6 +346,14 @@ const App = {
             }
         };
 
+        const importResultModal = {
+            obj: null,
+            create: () => {
+                importResultModal.obj = new bootstrap.Modal(importResultModalRef.value, { backdrop: 'static', keyboard: false });
+            },
+            show: () => importResultModal.obj.show()
+        };
+
         const secondaryGrid = {
             obj: null,
             create: async (dataSource) => {
@@ -367,6 +393,7 @@ const App = {
                 await mainGrid.create(state.mainData);
                 mainModal.create();
                 manageContactModal.create();
+                importResultModal.create();
                 await secondaryGrid.create([]);
 
                 customerGroupDropdown = new ej.dropdowns.DropDownList({
@@ -385,6 +412,37 @@ const App = {
                 });
                 customerCategoryDropdown.appendTo(customerCategoryIdRef.value);
 
+                document.getElementById('excelImportInput').addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    e.target.value = '';
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    try {
+                        const result = await AxiosManager.postFile(
+                            '/Customer/ImportCustomersFromExcel',
+                            formData,
+                            `vevo-import-hibak-${new Date().toISOString().slice(0, 10)}.xlsx`
+                        );
+
+                        const content = result?.content ?? {};
+                        state.importResult = {
+                            successCount: content.successCount ?? 0,
+                            errorCount: content.errorCount ?? 0,
+                            errors: content.errors ?? []
+                        };
+                        importResultModal.show();
+                        if ((content.successCount ?? 0) > 0) {
+                            await methods.populateMainData();
+                            mainGrid.refresh();
+                        }
+                    } catch (err) {
+                        alert('Import hiba: ' + (err?.response?.data?.message ?? err.message));
+                    }
+                });
+
             } catch (e) {
                 console.error('page init error:', e);
             }
@@ -392,7 +450,8 @@ const App = {
 
         return {
             mainGridRef, mainModalRef, manageContactModalRef,
-            secondaryGridRef, customerGroupIdRef, customerCategoryIdRef,
+            importResultModalRef, secondaryGridRef,
+            customerGroupIdRef, customerCategoryIdRef,
             state, handler,
         };
     }
