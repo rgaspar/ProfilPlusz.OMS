@@ -7,12 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.PriceListManager.Commands;
 
+public class ImportPriceListFromExcelErrorDto
+{
+    public int RowNumber { get; init; }
+    public string ErrorMessage { get; init; } = string.Empty;
+}
+
 public class ImportPriceListFromExcelResult
 {
     public int SuccessCount { get; init; }
     public int ErrorCount { get; init; }
     public int OverwriteCount { get; init; }
-    public byte[] ErrorReportBytes { get; init; } = [];
+    public List<ImportPriceListFromExcelErrorDto> Errors { get; init; } = [];
 }
 
 public class ImportPriceListFromExcelRequest : IRequest<ImportPriceListFromExcelResult>
@@ -53,7 +59,7 @@ public class ImportPriceListFromExcelHandler(
 
         var mapper = new PriceListExcelRowMapper(products, customers, taxes);
 
-        var result = await excelImportService.ImportWithValidationFirstAsync<CreatePriceListRequest>(
+        var result = await excelImportService.ImportAsync<CreatePriceListRequest>(
             request.ExcelStream,
             mapper,
             async (createRequest, _, _, ct) =>
@@ -61,10 +67,6 @@ public class ImportPriceListFromExcelHandler(
                 var validation = await validator.ValidateAsync(createRequest, ct);
                 if (!validation.IsValid)
                     return string.Join("; ", validation.Errors.Select(e => e.ErrorMessage));
-                return null;
-            },
-            async (createRequest, _, _, ct) =>
-            {
                 var existing = existingEntries.FirstOrDefault(pl =>
                     pl.ProductId == createRequest.ProductId
                     && pl.CustomerId == createRequest.CustomerId
@@ -107,16 +109,14 @@ public class ImportPriceListFromExcelHandler(
             },
             cancellationToken);
 
-        var reportBytes = result.HasErrors
-            ? excelImportService.GenerateErrorReport(result.Errors, mapper.TemplateHeaders)
-            : [];
-
         return new ImportPriceListFromExcelResult
         {
             SuccessCount = result.SuccessCount,
             ErrorCount = result.ErrorCount,
             OverwriteCount = 0,
-            ErrorReportBytes = reportBytes
+            Errors = result.Errors
+                .Select(e => new ImportPriceListFromExcelErrorDto { RowNumber = e.RowNumber, ErrorMessage = e.ErrorMessage })
+                .ToList()
         };
     }
 }
