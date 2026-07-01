@@ -45,10 +45,7 @@ public class CustomerExistsByEmailHandler
         .AsNoTracking()
         .ApplyIsDeletedFilter(request.IsDeleted)
         .AnyAsync(customer =>
-            (customer.EmailAddress != null && customer.EmailAddress.Trim().ToLower() == normalizedEmail) ||
-            (customer.EmailAddressInvoice != null && customer.EmailAddressInvoice.Trim().ToLower() == normalizedEmail) ||
-            (customer.EmailAddressOrderConfirmation != null && customer.EmailAddressOrderConfirmation.Trim().ToLower() == normalizedEmail) ||
-            (customer.EmailAddressPurchaseOrder != null && customer.EmailAddressPurchaseOrder.Trim().ToLower() == normalizedEmail),
+            customer.EmailAddress != null && customer.EmailAddress.Trim().ToLower() == normalizedEmail,
             cancellationToken);
 
         return new CustomerExistsByEmailResult

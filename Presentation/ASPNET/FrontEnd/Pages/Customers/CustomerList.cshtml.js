@@ -12,13 +12,8 @@ const App = {
             number: '',
             name: '',
             description: '',
-            contactPersonName: '',
-            phoneNumber: '',
             faxNumber: '',
             emailAddress: '',
-            emailAddressOrderConfirmation: '',
-            emailAddressInvoice: '',
-            emailAddressPurchaseOrder: '',
             website: '',
             taxNumber: '',
             euTaxNumber: '',
@@ -28,6 +23,7 @@ const App = {
             paymentDeadlineDays: null,
             currency: null,
             addresses: [],
+            contacts: [],
             customerGroupId: null,
             customerCategoryId: null,
             customerGroupListLookupData: [],
@@ -94,13 +90,12 @@ const App = {
         const resetFormState = () => {
             Object.assign(state, {
                 id: '', number: '', name: '', description: '',
-                contactPersonName: '', phoneNumber: '', faxNumber: '',
-                emailAddress: '', emailAddressOrderConfirmation: '',
-                emailAddressInvoice: '', emailAddressPurchaseOrder: '',
-                website: '', taxNumber: '', euTaxNumber: '', bankAccountNumber: '',
+                faxNumber: '', emailAddress: '', website: '',
+                taxNumber: '', euTaxNumber: '', bankAccountNumber: '',
                 invoiceType: null, paymentMethod: null,
                 paymentDeadlineDays: null, currency: null,
                 addresses: [],
+                contacts: [],
                 customerGroupId: null, customerCategoryId: null,
                 errors: { name: '', emailAddress: '', customerGroupId: '', customerCategoryId: '' }
             });
@@ -114,13 +109,8 @@ const App = {
                 number: r.number ?? '',
                 name: r.name ?? '',
                 description: r.description ?? '',
-                contactPersonName: r.contactPersonName ?? '',
-                phoneNumber: r.phoneNumber ?? '',
                 faxNumber: r.faxNumber ?? '',
                 emailAddress: r.emailAddress ?? '',
-                emailAddressOrderConfirmation: r.emailAddressOrderConfirmation ?? '',
-                emailAddressInvoice: r.emailAddressInvoice ?? '',
-                emailAddressPurchaseOrder: r.emailAddressPurchaseOrder ?? '',
                 website: r.website ?? '',
                 taxNumber: r.taxNumber ?? '',
                 euTaxNumber: r.euTaxNumber ?? '',
@@ -130,6 +120,7 @@ const App = {
                 paymentDeadlineDays: r.paymentDeadlineDays ?? null,
                 currency: r.currency ?? null,
                 addresses: (r.addresses ?? []).map(a => ({ type: a.type ?? 1, street: a.street ?? '', city: a.city ?? '', zipCode: a.zipCode ?? '', country: a.country ?? '' })),
+                contacts: (r.contacts ?? []).map(c => ({ name: c.name ?? '', jobTitle: c.jobTitle ?? '', phoneNumber: c.phoneNumber ?? '', description: c.description ?? '' })),
                 customerGroupId: r.customerGroupId ?? null,
                 customerCategoryId: r.customerCategoryId ?? null,
             });
@@ -146,6 +137,12 @@ const App = {
             },
             removeAddress: (index) => {
                 state.addresses.splice(index, 1);
+            },
+            addContact: () => {
+                state.contacts.push({ name: '', jobTitle: '', phoneNumber: '', description: '' });
+            },
+            removeContact: (index) => {
+                state.contacts.splice(index, 1);
             },
             handleSubmit: async function () {
                 try {
@@ -166,13 +163,8 @@ const App = {
                         id: state.id || undefined,
                         name: state.name,
                         description: state.description,
-                        contactPersonName: state.contactPersonName,
-                        phoneNumber: state.phoneNumber,
                         faxNumber: state.faxNumber,
                         emailAddress: state.emailAddress,
-                        emailAddressOrderConfirmation: state.emailAddressOrderConfirmation,
-                        emailAddressInvoice: state.emailAddressInvoice,
-                        emailAddressPurchaseOrder: state.emailAddressPurchaseOrder,
                         website: state.website,
                         taxNumber: state.taxNumber,
                         euTaxNumber: state.euTaxNumber,
@@ -190,6 +182,12 @@ const App = {
                             zipCode: a.zipCode,
                             country: a.country,
                             type: a.type
+                        })),
+                        contacts: state.contacts.map(c => ({
+                            name: c.name,
+                            jobTitle: c.jobTitle,
+                            phoneNumber: c.phoneNumber,
+                            description: c.description
                         })),
                         createdById: StorageManager.getUserId(),
                         updatedById: StorageManager.getUserId(),
@@ -262,8 +260,6 @@ const App = {
                         { field: 'customerGroupName', headerText: 'Csoport', width: 150, minWidth: 100 },
                         { field: 'customerCategoryName', headerText: 'Kategória', width: 150, minWidth: 100 },
                         { field: 'taxNumber', headerText: 'Adószám', width: 130, minWidth: 100 },
-                        { field: 'contactPersonName', headerText: 'Kapcsolattartó', width: 150, minWidth: 100 },
-                        { field: 'phoneNumber', headerText: 'Telefon', width: 130, minWidth: 100 },
                         { field: 'emailAddress', headerText: 'E-mail', width: 200, minWidth: 150 },
                         { field: 'city', headerText: 'Város', width: 120, minWidth: 100 },
                         { field: 'createdAtUtc', headerText: 'Létrehozva', width: 150, format: 'yyyy-MM-dd HH:mm' }

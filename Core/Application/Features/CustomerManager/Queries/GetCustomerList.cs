@@ -18,6 +18,16 @@ public record AddressListItemDto
     public int Type { get; set; }
 }
 
+public record ContactListItemDto
+{
+    public string? Id { get; set; }
+    public string? Name { get; set; }
+    public string? JobTitle { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? EmailAddress { get; set; }
+    public string? Description { get; set; }
+}
+
 public record GetCustomerListDto
 {
     public string? Id { get; init; }
@@ -25,13 +35,9 @@ public record GetCustomerListDto
     public string? Number { get; set; }
     public string? Description { get; set; }
 
-    public string? PhoneNumber { get; set; }
     public string? FaxNumber { get; set; }
 
     public string? EmailAddress { get; set; }
-    public string? EmailAddressOrderConfirmation { get; set; }
-    public string? EmailAddressInvoice { get; set; }
-    public string? EmailAddressPurchaseOrder { get; set; }
 
     public string? Website { get; set; }
     public string? WhatsApp { get; set; }
@@ -40,8 +46,6 @@ public record GetCustomerListDto
     public string? Instagram { get; set; }
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
-
-    public string? ContactPersonName { get; set; }
 
     public string? TaxNumber { get; set; }
     public string? EuTaxNumber { get; set; }
@@ -55,6 +59,7 @@ public record GetCustomerListDto
     public string? City { get; set; }
 
     public List<AddressListItemDto>? Addresses { get; set; }
+    public List<ContactListItemDto>? Contacts { get; set; }
 
     public string? CustomerGroupId { get; set; }
     public string? CustomerGroupName { get; set; }
@@ -72,6 +77,8 @@ public class GetCustomerListProfile : Profile
         CreateMap<Address, AddressListItemDto>()
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => (int)src.Type));
 
+        CreateMap<CustomerContact, ContactListItemDto>();
+
         CreateMap<Customer, GetCustomerListDto>()
             .ForMember(
                 dest => dest.CustomerGroupName,
@@ -84,7 +91,10 @@ public class GetCustomerListProfile : Profile
                 opt => opt.MapFrom(src => src.AddressList.FirstOrDefault() != null ? src.AddressList.FirstOrDefault()!.City : null))
             .ForMember(
                 dest => dest.Addresses,
-                opt => opt.MapFrom(src => src.AddressList));
+                opt => opt.MapFrom(src => src.AddressList))
+            .ForMember(
+                dest => dest.Contacts,
+                opt => opt.MapFrom(src => src.CustomerContactList));
     }
 }
 
@@ -118,6 +128,7 @@ public class GetCustomerListHandler : IRequestHandler<GetCustomerListRequest, Ge
             .Include(x => x.CustomerGroup)
             .Include(x => x.CustomerCategory)
             .Include(x => x.AddressList)
+            .Include(x => x.CustomerContactList)
             .AsQueryable();
 
         var entities = await query.ToListAsync(cancellationToken);

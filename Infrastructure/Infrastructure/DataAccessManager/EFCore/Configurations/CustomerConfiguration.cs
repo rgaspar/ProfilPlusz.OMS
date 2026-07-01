@@ -25,28 +25,11 @@ public class CustomerConfiguration : BaseEntityConfiguration<Customer>
             .IsRequired(false);
 
 
-        builder.Property(x => x.PhoneNumber)
-            .HasMaxLength(NameConsts.MaxLength)
-            .IsRequired(false);
-
         builder.Property(x => x.FaxNumber)
             .HasMaxLength(NameConsts.MaxLength)
             .IsRequired(false);
 
-
         builder.Property(x => x.EmailAddress)
-            .HasMaxLength(NameConsts.MaxLength)
-            .IsRequired(false);
-
-        builder.Property(x => x.EmailAddressOrderConfirmation)
-            .HasMaxLength(NameConsts.MaxLength)
-            .IsRequired(false);
-
-        builder.Property(x => x.EmailAddressInvoice)
-            .HasMaxLength(NameConsts.MaxLength)
-            .IsRequired(false);
-
-        builder.Property(x => x.EmailAddressPurchaseOrder)
             .HasMaxLength(NameConsts.MaxLength)
             .IsRequired(false);
 

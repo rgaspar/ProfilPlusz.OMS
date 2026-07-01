@@ -77,11 +77,7 @@ public class CustomerSeeder
             customer.CustomerGroupId = GetRandomValue(groups, random);
             customer.CustomerCategoryId = GetRandomValue(categories, random);
 
-            customer.PhoneNumber = GetRandomString(phoneNumbers, random);
-
             customer.EmailAddress = $"{baseName}@{GetRandomString(emailDomains, random)}";
-            customer.EmailAddressInvoice = $"billing@{GetRandomString(emailDomains, random)}";
-            customer.EmailAddressOrderConfirmation = $"orders@{GetRandomString(emailDomains, random)}";
 
             customer.Website = $"https://www.{baseName}.com";
 

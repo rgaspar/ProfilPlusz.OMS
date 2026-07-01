@@ -84,16 +84,38 @@
 
                             <!-- KAPCSOLATTARTÓ -->
                             <div class="tab-pane fade" id="tab-kapcsolattarto">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Kapcsolattartó neve</label>
-                                        <input v-model="state.contactPersonName" class="form-control" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Kapcsolattartó telefonszáma</label>
-                                        <input v-model="state.phoneNumber" class="form-control" />
-                                    </div>
+                                <div class="table-responsive mb-2">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Név <span class="text-danger">*</span></th>
+                                                <th style="width:160px">Beosztás</th>
+                                                <th style="width:140px">Telefon</th>
+                                                <th>Megjegyzés</th>
+                                                <th style="width:40px"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="(contact, idx) in state.contacts" :key="idx">
+                                                <td><input v-model="contact.name" class="form-control form-control-sm" placeholder="Kötelező" /></td>
+                                                <td><input v-model="contact.jobTitle" class="form-control form-control-sm" /></td>
+                                                <td><input v-model="contact.phoneNumber" class="form-control form-control-sm" /></td>
+                                                <td><input v-model="contact.description" class="form-control form-control-sm" /></td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" v-on:click="handler.removeContact(idx)" :disabled="state.deleteMode">
+                                                        <i class="fa fa-times"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr v-if="state.contacts.length === 0">
+                                                <td colspan="5" class="text-center text-muted py-2" style="font-size:0.85rem">Nincs rögzített kapcsolattartó</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" v-on:click="handler.addContact" :disabled="state.deleteMode">
+                                    <i class="fa fa-plus me-1"></i>Kapcsolattartó hozzáadása
+                                </button>
                             </div>
 
                             <!-- ADÓZÁS -->
@@ -117,20 +139,6 @@
                                         <label class="form-label">E-mail (általános) <span class="text-danger">*</span></label>
                                         <input v-model="state.emailAddress" class="form-control" type="email" />
                                         <div class="form-text text-danger" v-text="state.errors.emailAddress"></div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail - rendelés visszaigazolás</label>
-                                        <input v-model="state.emailAddressOrderConfirmation" class="form-control" type="email" />
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail - számlázás</label>
-                                        <input v-model="state.emailAddressInvoice" class="form-control" type="email" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail - beszerzési rendelés</label>
-                                        <input v-model="state.emailAddressPurchaseOrder" class="form-control" type="email" />
                                     </div>
                                 </div>
                             </div>

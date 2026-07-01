@@ -12,6 +12,15 @@ public class CreateCustomerResult
     public Customer? Data { get; set; }
 }
 
+public class CreateCustomerContactDto
+{
+    public string? Name { get; set; }
+    public string? JobTitle { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? EmailAddress { get; set; }
+    public string? Description { get; set; }
+}
+
 public class CreateAddressDto
 {
     public string? Street { get; set; }
@@ -28,13 +37,9 @@ public class CreateCustomerRequest : IRequest<CreateCustomerResult>
     public string? Name { get; set; }
     public string? Description { get; set; }
 
-    public string? PhoneNumber { get; set; }
     public string? FaxNumber { get; set; }
 
     public string? EmailAddress { get; set; }
-    public string? EmailAddressOrderConfirmation { get; set; }
-    public string? EmailAddressInvoice { get; set; }
-    public string? EmailAddressPurchaseOrder { get; set; }
 
     public string? Website { get; set; }
     public string? WhatsApp { get; set; }
@@ -43,8 +48,6 @@ public class CreateCustomerRequest : IRequest<CreateCustomerResult>
     public string? Instagram { get; set; }
     public string? TwitterX { get; set; }
     public string? TikTok { get; set; }
-
-    public string? ContactPersonName { get; set; }
 
     public string? TaxNumber { get; set; }
     public string? EuTaxNumber { get; set; }
@@ -59,6 +62,7 @@ public class CreateCustomerRequest : IRequest<CreateCustomerResult>
     public string? CustomerCategoryId { get; set; }
 
     public List<CreateAddressDto>? Addresses { get; set; }
+    public List<CreateCustomerContactDto>? Contacts { get; set; }
 
     public string? CreatedById { get; init; }
 }
@@ -117,13 +121,9 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerRequest, Crea
             Number = _numberSequenceService.GenerateNumber(nameof(Customer), "", "CST"),
             Description = request.Description,
 
-            PhoneNumber = request.PhoneNumber,
             FaxNumber = request.FaxNumber,
 
             EmailAddress = request.EmailAddress,
-            EmailAddressOrderConfirmation = request.EmailAddressOrderConfirmation,
-            EmailAddressInvoice = request.EmailAddressInvoice,
-            EmailAddressPurchaseOrder = request.EmailAddressPurchaseOrder,
 
             Website = request.Website,
             WhatsApp = request.WhatsApp,
@@ -132,8 +132,6 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerRequest, Crea
             Instagram = request.Instagram,
             TwitterX = request.TwitterX,
             TikTok = request.TikTok,
-
-            ContactPersonName = request.ContactPersonName,
 
             TaxNumber = request.TaxNumber,
             EuTaxNumber = request.EuTaxNumber,
@@ -160,6 +158,22 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerRequest, Crea
                     ZipCode = addr.ZipCode,
                     Country = addr.Country,
                     Type = addr.Type
+                });
+            }
+        }
+
+        if (request.Contacts != null && request.Contacts.Count > 0)
+        {
+            foreach (var contact in request.Contacts)
+            {
+                if (string.IsNullOrWhiteSpace(contact.Name)) continue;
+                entity.CustomerContactList.Add(new CustomerContact
+                {
+                    Name = contact.Name,
+                    JobTitle = contact.JobTitle,
+                    PhoneNumber = contact.PhoneNumber,
+                    EmailAddress = contact.EmailAddress,
+                    Description = contact.Description
                 });
             }
         }
