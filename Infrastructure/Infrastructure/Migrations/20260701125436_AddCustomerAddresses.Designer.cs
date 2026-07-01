@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260623132714_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260701125436_AddCustomerAddresses")]
+    partial class AddCustomerAddresses
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -266,6 +266,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("BankAccountNumber")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ContactPersonName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("CreatedAtUtc")
                         .HasColumnType("datetime2");
@@ -1176,6 +1179,10 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("IsStockProduct")
                         .HasColumnType("bit");
+
+                    b.Property<decimal?>("Length")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Manufacturer")
                         .HasMaxLength(200)

@@ -5,17 +5,15 @@
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddProductLength : Migration
+    public partial class AddCustomerAddresses : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
-                name: "Length",
-                table: "Product",
-                type: "decimal(18,4)",
-                precision: 18,
-                scale: 4,
+            migrationBuilder.AddColumn<string>(
+                name: "ContactPersonName",
+                table: "Customer",
+                type: "nvarchar(max)",
                 nullable: true);
         }
 
@@ -23,8 +21,8 @@ namespace Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Length",
-                table: "Product");
+                name: "ContactPersonName",
+                table: "Customer");
         }
     }
 }

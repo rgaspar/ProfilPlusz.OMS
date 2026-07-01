@@ -264,6 +264,9 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("ContactPersonName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
