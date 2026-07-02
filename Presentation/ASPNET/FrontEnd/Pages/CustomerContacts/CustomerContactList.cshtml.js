@@ -188,6 +188,9 @@ const App = {
                         { field: 'jobTitle', headerText: 'Munkakör', width: 150, minWidth: 120 },
                         { field: 'phoneNumber', headerText: 'Telefon', width: 130, minWidth: 100 },
                         { field: 'emailAddress', headerText: 'E-mail', width: 200, minWidth: 150 },
+                        { field: 'emailAddressOrderConfirmation', headerText: 'E-mail visszaigazolás', width: 200, minWidth: 150 },
+                        { field: 'emailAddressInvoice', headerText: 'E-mail számlázás', width: 200, minWidth: 150 },
+                        { field: 'emailAddressPurchaseOrder', headerText: 'E-mail beszerzés', width: 200, minWidth: 150 },
                         { field: 'createdAtUtc', headerText: 'Létrehozva', width: 150, format: 'yyyy-MM-dd HH:mm' }
                     ],
                     toolbar: [
@@ -200,7 +203,7 @@ const App = {
                     ],
                     dataBound: function () {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], false);
-                        mainGrid.obj.autoFitColumns(['number', 'name', 'customerName', 'jobTitle', 'emailAddress', 'createdAtUtc']);
+                        mainGrid.obj.autoFitColumns(['number', 'name', 'customerName', 'jobTitle', 'emailAddress', 'emailAddressOrderConfirmation', 'emailAddressInvoice', 'emailAddressPurchaseOrder', 'createdAtUtc']);
                     },
                     rowSelected: () => {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], mainGrid.obj.getSelectedRecords().length === 1);
