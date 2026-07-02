@@ -18,6 +18,9 @@ public class CreateCustomerContactDto
     public string? JobTitle { get; set; }
     public string? PhoneNumber { get; set; }
     public string? EmailAddress { get; set; }
+    public string? EmailAddressOrderConfirmation { get; set; }
+    public string? EmailAddressInvoice { get; set; }
+    public string? EmailAddressPurchaseOrder { get; set; }
     public string? Description { get; set; }
 }
 
@@ -173,6 +176,9 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerRequest, Crea
                     JobTitle = contact.JobTitle,
                     PhoneNumber = contact.PhoneNumber,
                     EmailAddress = contact.EmailAddress,
+                    EmailAddressOrderConfirmation = contact.EmailAddressOrderConfirmation,
+                    EmailAddressInvoice = contact.EmailAddressInvoice,
+                    EmailAddressPurchaseOrder = contact.EmailAddressPurchaseOrder,
                     Description = contact.Description
                 });
             }

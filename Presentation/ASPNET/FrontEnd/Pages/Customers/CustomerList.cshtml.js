@@ -120,7 +120,7 @@ const App = {
                 paymentDeadlineDays: r.paymentDeadlineDays ?? null,
                 currency: r.currency ?? null,
                 addresses: (r.addresses ?? []).map(a => ({ type: a.type ?? 1, street: a.street ?? '', city: a.city ?? '', zipCode: a.zipCode ?? '', country: a.country ?? '' })),
-                contacts: (r.contacts ?? []).map(c => ({ name: c.name ?? '', jobTitle: c.jobTitle ?? '', phoneNumber: c.phoneNumber ?? '', description: c.description ?? '' })),
+                contacts: (r.contacts ?? []).map(c => ({ name: c.name ?? '', jobTitle: c.jobTitle ?? '', phoneNumber: c.phoneNumber ?? '', emailAddressOrderConfirmation: c.emailAddressOrderConfirmation ?? '', emailAddressInvoice: c.emailAddressInvoice ?? '', emailAddressPurchaseOrder: c.emailAddressPurchaseOrder ?? '', description: c.description ?? '' })),
                 customerGroupId: r.customerGroupId ?? null,
                 customerCategoryId: r.customerCategoryId ?? null,
             });
@@ -139,7 +139,7 @@ const App = {
                 state.addresses.splice(index, 1);
             },
             addContact: () => {
-                state.contacts.push({ name: '', jobTitle: '', phoneNumber: '', description: '' });
+                state.contacts.push({ name: '', jobTitle: '', phoneNumber: '', emailAddressOrderConfirmation: '', emailAddressInvoice: '', emailAddressPurchaseOrder: '', description: '' });
             },
             removeContact: (index) => {
                 state.contacts.splice(index, 1);
@@ -187,6 +187,9 @@ const App = {
                             name: c.name,
                             jobTitle: c.jobTitle,
                             phoneNumber: c.phoneNumber,
+                            emailAddressOrderConfirmation: c.emailAddressOrderConfirmation,
+                            emailAddressInvoice: c.emailAddressInvoice,
+                            emailAddressPurchaseOrder: c.emailAddressPurchaseOrder,
                             description: c.description
                         })),
                         createdById: StorageManager.getUserId(),
