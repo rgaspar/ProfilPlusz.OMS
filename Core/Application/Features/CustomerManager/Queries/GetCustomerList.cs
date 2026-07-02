@@ -25,6 +25,9 @@ public record ContactListItemDto
     public string? JobTitle { get; set; }
     public string? PhoneNumber { get; set; }
     public string? EmailAddress { get; set; }
+    public string? EmailAddressOrderConfirmation { get; set; }
+    public string? EmailAddressInvoice { get; set; }
+    public string? EmailAddressPurchaseOrder { get; set; }
     public string? Description { get; set; }
 }
 
