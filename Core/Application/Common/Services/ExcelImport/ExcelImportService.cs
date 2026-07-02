@@ -226,6 +226,26 @@ public class ExcelImportService
         return stream.ToArray();
     }
 
+    public byte[] GenerateTemplateWithMultipleSheets(
+        string[] headers,
+        IDictionary<string, object?> sampleRow,
+        Dictionary<string, IEnumerable<Dictionary<string, object?>>> extraSheets)
+    {
+        var mainData = new List<Dictionary<string, object?>>
+        {
+            headers.ToDictionary(h => h, h => sampleRow.TryGetValue(h, out var v) ? v : null)
+        };
+
+        var sheets = new Dictionary<string, object> { ["Sablon"] = mainData };
+
+        foreach (var (sheetName, sheetData) in extraSheets)
+            sheets[sheetName] = sheetData;
+
+        using var stream = new MemoryStream();
+        stream.SaveAs(sheets);
+        return stream.ToArray();
+    }
+
     private static Dictionary<string, object?> BuildReportRow(
         IDictionary<string, object> originalRow,
         string[] headers,

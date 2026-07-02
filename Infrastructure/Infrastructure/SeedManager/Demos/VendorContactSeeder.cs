@@ -70,7 +70,6 @@ public class VendorContactSeeder
                     Number = _numberSequenceService.GenerateNumber(nameof(VendorContact), "", "VC"),
                     VendorId = vendorId,
                     JobTitle = GetRandomString(jobTitles, random),
-                    EmailAddress = $"{firstName.ToLower()}.{lastName.ToLower()}@gmail.com",
                     PhoneNumber = $"+1-{random.Next(100, 999)}-{random.Next(100, 999)}-{random.Next(1000, 9999)}"
                 });
             }

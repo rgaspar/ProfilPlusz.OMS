@@ -80,9 +80,6 @@ public class ImportCustomersFromExcelHandler(
             {
                 var contactName = RowGet(row, "Kapcsolattartó neve");
                 var contactPhone = RowGet(row, "Telefon");
-                var contactEmailOC = RowGet(row, "E-mail - visszaigazolás");
-                var contactEmailInv = RowGet(row, "E-mail - számlázás");
-                var contactEmailPO = RowGet(row, "E-mail - beszerzés");
 
                 var customerName = createRequest.Name?.Trim() ?? string.Empty;
 
@@ -95,9 +92,6 @@ public class ImportCustomersFromExcelHandler(
                         if (customerContacts != null && customerContacts.TryGetValue(contactName, out var existingContact))
                         {
                             existingContact.PhoneNumber = contactPhone ?? existingContact.PhoneNumber;
-                            existingContact.EmailAddressOrderConfirmation = contactEmailOC ?? existingContact.EmailAddressOrderConfirmation;
-                            existingContact.EmailAddressInvoice = contactEmailInv ?? existingContact.EmailAddressInvoice;
-                            existingContact.EmailAddressPurchaseOrder = contactEmailPO ?? existingContact.EmailAddressPurchaseOrder;
                             existingContact.UpdatedById = request.CreatedById;
                             contactRepository.Update(existingContact);
                         }
@@ -108,9 +102,6 @@ public class ImportCustomersFromExcelHandler(
                                 CustomerId = existingCustomerId,
                                 Name = contactName,
                                 PhoneNumber = contactPhone,
-                                EmailAddressOrderConfirmation = contactEmailOC,
-                                EmailAddressInvoice = contactEmailInv,
-                                EmailAddressPurchaseOrder = contactEmailPO,
                                 CreatedById = request.CreatedById
                             };
                             await contactRepository.CreateAsync(newContact, ct);
@@ -168,9 +159,6 @@ public class ImportCustomersFromExcelHandler(
                     {
                         Name = contactName,
                         PhoneNumber = contactPhone,
-                        EmailAddressOrderConfirmation = contactEmailOC,
-                        EmailAddressInvoice = contactEmailInv,
-                        EmailAddressPurchaseOrder = contactEmailPO,
                         CreatedById = request.CreatedById
                     });
                 }
@@ -204,7 +192,6 @@ internal sealed class CustomerExcelRowMapper : IExcelRowMapper<CreateCustomerReq
     [
         "Ügyfél neve", "Ügyfélcsoport", "Ügyfélkategória",
         "Adószám", "Közösségi adószám", "Kapcsolattartó neve",
-        "E-mail - visszaigazolás", "E-mail - számlázás", "E-mail - beszerzés",
         "Telefon", "Ország", "Irányítószám", "Város", "Utca, házszám",
         "Bankszámlaszám", "Számla típusa", "Fizetés módja", "Fizetési határidő", "Pénznem"
     ];

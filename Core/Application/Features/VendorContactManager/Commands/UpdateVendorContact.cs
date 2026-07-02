@@ -16,7 +16,6 @@ public class UpdateVendorContactRequest : IRequest<UpdateVendorContactResult>
     public string? Name { get; init; }
     public string? JobTitle { get; set; }
     public string? PhoneNumber { get; set; }
-    public string? EmailAddress { get; set; }
     public string? Description { get; set; }
     public string? VendorId { get; set; }
     public string? UpdatedById { get; init; }
@@ -30,7 +29,6 @@ public class UpdateVendorContactValidator : AbstractValidator<UpdateVendorContac
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.JobTitle).NotEmpty();
         RuleFor(x => x.PhoneNumber).NotEmpty();
-        RuleFor(x => x.EmailAddress).NotEmpty();
     }
 }
 
@@ -63,7 +61,6 @@ public class UpdateVendorContactHandler : IRequestHandler<UpdateVendorContactReq
         entity.Name = request.Name;
         entity.JobTitle = request.JobTitle;
         entity.PhoneNumber = request.PhoneNumber;
-        entity.EmailAddress = request.EmailAddress;
         entity.Description = request.Description;
         entity.VendorId = request.VendorId;
 

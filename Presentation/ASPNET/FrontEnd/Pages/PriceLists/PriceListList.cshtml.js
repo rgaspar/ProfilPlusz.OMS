@@ -9,84 +9,51 @@ const App = {
             id: '',
             productId: null,
             customerId: null,
-            taxId: null,
-            netPrice: 0,
-            grossPrice: null,
-            quantityDiscount: null,
-            discountFrom: null,
-            discountTo: null,
 
             productListLookupData: [],
             customerListLookupData: [],
-            taxListLookupData: [],
 
             errors: {
-                productId: '',
-                netPrice: ''
-            },
-
-            importResult: {
-                successCount: 0,
-                errorCount: 0,
-                overwriteCount: 0,
-                errors: []
+                productId: ''
             }
         });
 
         const mainGridRef = Vue.ref(null);
         const mainModalRef = Vue.ref(null);
-        const importResultModalRef = Vue.ref(null);
         const productIdRef = Vue.ref(null);
         const customerIdRef = Vue.ref(null);
-        const taxIdRef = Vue.ref(null);
 
         let productDropdown = null;
         let customerDropdown = null;
-        let taxDropdown = null;
 
         const resetFormState = () => {
             Object.assign(state, {
                 id: '',
                 productId: null,
                 customerId: null,
-                taxId: null,
-                netPrice: 0,
-                grossPrice: null,
-                quantityDiscount: null,
-                discountFrom: null,
-                discountTo: null,
-                errors: { productId: '', netPrice: '' }
+                errors: { productId: '' }
             });
             if (productDropdown) productDropdown.value = null;
             if (customerDropdown) customerDropdown.value = null;
-            if (taxDropdown) taxDropdown.value = null;
         };
 
         const populateFormFromRecord = (r) => {
             Object.assign(state, {
                 id: r.id,
                 productId: r.productId,
-                customerId: r.customerId,
-                taxId: r.taxId,
-                netPrice: r.netPrice,
-                grossPrice: r.grossPrice,
-                quantityDiscount: r.quantityDiscount,
-                discountFrom: r.discountFrom ? r.discountFrom.substring(0, 10) : null,
-                discountTo: r.discountTo ? r.discountTo.substring(0, 10) : null
+                customerId: r.customerId
             });
             if (productDropdown) productDropdown.value = state.productId;
             if (customerDropdown) customerDropdown.value = state.customerId;
-            if (taxDropdown) taxDropdown.value = state.taxId;
         };
 
         const services = {
-            getMainData: () => AxiosManager.get('/PriceList/GetPriceList', {}),
+            getMainData: () => AxiosManager.get('/ProductCustomer/GetProductCustomerList', {}),
             getProducts: () => AxiosManager.get('/Product/GetProductList', {}),
             getCustomers: () => AxiosManager.get('/Customer/GetCustomerList', {}),
-            getTaxes: () => AxiosManager.get('/Tax/GetTaxList', {}),
-            createMainData: (payload) => AxiosManager.post('/PriceList/CreatePriceList', payload),
-            updateMainData: (payload) => AxiosManager.post('/PriceList/UpdatePriceList', payload),
-            deleteMainData: (id, deletedById) => AxiosManager.post('/PriceList/DeletePriceList', { id, deletedById })
+            createMainData: (payload) => AxiosManager.post('/ProductCustomer/CreateProductCustomer', payload),
+            updateMainData: (payload) => AxiosManager.post('/ProductCustomer/UpdateProductCustomer', payload),
+            deleteMainData: (id, deletedById) => AxiosManager.post('/ProductCustomer/DeleteProductCustomer', { id, deletedById })
         };
 
         const methods = {
@@ -95,14 +62,12 @@ const App = {
                 state.mainData = response?.data?.content?.data ?? [];
             },
             populateLookups: async () => {
-                const [products, customers, taxes] = await Promise.all([
+                const [products, customers] = await Promise.all([
                     services.getProducts(),
-                    services.getCustomers(),
-                    services.getTaxes()
+                    services.getCustomers()
                 ]);
                 state.productListLookupData = products?.data?.content?.data ?? [];
                 state.customerListLookupData = customers?.data?.content?.data ?? [];
-                state.taxListLookupData = taxes?.data?.content?.data ?? [];
             }
         };
 
@@ -112,10 +77,9 @@ const App = {
                     state.isSubmitting = true;
                     await new Promise(resolve => setTimeout(resolve, 200));
 
-                    state.errors = { productId: '', netPrice: '' };
+                    state.errors = { productId: '' };
                     let isValid = true;
                     if (!state.productId) { state.errors.productId = 'Kötelező mező.'; isValid = false; }
-                    if (state.netPrice === null || state.netPrice === '') { state.errors.netPrice = 'Kötelező mező.'; isValid = false; }
                     if (!isValid) return;
 
                     const userId = StorageManager.getUserId();
@@ -123,12 +87,6 @@ const App = {
                         id: state.id || undefined,
                         productId: state.productId,
                         customerId: state.customerId,
-                        taxId: state.taxId,
-                        netPrice: parseFloat(state.netPrice) || 0,
-                        grossPrice: state.grossPrice ? parseFloat(state.grossPrice) : null,
-                        quantityDiscount: state.quantityDiscount ? parseFloat(state.quantityDiscount) : null,
-                        discountFrom: state.discountFrom || null,
-                        discountTo: state.discountTo || null,
                         createdById: userId,
                         updatedById: userId,
                         deletedById: userId
@@ -197,27 +155,18 @@ const App = {
                         { field: 'id', isPrimaryKey: true, headerText: 'Id', visible: false },
                         { field: 'productNumber', headerText: 'Cikkszám', width: 130, minWidth: 100 },
                         { field: 'productName', headerText: 'Termék', width: 200, minWidth: 150 },
-                        { field: 'customerName', headerText: 'Vevő', width: 180, minWidth: 120 },
-                        { field: 'taxName', headerText: 'ÁFA', width: 100, minWidth: 80 },
-                        { field: 'netPrice', headerText: 'Nettó ár', width: 110, minWidth: 90, format: 'N2' },
-                        { field: 'grossPrice', headerText: 'Bruttó ár', width: 110, minWidth: 90, format: 'N2' },
-                        { field: 'quantityDiscount', headerText: 'Menny. kedv.', width: 130, minWidth: 100, format: 'N2' },
-                        { field: 'discountFrom', headerText: 'Kedvezménytől', width: 150, minWidth: 120, type: 'date', format: 'yMd' },
-                        { field: 'discountTo', headerText: 'Kedvezményig', width: 150, minWidth: 120, type: 'date', format: 'yMd' }
+                        { field: 'customerName', headerText: 'Vevő', width: 180, minWidth: 120 }
                     ],
                     toolbar: [
                         'ExcelExport', 'Search',
                         { type: 'Separator' },
                         { text: 'Hozzáadás', tooltipText: 'Hozzáadás', prefixIcon: 'e-add', id: 'AddCustom' },
                         { text: 'Szerkesztés', tooltipText: 'Szerkesztés', prefixIcon: 'e-edit', id: 'EditCustom' },
-                        { text: 'Törlés', tooltipText: 'Törlés', prefixIcon: 'e-delete', id: 'DeleteCustom' },
-                        { type: 'Separator' },
-                        { text: 'Import', tooltipText: 'Excel import', prefixIcon: 'e-upload', id: 'ImportExcel' },
-                        { text: 'Sablon', tooltipText: 'Sablon letöltése', prefixIcon: 'e-download', id: 'DownloadTemplate' }
+                        { text: 'Törlés', tooltipText: 'Törlés', prefixIcon: 'e-delete', id: 'DeleteCustom' }
                     ],
                     dataBound: () => {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], false);
-                        mainGrid.obj.autoFitColumns(['productNumber', 'productName', 'customerName', 'taxName', 'netPrice', 'grossPrice']);
+                        mainGrid.obj.autoFitColumns(['productNumber', 'productName', 'customerName']);
                     },
                     rowSelected: () => {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], mainGrid.obj.getSelectedRecords().length === 1);
@@ -233,31 +182,23 @@ const App = {
 
                         if (args.item.id === 'AddCustom') {
                             state.deleteMode = false;
-                            state.mainTitle = 'Árlista hozzáadása';
+                            state.mainTitle = 'Termék-vevő kapcsolat hozzáadása';
                             resetFormState();
                             mainModal.obj.show();
                         }
 
                         if (args.item.id === 'EditCustom' && mainGrid.obj.getSelectedRecords().length) {
                             state.deleteMode = false;
-                            state.mainTitle = 'Árlista módosítása';
+                            state.mainTitle = 'Termék-vevő kapcsolat módosítása';
                             populateFormFromRecord(mainGrid.obj.getSelectedRecords()[0]);
                             mainModal.obj.show();
                         }
 
                         if (args.item.id === 'DeleteCustom' && mainGrid.obj.getSelectedRecords().length) {
                             state.deleteMode = true;
-                            state.mainTitle = 'Árlista törlése?';
+                            state.mainTitle = 'Termék-vevő kapcsolat törlése?';
                             populateFormFromRecord(mainGrid.obj.getSelectedRecords()[0]);
                             mainModal.obj.show();
-                        }
-
-                        if (args.item.id === 'ImportExcel') {
-                            document.getElementById('excelImportInput').click();
-                        }
-
-                        if (args.item.id === 'DownloadTemplate') {
-                            AxiosManager.getFile('/PriceList/GetPriceListImportTemplate', 'arlista-import-template.xlsx');
                         }
                     }
                 });
@@ -273,14 +214,6 @@ const App = {
             }
         };
 
-        const importResultModal = {
-            obj: null,
-            create: () => {
-                importResultModal.obj = new bootstrap.Modal(importResultModalRef.value, { backdrop: 'static', keyboard: false });
-            },
-            show: () => importResultModal.obj.show()
-        };
-
         Vue.onMounted(async () => {
             try {
                 await SecurityManager.authorizePage(['PriceLists']);
@@ -290,7 +223,6 @@ const App = {
                 await methods.populateMainData();
                 await mainGrid.create(state.mainData);
                 mainModal.create();
-                importResultModal.create();
 
                 productDropdown = new ej.dropdowns.DropDownList({
                     dataSource: state.productListLookupData,
@@ -308,58 +240,14 @@ const App = {
                 });
                 customerDropdown.appendTo(customerIdRef.value);
 
-                taxDropdown = new ej.dropdowns.DropDownList({
-                    dataSource: state.taxListLookupData,
-                    fields: { value: 'id', text: 'name' },
-                    placeholder: 'Válassz ÁFÁ-t',
-                    change: e => { state.taxId = e.value; }
-                });
-                taxDropdown.appendTo(taxIdRef.value);
-
-                document.getElementById('excelImportInput').addEventListener('change', async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    e.target.value = '';
-
-                    const formData = new FormData();
-                    formData.append('file', file);
-
-                    try {
-                        const result = await AxiosManager.postFile(
-                            '/PriceList/ImportPriceListFromExcel',
-                            formData,
-                            `arlista-import-hibak-${new Date().toISOString().slice(0, 10)}.xlsx`
-                        );
-                        const content = result?.content ?? {};
-                        state.importResult = {
-                            successCount: content.successCount ?? 0,
-                            errorCount: content.errorCount ?? 0,
-                            overwriteCount: content.overwriteCount ?? 0,
-                            errors: content.errors ?? []
-                        };
-                        importResultModal.show();
-                        if ((content.successCount ?? 0) > 0 || (content.overwriteCount ?? 0) > 0) {
-                            await methods.populateMainData();
-                            mainGrid.refresh();
-                        }
-                    } catch (err) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Import hiba',
-                            text: err?.response?.data?.message ?? err.message,
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                });
-
             } catch (e) {
                 console.error('page init error:', e);
             }
         });
 
         return {
-            mainGridRef, mainModalRef, importResultModalRef,
-            productIdRef, customerIdRef, taxIdRef,
+            mainGridRef, mainModalRef,
+            productIdRef, customerIdRef,
             state, handler
         };
     }

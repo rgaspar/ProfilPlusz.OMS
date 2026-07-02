@@ -10,17 +10,12 @@ const App = {
             name: '',
             jobTitle: '',
             phoneNumber: '',
-            emailAddress: '',
-            emailAddressOrderConfirmation: '',
-            emailAddressInvoice: '',
-            emailAddressPurchaseOrder: '',
             description: '',
             customerId: null,
             errors: {
                 name: '',
                 jobTitle: '',
                 phoneNumber: '',
-                emailAddress: '',
                 customerId: ''
             },
             isSubmitting: false
@@ -39,13 +34,9 @@ const App = {
                 name: '',
                 jobTitle: '',
                 phoneNumber: '',
-                emailAddress: '',
-                emailAddressOrderConfirmation: '',
-                emailAddressInvoice: '',
-                emailAddressPurchaseOrder: '',
                 description: '',
                 customerId: null,
-                errors: { name: '', jobTitle: '', phoneNumber: '', emailAddress: '', customerId: '' }
+                errors: { name: '', jobTitle: '', phoneNumber: '', customerId: '' }
             });
             if (customerDropdown) customerDropdown.value = null;
         };
@@ -57,10 +48,6 @@ const App = {
                 name: r.name ?? '',
                 jobTitle: r.jobTitle ?? '',
                 phoneNumber: r.phoneNumber ?? '',
-                emailAddress: r.emailAddress ?? '',
-                emailAddressOrderConfirmation: r.emailAddressOrderConfirmation ?? '',
-                emailAddressInvoice: r.emailAddressInvoice ?? '',
-                emailAddressPurchaseOrder: r.emailAddressPurchaseOrder ?? '',
                 description: r.description ?? '',
                 customerId: r.customerId ?? null,
             });
@@ -95,13 +82,12 @@ const App = {
                     state.isSubmitting = true;
                     await new Promise(resolve => setTimeout(resolve, 200));
 
-                    state.errors = { name: '', jobTitle: '', phoneNumber: '', emailAddress: '', customerId: '' };
+                    state.errors = { name: '', jobTitle: '', phoneNumber: '', customerId: '' };
                     let isValid = true;
 
                     if (!state.name) { state.errors.name = 'Kötelező mező.'; isValid = false; }
                     if (!state.jobTitle) { state.errors.jobTitle = 'Kötelező mező.'; isValid = false; }
                     if (!state.phoneNumber) { state.errors.phoneNumber = 'Kötelező mező.'; isValid = false; }
-                    if (!state.emailAddress) { state.errors.emailAddress = 'Kötelező mező.'; isValid = false; }
                     if (!state.customerId) { state.errors.customerId = 'Kötelező mező.'; isValid = false; }
 
                     if (!isValid) return;
@@ -111,10 +97,6 @@ const App = {
                         name: state.name,
                         jobTitle: state.jobTitle,
                         phoneNumber: state.phoneNumber,
-                        emailAddress: state.emailAddress,
-                        emailAddressOrderConfirmation: state.emailAddressOrderConfirmation,
-                        emailAddressInvoice: state.emailAddressInvoice,
-                        emailAddressPurchaseOrder: state.emailAddressPurchaseOrder,
                         description: state.description,
                         customerId: state.customerId,
                         createdById: StorageManager.getUserId(),
@@ -187,10 +169,6 @@ const App = {
                         { field: 'customerName', headerText: 'Ügyfél', width: 150, minWidth: 120 },
                         { field: 'jobTitle', headerText: 'Munkakör', width: 150, minWidth: 120 },
                         { field: 'phoneNumber', headerText: 'Telefon', width: 130, minWidth: 100 },
-                        { field: 'emailAddress', headerText: 'E-mail', width: 200, minWidth: 150 },
-                        { field: 'emailAddressOrderConfirmation', headerText: 'E-mail visszaigazolás', width: 200, minWidth: 150 },
-                        { field: 'emailAddressInvoice', headerText: 'E-mail számlázás', width: 200, minWidth: 150 },
-                        { field: 'emailAddressPurchaseOrder', headerText: 'E-mail beszerzés', width: 200, minWidth: 150 },
                         { field: 'createdAtUtc', headerText: 'Létrehozva', width: 150, format: 'yyyy-MM-dd HH:mm' }
                     ],
                     toolbar: [
@@ -203,7 +181,7 @@ const App = {
                     ],
                     dataBound: function () {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], false);
-                        mainGrid.obj.autoFitColumns(['number', 'name', 'customerName', 'jobTitle', 'emailAddress', 'emailAddressOrderConfirmation', 'emailAddressInvoice', 'emailAddressPurchaseOrder', 'createdAtUtc']);
+                        mainGrid.obj.autoFitColumns(['number', 'name', 'customerName', 'jobTitle', 'phoneNumber', 'createdAtUtc']);
                     },
                     rowSelected: () => {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], mainGrid.obj.getSelectedRecords().length === 1);

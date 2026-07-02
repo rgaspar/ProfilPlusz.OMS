@@ -27,9 +27,6 @@
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-alapadatok" type="button">Alapadatok</button>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-kapcsolat" type="button">Elérhetőség</button>
-                            </li>
                         </ul>
 
                         <div class="tab-content">
@@ -60,41 +57,16 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label class="form-label">Leírás</label>
-                                        <textarea v-model="state.description" class="form-control" rows="3"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ELÉRHETŐSÉG -->
-                            <div class="tab-pane fade" id="tab-kapcsolat">
-                                <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Telefonszám <span class="text-danger">*</span></label>
                                         <input v-model="state.phoneNumber" class="form-control" type="tel" />
                                         <div class="form-text text-danger" v-text="state.errors.phoneNumber"></div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail <span class="text-danger">*</span></label>
-                                        <input v-model="state.emailAddress" class="form-control" type="email" />
-                                        <div class="form-text text-danger" v-text="state.errors.emailAddress"></div>
-                                    </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail - rendelés visszaigazolás</label>
-                                        <input v-model="state.emailAddressOrderConfirmation" class="form-control" type="email" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail - számlázás</label>
-                                        <input v-model="state.emailAddressInvoice" class="form-control" type="email" />
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail - beszerzési rendelés</label>
-                                        <input v-model="state.emailAddressPurchaseOrder" class="form-control" type="email" />
+                                    <div class="col-md-12">
+                                        <label class="form-label">Leírás</label>
+                                        <textarea v-model="state.description" class="form-control" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>

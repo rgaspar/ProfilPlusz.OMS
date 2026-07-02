@@ -57,6 +57,8 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
     public DbSet<Color> Color { get; set; }
     public DbSet<Brand> Brand { get; set; }
     public DbSet<PriceList> PriceList { get; set; }
+    public DbSet<ProductVendor> ProductVendor { get; set; }
+    public DbSet<ProductCustomer> ProductCustomer { get; set; }
 
 
 
@@ -107,6 +109,8 @@ public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
         modelBuilder.ApplyConfiguration(new ColorConfiguration());
         modelBuilder.ApplyConfiguration(new BrandConfiguration());
         modelBuilder.ApplyConfiguration(new PriceListConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductVendorConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductCustomerConfiguration());
     }
 
 }
