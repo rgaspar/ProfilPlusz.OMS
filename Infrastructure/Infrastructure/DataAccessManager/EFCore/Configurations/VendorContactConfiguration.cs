@@ -15,7 +15,6 @@ public class VendorContactConfiguration : BaseEntityConfiguration<VendorContact>
         builder.Property(x => x.Number).HasMaxLength(CodeConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.JobTitle).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.PhoneNumber).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
-        builder.Property(x => x.EmailAddress).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.Description).HasMaxLength(DescriptionConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.VendorId).HasMaxLength(IdConsts.MaxLength).IsRequired(false);
 

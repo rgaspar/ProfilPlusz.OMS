@@ -14,7 +14,6 @@ public record GetVendorContactListDto
     public string? Number { get; set; }
     public string? JobTitle { get; set; }
     public string? PhoneNumber { get; set; }
-    public string? EmailAddress { get; set; }
     public string? Description { get; set; }
     public string? VendorId { get; set; }
     public string? VendorName { get; set; }

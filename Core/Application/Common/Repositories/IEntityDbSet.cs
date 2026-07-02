@@ -46,5 +46,7 @@ public interface IEntityDbSet
     public DbSet<Brand> Brand { get; set; }
     public DbSet<Color> Color { get; set; }
     public DbSet<PriceList> PriceList { get; set; }
+    public DbSet<ProductVendor> ProductVendor { get; set; }
+    public DbSet<ProductCustomer> ProductCustomer { get; set; }
 }
 

@@ -70,7 +70,6 @@ public class CustomerContactSeeder
                     Number = _numberSequenceService.GenerateNumber(nameof(CustomerContact), "", "CC"),
                     CustomerId = customerId,
                     JobTitle = GetRandomString(jobTitles, random),
-                    EmailAddress = $"{firstName.ToLower()}.{lastName.ToLower()}@gmail.com",
                     PhoneNumber = GenerateRandomPhoneNumber(random)
                 });
             }

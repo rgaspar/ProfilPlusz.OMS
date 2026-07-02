@@ -16,10 +16,6 @@ public class CreateCustomerContactRequest : IRequest<CreateCustomerContactResult
     public string? Name { get; init; }
     public string? JobTitle { get; set; }
     public string? PhoneNumber { get; set; }
-    public string? EmailAddress { get; set; }
-    public string? EmailAddressOrderConfirmation { get; set; }
-    public string? EmailAddressInvoice { get; set; }
-    public string? EmailAddressPurchaseOrder { get; set; }
     public string? Description { get; set; }
     public string? CustomerId { get; set; }
     public string? CreatedById { get; init; }
@@ -32,7 +28,6 @@ public class CreateCustomerContactValidator : AbstractValidator<CreateCustomerCo
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.JobTitle).NotEmpty();
         RuleFor(x => x.PhoneNumber).NotEmpty();
-        RuleFor(x => x.EmailAddress).NotEmpty();
     }
 }
 
@@ -62,10 +57,6 @@ public class CreateCustomerContactHandler : IRequestHandler<CreateCustomerContac
         entity.Number = _numberSequenceService.GenerateNumber(nameof(CustomerContact), "", "CC");
         entity.JobTitle = request.JobTitle;
         entity.PhoneNumber = request.PhoneNumber;
-        entity.EmailAddress = request.EmailAddress;
-        entity.EmailAddressOrderConfirmation = request.EmailAddressOrderConfirmation;
-        entity.EmailAddressInvoice = request.EmailAddressInvoice;
-        entity.EmailAddressPurchaseOrder = request.EmailAddressPurchaseOrder;
         entity.Description = request.Description;
         entity.CustomerId = request.CustomerId;
 

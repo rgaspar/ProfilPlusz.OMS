@@ -1,4 +1,5 @@
 ﻿using Application.Common.Services.ExcelImport;
+using Application.Features.CustomerManager.Queries;
 using Application.Features.ProductManager.Commands;
 using Application.Features.ProductManager.Queries;
 using ASPNET.BackEnd.Common.Base;
@@ -143,14 +144,15 @@ public class ProductController : BaseApiController
 
     [Authorize]
     [HttpGet("GetProductImportTemplate")]
-    public IActionResult GetProductImportTemplate()
+    public async Task<IActionResult> GetProductImportTemplate(CancellationToken cancellationToken)
     {
         var headers = new[]
         {
             "Szám", "Név", "GyárNeve", "Leírás",
             "Egységár", "Mértékegység", "Termékcsoport", "Fizikai",
             "Gyártó", "GyártóiSzám", "EAN",
-            "BeszerzésiPénznem", "ÉrtékesítésiPénznem", "Státusz"
+            "BeszerzésiPénznem", "ÉrtékesítésiPénznem", "Státusz",
+            "Szállítókód", "Vevőkódok"
         };
 
         var sampleRow = new Dictionary<string, object?>
@@ -168,8 +170,16 @@ public class ProductController : BaseApiController
             ["EAN"] = "5901234123457",
             ["BeszerzésiPénznem"] = "HUF",
             ["ÉrtékesítésiPénznem"] = "HUF",
-            ["Státusz"] = "Active"
+            ["Státusz"] = "Active",
+            ["Szállítókód"] = "SZ001",
+            ["Vevőkódok"] = "V001;V002"
         };
+
+        var customerResult = await _sender.Send(new GetCustomerListRequest(), cancellationToken);
+        var buyerRows = (customerResult.Data ?? [])
+            .Where(c => c.CustomerCategoryName == "Vevő")
+            .Select(c => new Dictionary<string, object?> { ["Kód"] = c.Number, ["Név"] = c.Name })
+            .ToList();
 
         var referenceRows = new List<Dictionary<string, object?>>
         {
@@ -177,9 +187,17 @@ public class ProductController : BaseApiController
             new() { ["Mező"] = "BeszerzésiPénznem", ["Lehetséges értékek"] = "HUF, EUR, USD", ["Megjegyzés"] = string.Empty },
             new() { ["Mező"] = "ÉrtékesítésiPénznem", ["Lehetséges értékek"] = "HUF, EUR, USD", ["Megjegyzés"] = string.Empty },
             new() { ["Mező"] = "Státusz", ["Lehetséges értékek"] = "Active, Blocked, Discontinued", ["Megjegyzés"] = "Active=Aktív, Blocked=Zárolt, Discontinued=Kifutó" },
+            new() { ["Mező"] = "Szállítókód", ["Lehetséges értékek"] = "Szállító kódja", ["Megjegyzés"] = "Egy szállító kódja (opcionális)" },
+            new() { ["Mező"] = "Vevőkódok", ["Lehetséges értékek"] = "V001;V002;V003", ["Megjegyzés"] = "Vevő kódok pontosvesszővel elválasztva (opcionális)" },
         };
 
-        var bytes = _excelImportService.GenerateTemplateWithReferenceSheet(headers, sampleRow, referenceRows);
+        var extraSheets = new Dictionary<string, IEnumerable<Dictionary<string, object?>>>
+        {
+            ["Vevők"] = buyerRows,
+            ["Referencia"] = referenceRows
+        };
+
+        var bytes = _excelImportService.GenerateTemplateWithMultipleSheets(headers, sampleRow, extraSheets);
         return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "termek-import-template.xlsx");
     }
 

@@ -9,14 +9,12 @@
             name: '',
             jobTitle: '',
             phoneNumber: '',
-            emailAddress: '',
             description: '',
             vendorId: null,
             errors: {
                 name: '',
                 jobTitle: '',
                 phoneNumber: '',
-                emailAddress: '',
                 vendorId: ''
             },
             isSubmitting: false
@@ -28,14 +26,12 @@
         const numberRef = Vue.ref(null);
         const jobTitleRef = Vue.ref(null);
         const phoneNumberRef = Vue.ref(null);
-        const emailAddressRef = Vue.ref(null);
         const vendorIdRef = Vue.ref(null);
 
         const validateForm = function () {
             state.errors.name = '';
             state.errors.jobTitle = '';
             state.errors.phoneNumber = '';
-            state.errors.emailAddress = '';
             state.errors.vendorId = '';
 
             let isValid = true;
@@ -52,10 +48,6 @@
                 state.errors.phoneNumber = 'Phone number is required.';
                 isValid = false;
             }
-            if (!state.emailAddress) {
-                state.errors.emailAddress = 'Email address is required.';
-                isValid = false;
-            }
             if (!state.vendorId) {
                 state.errors.vendorId = 'Vendor is required.';
                 isValid = false;
@@ -70,14 +62,12 @@
             state.number = '';
             state.jobTitle = '';
             state.phoneNumber = '';
-            state.emailAddress = '';
             state.description = '';
             state.vendorId = null;
             state.errors = {
                 name: '',
                 jobTitle: '',
                 phoneNumber: '',
-                emailAddress: '',
                 vendorId: ''
             };
         };
@@ -91,20 +81,20 @@
                     throw error;
                 }
             },
-            createMainData: async (name, jobTitle, phoneNumber, emailAddress, description, vendorId, createdById) => {
+            createMainData: async (name, jobTitle, phoneNumber, description, vendorId, createdById) => {
                 try {
                     const response = await AxiosManager.post('/VendorContact/CreateVendorContact', {
-                        name, jobTitle, phoneNumber, emailAddress, description, vendorId, createdById
+                        name, jobTitle, phoneNumber, description, vendorId, createdById
                     });
                     return response;
                 } catch (error) {
                     throw error;
                 }
             },
-            updateMainData: async (id, name, jobTitle, phoneNumber, emailAddress, description, vendorId, updatedById) => {
+            updateMainData: async (id, name, jobTitle, phoneNumber, description, vendorId, updatedById) => {
                 try {
                     const response = await AxiosManager.post('/VendorContact/UpdateVendorContact', {
-                        id, name, jobTitle, phoneNumber, emailAddress, description, vendorId, updatedById
+                        id, name, jobTitle, phoneNumber, description, vendorId, updatedById
                     });
                     return response;
                 } catch (error) {
@@ -207,21 +197,6 @@
             }
         };
 
-        const emailAddressText = {
-            obj: null,
-            create: () => {
-                emailAddressText.obj = new ej.inputs.TextBox({
-                    placeholder: 'Enter Email Address'
-                });
-                emailAddressText.obj.appendTo(emailAddressRef.value);
-            },
-            refresh: () => {
-                if (emailAddressText.obj) {
-                    emailAddressText.obj.value = state.emailAddress;
-                }
-            }
-        };
-
         const vendorListLookup = {
             obj: null,
             create: () => {
@@ -271,14 +246,6 @@
         );
 
         Vue.watch(
-            () => state.emailAddress,
-            (newVal, oldVal) => {
-                state.errors.emailAddress = '';
-                emailAddressText.refresh();
-            }
-        );
-
-        Vue.watch(
             () => state.vendorId,
             (newVal, oldVal) => {
                 state.errors.vendorId = '';
@@ -297,10 +264,10 @@
                     }
 
                     const response = state.id === ''
-                        ? await services.createMainData(state.name, state.jobTitle, state.phoneNumber, state.emailAddress, state.description, state.vendorId, StorageManager.getUserId())
+                        ? await services.createMainData(state.name, state.jobTitle, state.phoneNumber, state.description, state.vendorId, StorageManager.getUserId())
                         : state.deleteMode
                             ? await services.deleteMainData(state.id, StorageManager.getUserId())
-                            : await services.updateMainData(state.id, state.name, state.jobTitle, state.phoneNumber, state.emailAddress, state.description, state.vendorId, StorageManager.getUserId());
+                            : await services.updateMainData(state.id, state.name, state.jobTitle, state.phoneNumber, state.description, state.vendorId, StorageManager.getUserId());
 
                     if (response.data.code === 200) {
                         await methods.populateMainData();
@@ -313,7 +280,6 @@
                             state.name = response?.data?.content?.data.name ?? '';
                             state.jobTitle = response?.data?.content?.data.jobTitle ?? '';
                             state.phoneNumber = response?.data?.content?.data.phoneNumber ?? '';
-                            state.emailAddress = response?.data?.content?.data.emailAddress ?? '';
                             state.description = response?.data?.content?.data.description ?? '';
                             state.vendorId = response?.data?.content?.data.vendorId ?? '';
 
@@ -377,7 +343,6 @@
                 numberText.create();
                 jobTitleText.create();
                 phoneNumberText.create();
-                emailAddressText.create();
 
                 mainModal.create();
                 mainModalRef.value?.addEventListener('hidden.bs.modal', () => {
@@ -429,7 +394,6 @@
                         { field: 'vendorName', headerText: 'Vendor', width: 150, minWidth: 150 },
                         { field: 'jobTitle', headerText: 'Job Title', width: 150, minWidth: 150 },
                         { field: 'phoneNumber', headerText: 'Phone', width: 150, minWidth: 150 },
-                        { field: 'emailAddress', headerText: 'Email', width: 150, minWidth: 150 },
                         { field: 'createdAtUtc', headerText: 'Created At UTC', width: 150, format: 'yyyy-MM-dd HH:mm' }
                     ],
                     toolbar: [
@@ -443,7 +407,7 @@
                     beforeDataBound: () => { },
                     dataBound: function () {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], false);
-                        mainGrid.obj.autoFitColumns(['name', 'vendorName', 'jobTitle', 'phoneNumber', 'emailAddress', 'createdAtUtc']);
+                        mainGrid.obj.autoFitColumns(['name', 'vendorName', 'jobTitle', 'phoneNumber', 'createdAtUtc']);
                     },
                     excelExportComplete: () => { },
                     rowSelected: () => {
@@ -487,7 +451,6 @@
                                 state.name = selectedRecord.name ?? '';
                                 state.jobTitle = selectedRecord.jobTitle ?? '';
                                 state.phoneNumber = selectedRecord.phoneNumber ?? '';
-                                state.emailAddress = selectedRecord.emailAddress ?? '';
                                 state.description = selectedRecord.description ?? '';
                                 state.vendorId = selectedRecord.vendorId ?? '';
                                 mainModal.obj.show();
@@ -504,7 +467,6 @@
                                 state.name = selectedRecord.name ?? '';
                                 state.jobTitle = selectedRecord.jobTitle ?? '';
                                 state.phoneNumber = selectedRecord.phoneNumber ?? '';
-                                state.emailAddress = selectedRecord.emailAddress ?? '';
                                 state.description = selectedRecord.description ?? '';
                                 state.vendorId = selectedRecord.vendorId ?? '';
                                 mainModal.obj.show();
@@ -537,7 +499,6 @@
             numberRef,
             jobTitleRef,
             phoneNumberRef,
-            emailAddressRef,
             vendorIdRef,
             state,
             handler,

@@ -35,19 +35,25 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
     private readonly IUnitOfWork _unitOfWork;
     private readonly ExcelImportService _excelImportService;
     private readonly IValidator<CreateProductRequest> _validator;
+    private readonly ICommandRepository<ProductVendor> _productVendorRepository;
+    private readonly ICommandRepository<ProductCustomer> _productCustomerRepository;
 
     public ImportProductsFromExcelHandler(
         ICommandRepository<Product> productRepository,
         IEntityDbSet db,
         IUnitOfWork unitOfWork,
         ExcelImportService excelImportService,
-        IValidator<CreateProductRequest> validator)
+        IValidator<CreateProductRequest> validator,
+        ICommandRepository<ProductVendor> productVendorRepository,
+        ICommandRepository<ProductCustomer> productCustomerRepository)
     {
         _productRepository = productRepository;
         _db = db;
         _unitOfWork = unitOfWork;
         _excelImportService = excelImportService;
         _validator = validator;
+        _productVendorRepository = productVendorRepository;
+        _productCustomerRepository = productCustomerRepository;
     }
 
     public async Task<ImportProductsFromExcelResult> Handle(
@@ -61,6 +67,16 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
         var productGroups = await _db.ProductGroup
             .AsNoTracking()
             .ToDictionaryAsync(g => g.Name ?? string.Empty, g => g.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
+        var vendors = await _db.Vendor
+            .AsNoTracking()
+            .Where(v => v.Number != null && !v.IsDeleted)
+            .ToDictionaryAsync(v => v.Number!, v => v.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
+        var customers = await _db.Customer
+            .AsNoTracking()
+            .Where(c => c.Number != null && !c.IsDeleted)
+            .ToDictionaryAsync(c => c.Number!, c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken);
 
         var existingProductsByNumber = await _db.Product
             .AsNoTracking()
@@ -98,6 +114,11 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
                     _productRepository.Update(tracked);
                     await _unitOfWork.SaveAsync(ct);
 
+                    var vendorCodeUpdate = originalRow.TryGetValue("Szállítókód", out var vcUpdate) ? vcUpdate?.ToString() ?? "" : "";
+                    var customerCodesUpdate = originalRow.TryGetValue("Vevőkódok", out var vkUpdate) ? vkUpdate?.ToString() ?? "" : "";
+                    await ProcessVendorLink(existingId, vendorCodeUpdate, vendors, ct);
+                    await ProcessCustomerLinks(existingId, customerCodesUpdate, customers, ct);
+
                     overwriteWarnings.Add(new ImportWarning
                     {
                         RowNumber = rowNumber,
@@ -111,6 +132,12 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
                 var entity = MapToEntity(createRequest, request.CreatedById);
                 await _productRepository.CreateAsync(entity, ct);
                 await _unitOfWork.SaveAsync(ct);
+
+                var vendorCode = originalRow.TryGetValue("Szállítókód", out var vc) ? vc?.ToString() ?? "" : "";
+                var customerCodesRaw = originalRow.TryGetValue("Vevőkódok", out var vk) ? vk?.ToString() ?? "" : "";
+                await ProcessVendorLink(entity.Id, vendorCode, vendors, ct);
+                await ProcessCustomerLinks(entity.Id, customerCodesRaw, customers, ct);
+
                 return null;
             },
             cancellationToken);
@@ -193,6 +220,47 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
         entity.Status = req.Status;
     }
 
+    private async Task ProcessVendorLink(
+        string productId,
+        string vendorCode,
+        Dictionary<string, string> vendors,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(vendorCode)) return;
+        if (!vendors.TryGetValue(vendorCode, out var vendorId)) return;
+
+        var exists = await _db.ProductVendor
+            .AnyAsync(pv => pv.ProductId == productId && pv.VendorId == vendorId && !pv.IsDeleted, ct);
+        if (exists) return;
+
+        await _productVendorRepository.CreateAsync(
+            new ProductVendor { ProductId = productId, VendorId = vendorId }, ct);
+        await _unitOfWork.SaveAsync(ct);
+    }
+
+    private async Task ProcessCustomerLinks(
+        string productId,
+        string customerCodesRaw,
+        Dictionary<string, string> customers,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(customerCodesRaw)) return;
+
+        var codes = customerCodesRaw.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var code in codes)
+        {
+            if (!customers.TryGetValue(code, out var customerId)) continue;
+
+            var exists = await _db.ProductCustomer
+                .AnyAsync(pc => pc.ProductId == productId && pc.CustomerId == customerId && !pc.IsDeleted, ct);
+            if (exists) continue;
+
+            await _productCustomerRepository.CreateAsync(
+                new ProductCustomer { ProductId = productId, CustomerId = customerId }, ct);
+            await _unitOfWork.SaveAsync(ct);
+        }
+    }
+
     private static Product MapToEntity(CreateProductRequest req, string? createdById) => new()
     {
         CreatedById = createdById,
@@ -239,7 +307,8 @@ internal sealed class ProductExcelRowMapper : IExcelRowMapper<CreateProductReque
         "Szám", "Név", "GyárNeve", "Leírás",
         "Egységár", "Mértékegység", "Termékcsoport", "Fizikai",
         "Gyártó", "GyártóiSzám", "EAN",
-        "BeszerzésiPénznem", "ÉrtékesítésiPénznem", "Státusz"
+        "BeszerzésiPénznem", "ÉrtékesítésiPénznem", "Státusz",
+        "Szállítókód", "Vevőkódok"
     ];
 
     public ProductExcelRowMapper(

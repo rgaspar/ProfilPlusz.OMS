@@ -16,7 +16,6 @@ public class CreateVendorContactRequest : IRequest<CreateVendorContactResult>
     public string? Name { get; init; }
     public string? JobTitle { get; set; }
     public string? PhoneNumber { get; set; }
-    public string? EmailAddress { get; set; }
     public string? Description { get; set; }
     public string? VendorId { get; set; }
     public string? CreatedById { get; init; }
@@ -29,7 +28,6 @@ public class CreateVendorContactValidator : AbstractValidator<CreateVendorContac
         RuleFor(x => x.Name).NotEmpty();
         RuleFor(x => x.JobTitle).NotEmpty();
         RuleFor(x => x.PhoneNumber).NotEmpty();
-        RuleFor(x => x.EmailAddress).NotEmpty();
     }
 }
 
@@ -59,7 +57,6 @@ public class CreateVendorContactHandler : IRequestHandler<CreateVendorContactReq
         entity.Number = _numberSequenceService.GenerateNumber(nameof(VendorContact), "", "VC");
         entity.JobTitle = request.JobTitle;
         entity.PhoneNumber = request.PhoneNumber;
-        entity.EmailAddress = request.EmailAddress;
         entity.Description = request.Description;
         entity.VendorId = request.VendorId;
 

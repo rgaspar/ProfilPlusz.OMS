@@ -124,20 +124,20 @@
                     throw error;
                 }
             },
-            createSecondaryData: async (name, jobTitle, phoneNumber, emailAddress, description, vendorId, createdById) => {
+            createSecondaryData: async (name, jobTitle, phoneNumber, description, vendorId, createdById) => {
                 try {
                     const response = await AxiosManager.post('/VendorContact/CreateVendorContact', {
-                        name, jobTitle, phoneNumber, emailAddress, description, vendorId, createdById
+                        name, jobTitle, phoneNumber, description, vendorId, createdById
                     });
                     return response;
                 } catch (error) {
                     throw error;
                 }
             },
-            updateSecondaryData: async (id, name, jobTitle, phoneNumber, emailAddress, description, vendorId, updatedById) => {
+            updateSecondaryData: async (id, name, jobTitle, phoneNumber, description, vendorId, updatedById) => {
                 try {
                     const response = await AxiosManager.post('/VendorContact/UpdateVendorContact', {
-                        id, name, jobTitle, phoneNumber, emailAddress, description, vendorId, updatedById
+                        id, name, jobTitle, phoneNumber, description, vendorId, updatedById
                     });
                     return response;
                 } catch (error) {
@@ -863,7 +863,6 @@
                         { field: 'name', headerText: 'Name', width: 200, minWidth: 200, validationRules: { required: true } },
                         { field: 'jobTitle', headerText: 'Job Title', width: 200, minWidth: 200, validationRules: { required: true } },
                         { field: 'phoneNumber', headerText: 'Phone', width: 200, minWidth: 200, validationRules: { required: true } },
-                        { field: 'emailAddress', headerText: 'Email', width: 200, minWidth: 200, validationRules: { required: true } },
                         { field: 'description', headerText: 'Description', width: 400, minWidth: 400 },
                         { field: 'createdAtUtc', headerText: 'Created At UTC', width: 150, format: 'yyyy-MM-dd HH:mm' }
                     ],
@@ -873,7 +872,7 @@
                     beforeDataBound: () => { },
                     dataBound: function () {
                         secondaryGrid.obj.toolbarModule.enableItems(['Edit', 'Delete'], false);
-                        secondaryGrid.obj.autoFitColumns(['name', 'jobTitle', 'phoneNumber', 'emailAddress', 'description', 'createdAtUtc']);
+                        secondaryGrid.obj.autoFitColumns(['name', 'jobTitle', 'phoneNumber', 'description', 'createdAtUtc']);
                     },
                     excelExportComplete: () => { },
                     rowSelected: () => {
@@ -898,7 +897,7 @@
                     actionComplete: async (args) => {
                         if (args.requestType === 'save' && args.action === 'add') {
                             const response = await services.createSecondaryData(
-                                args.data.name, args.data.jobTitle, args.data.phoneNumber, args.data.emailAddress, args.data.description, state.id, StorageManager.getUserId()
+                                args.data.name, args.data.jobTitle, args.data.phoneNumber, args.data.description, state.id, StorageManager.getUserId()
                             );
                             await methods.populateSecondaryData(state.id);
                             secondaryGrid.refresh();
@@ -911,7 +910,7 @@
                         }
                         if (args.requestType === 'save' && args.action === 'edit') {
                             const response = await services.updateSecondaryData(
-                                args.data.id, args.data.name, args.data.jobTitle, args.data.phoneNumber, args.data.emailAddress, args.data.description, state.id, StorageManager.getUserId()
+                                args.data.id, args.data.name, args.data.jobTitle, args.data.phoneNumber, args.data.description, state.id, StorageManager.getUserId()
                             );
                             await methods.populateSecondaryData(state.id);
                             secondaryGrid.refresh();
