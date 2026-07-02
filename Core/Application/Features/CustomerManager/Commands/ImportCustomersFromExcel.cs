@@ -136,7 +136,6 @@ public class ImportCustomersFromExcelHandler(
                     Number = numberSequenceService.GenerateNumber(nameof(Customer), "", "CST"),
                     Name = createRequest.Name,
                     Description = createRequest.Description,
-                    EmailAddress = createRequest.EmailAddress,
                     TaxNumber = createRequest.TaxNumber,
                     EuTaxNumber = createRequest.EuTaxNumber,
                     BankAccountNumber = createRequest.BankAccountNumber,
@@ -203,7 +202,7 @@ internal sealed class CustomerExcelRowMapper : IExcelRowMapper<CreateCustomerReq
 
     public string[] TemplateHeaders =>
     [
-        "Ügyfél neve", "Ügyfélcsoport", "Ügyfélkategória", "E-mail",
+        "Ügyfél neve", "Ügyfélcsoport", "Ügyfélkategória",
         "Adószám", "Közösségi adószám", "Kapcsolattartó neve",
         "E-mail - visszaigazolás", "E-mail - számlázás", "E-mail - beszerzés",
         "Telefon", "Ország", "Irányítószám", "Város", "Utca, házszám",
@@ -245,7 +244,6 @@ internal sealed class CustomerExcelRowMapper : IExcelRowMapper<CreateCustomerReq
         var request = new CreateCustomerRequest
         {
             Name = Get(row, "Ügyfél neve"),
-            EmailAddress = Get(row, "E-mail"),
             CustomerGroupId = string.IsNullOrEmpty(groupId) ? null : groupId,
             CustomerCategoryId = string.IsNullOrEmpty(categoryId) ? null : categoryId,
             TaxNumber = GetOrNull(row, "Adószám"),

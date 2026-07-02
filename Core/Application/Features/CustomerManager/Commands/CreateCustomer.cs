@@ -40,11 +40,6 @@ public class CreateCustomerRequest : IRequest<CreateCustomerResult>
     public string? Name { get; set; }
     public string? Description { get; set; }
 
-    public string? FaxNumber { get; set; }
-
-    public string? EmailAddress { get; set; }
-
-    public string? Website { get; set; }
     public string? WhatsApp { get; set; }
     public string? LinkedIn { get; set; }
     public string? Facebook { get; set; }
@@ -76,10 +71,6 @@ public class CreateCustomerValidator : AbstractValidator<CreateCustomerRequest>
     {
         RuleFor(x => x.Name)
             .NotEmpty();
-
-        RuleFor(x => x.EmailAddress)
-            .NotEmpty()
-            .EmailAddress();
 
         RuleFor(x => x.CustomerGroupId)
             .NotEmpty();
@@ -124,11 +115,6 @@ public class CreateCustomerHandler : IRequestHandler<CreateCustomerRequest, Crea
             Number = _numberSequenceService.GenerateNumber(nameof(Customer), "", "CST"),
             Description = request.Description,
 
-            FaxNumber = request.FaxNumber,
-
-            EmailAddress = request.EmailAddress,
-
-            Website = request.Website,
             WhatsApp = request.WhatsApp,
             LinkedIn = request.LinkedIn,
             Facebook = request.Facebook,

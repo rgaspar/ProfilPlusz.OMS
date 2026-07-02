@@ -42,11 +42,6 @@ public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
     public string? Name { get; set; }
     public string? Description { get; set; }
 
-    public string? FaxNumber { get; set; }
-
-    public string? EmailAddress { get; set; }
-
-    public string? Website { get; set; }
     public string? WhatsApp { get; set; }
     public string? LinkedIn { get; set; }
     public string? Facebook { get; set; }
@@ -81,10 +76,6 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerRequest>
 
         RuleFor(x => x.Name)
             .NotEmpty();
-
-        RuleFor(x => x.EmailAddress)
-            .NotEmpty()
-            .EmailAddress();
 
         RuleFor(x => x.CustomerGroupId)
             .NotEmpty();
@@ -142,11 +133,6 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
         entity.Name = request.Name;
         entity.Description = request.Description;
 
-        entity.FaxNumber = request.FaxNumber;
-
-        entity.EmailAddress = request.EmailAddress;
-
-        entity.Website = request.Website;
         entity.WhatsApp = request.WhatsApp;
         entity.LinkedIn = request.LinkedIn;
         entity.Facebook = request.Facebook;

@@ -79,8 +79,6 @@ public class CustomerSeeder
 
             customer.EmailAddress = $"{baseName}@{GetRandomString(emailDomains, random)}";
 
-            customer.Website = $"https://www.{baseName}.com";
-
             customer.TaxNumber = $"{random.Next(10000000, 99999999)}-2-42";
             customer.EuTaxNumber = $"EU{random.Next(10000000, 99999999)}";
 

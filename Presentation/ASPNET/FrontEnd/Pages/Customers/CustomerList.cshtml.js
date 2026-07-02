@@ -10,9 +10,6 @@ const App = {
             number: '',
             name: '',
             description: '',
-            faxNumber: '',
-            emailAddress: '',
-            website: '',
             taxNumber: '',
             euTaxNumber: '',
             bankAccountNumber: '',
@@ -29,7 +26,6 @@ const App = {
 
             errors: {
                 name: '',
-                emailAddress: '',
                 customerGroupId: '',
                 customerCategoryId: ''
             },
@@ -77,14 +73,13 @@ const App = {
         const resetFormState = () => {
             Object.assign(state, {
                 id: '', number: '', name: '', description: '',
-                faxNumber: '', emailAddress: '', website: '',
                 taxNumber: '', euTaxNumber: '', bankAccountNumber: '',
                 invoiceType: null, paymentMethod: null,
                 paymentDeadlineDays: null, currency: null,
                 addresses: [],
                 contacts: [],
                 customerGroupId: null, customerCategoryId: null,
-                errors: { name: '', emailAddress: '', customerGroupId: '', customerCategoryId: '' }
+                errors: { name: '', customerGroupId: '', customerCategoryId: '' }
             });
             if (customerGroupDropdown) customerGroupDropdown.value = null;
             if (customerCategoryDropdown) customerCategoryDropdown.value = null;
@@ -96,9 +91,6 @@ const App = {
                 number: r.number ?? '',
                 name: r.name ?? '',
                 description: r.description ?? '',
-                faxNumber: r.faxNumber ?? '',
-                emailAddress: r.emailAddress ?? '',
-                website: r.website ?? '',
                 taxNumber: r.taxNumber ?? '',
                 euTaxNumber: r.euTaxNumber ?? '',
                 bankAccountNumber: r.bankAccountNumber ?? '',
@@ -136,11 +128,10 @@ const App = {
                     state.isSubmitting = true;
                     await new Promise(resolve => setTimeout(resolve, 200));
 
-                    state.errors = { name: '', emailAddress: '', customerGroupId: '', customerCategoryId: '' };
+                    state.errors = { name: '', customerGroupId: '', customerCategoryId: '' };
                     let isValid = true;
 
                     if (!state.name) { state.errors.name = 'Név megadása kötelező.'; isValid = false; }
-                    if (!state.emailAddress) { state.errors.emailAddress = 'E-mail megadása kötelező.'; isValid = false; }
                     if (!state.customerGroupId) { state.errors.customerGroupId = 'Ügyfélcsoport megadása kötelező.'; isValid = false; }
                     if (!state.customerCategoryId) { state.errors.customerCategoryId = 'Ügyfélkategória megadása kötelező.'; isValid = false; }
 
@@ -150,9 +141,6 @@ const App = {
                         id: state.id || undefined,
                         name: state.name,
                         description: state.description,
-                        faxNumber: state.faxNumber,
-                        emailAddress: state.emailAddress,
-                        website: state.website,
                         taxNumber: state.taxNumber,
                         euTaxNumber: state.euTaxNumber,
                         bankAccountNumber: state.bankAccountNumber,
@@ -250,7 +238,6 @@ const App = {
                         { field: 'customerGroupName', headerText: 'Csoport', width: 150, minWidth: 100 },
                         { field: 'customerCategoryName', headerText: 'Kategória', width: 150, minWidth: 100 },
                         { field: 'taxNumber', headerText: 'Adószám', width: 130, minWidth: 100 },
-                        { field: 'emailAddress', headerText: 'E-mail', width: 200, minWidth: 150 },
                         { field: 'city', headerText: 'Város', width: 120, minWidth: 100 },
                         { field: 'createdAtUtc', headerText: 'Létrehozva', width: 150, format: 'yyyy-MM-dd HH:mm' }
                     ],
@@ -267,7 +254,7 @@ const App = {
                     ],
                     dataBound: function () {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], false);
-                        mainGrid.obj.autoFitColumns(['number', 'name', 'customerGroupName', 'customerCategoryName', 'emailAddress', 'createdAtUtc']);
+                        mainGrid.obj.autoFitColumns(['number', 'name', 'customerGroupName', 'customerCategoryName', 'createdAtUtc']);
                     },
                     rowSelected: () => {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom'], mainGrid.obj.getSelectedRecords().length === 1);
