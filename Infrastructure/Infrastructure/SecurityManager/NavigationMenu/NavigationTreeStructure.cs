@@ -37,11 +37,6 @@ public static class NavigationTreeStructure
                     "IsModule": false
                 },
                 {
-                    "URL": "/CustomerContacts/CustomerContactList",
-                    "Name": "Kapcsolattartók",
-                    "IsModule": false
-                },
-                {
                     "URL": "/PriceLists/PriceListList",
                     "Name": "Árlista",
                     "IsModule": false
