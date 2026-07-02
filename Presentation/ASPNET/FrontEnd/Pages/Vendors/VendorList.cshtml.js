@@ -20,9 +20,6 @@
             zipCode: '',
             country: '',
             phoneNumber: '',
-            faxNumber: '',
-            emailAddress: '',
-            website: '',
             whatsApp: '',
             linkedIn: '',
             facebook: '',
@@ -39,7 +36,6 @@
                 zipCode: '',
                 country: '',
                 phoneNumber: '',
-                emailAddress: '',
             },
             isSubmitting: false
         });
@@ -56,9 +52,6 @@
         const zipCodeRef = Vue.ref(null);
         const countryRef = Vue.ref(null);
         const phoneNumberRef = Vue.ref(null);
-        const faxNumberRef = Vue.ref(null);
-        const emailAddressRef = Vue.ref(null);
-        const websiteRef = Vue.ref(null);
         const whatsAppRef = Vue.ref(null);
         const linkedInRef = Vue.ref(null);
         const facebookRef = Vue.ref(null);
@@ -77,20 +70,20 @@
                     throw error;
                 }
             },
-            createMainData: async (name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, faxNumber, emailAddress, website, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, createdById) => {
+            createMainData: async (name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, createdById) => {
                 try {
                     const response = await AxiosManager.post('/Vendor/CreateVendor', {
-                        name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, faxNumber, emailAddress, website, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, createdById
+                        name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, createdById
                     });
                     return response;
                 } catch (error) {
                     throw error;
                 }
             },
-            updateMainData: async (id, name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, faxNumber, emailAddress, website, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, updatedById) => {
+            updateMainData: async (id, name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, updatedById) => {
                 try {
                     const response = await AxiosManager.post('/Vendor/UpdateVendor', {
-                        id, name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, faxNumber, emailAddress, website, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, updatedById
+                        id, name, vendorGroupId, vendorCategoryId, description, street, city, state, zipCode, country, phoneNumber, whatsApp, linkedIn, facebook, instagram, twitterX, tikTok, updatedById
                     });
                     return response;
                 } catch (error) {
@@ -357,51 +350,6 @@
             }
         };
 
-        const faxNumberText = {
-            obj: null,
-            create: () => {
-                faxNumberText.obj = new ej.inputs.TextBox({
-                    placeholder: 'Enter Fax Number',
-                });
-                faxNumberText.obj.appendTo(faxNumberRef.value);
-            },
-            refresh: () => {
-                if (faxNumberText.obj) {
-                    faxNumberText.obj.value = state.faxNumber;
-                }
-            }
-        };
-
-        const emailAddressText = {
-            obj: null,
-            create: () => {
-                emailAddressText.obj = new ej.inputs.TextBox({
-                    placeholder: 'Enter Email Address',
-                });
-                emailAddressText.obj.appendTo(emailAddressRef.value);
-            },
-            refresh: () => {
-                if (emailAddressText.obj) {
-                    emailAddressText.obj.value = state.emailAddress;
-                }
-            }
-        };
-
-        const websiteText = {
-            obj: null,
-            create: () => {
-                websiteText.obj = new ej.inputs.TextBox({
-                    placeholder: 'Enter Website',
-                });
-                websiteText.obj.appendTo(websiteRef.value);
-            },
-            refresh: () => {
-                if (websiteText.obj) {
-                    websiteText.obj.value = state.website;
-                }
-            }
-        };
-
         const whatsAppText = {
             obj: null,
             create: () => {
@@ -571,14 +519,6 @@
             }
         );
 
-        Vue.watch(
-            () => state.emailAddress,
-            (newVal, oldVal) => {
-                state.errors.emailAddress = '';
-                emailAddressText.refresh();
-            }
-        );
-
         const handler = {
             handleSubmit: async function () {
                 try {
@@ -623,18 +563,14 @@
                         state.errors.phoneNumber = 'Phone Number is required.';
                         isValid = false;
                     }
-                    if (!state.emailAddress) {
-                        state.errors.emailAddress = 'Email Address is required.';
-                        isValid = false;
-                    }
 
                     if (!isValid) return;
 
                     const response = state.id === ''
-                        ? await services.createMainData(state.name, state.vendorGroupId, state.vendorCategoryId, state.description, state.street, state.city, state.state, state.zipCode, state.country, state.phoneNumber, state.faxNumber, state.emailAddress, state.website, state.whatsApp, state.linkedIn, state.facebook, state.instagram, state.twitterX, state.tikTok, StorageManager.getUserId())
+                        ? await services.createMainData(state.name, state.vendorGroupId, state.vendorCategoryId, state.description, state.street, state.city, state.state, state.zipCode, state.country, state.phoneNumber, state.whatsApp, state.linkedIn, state.facebook, state.instagram, state.twitterX, state.tikTok, StorageManager.getUserId())
                         : state.deleteMode
                             ? await services.deleteMainData(state.id, StorageManager.getUserId())
-                            : await services.updateMainData(state.id, state.name, state.vendorGroupId, state.vendorCategoryId, state.description, state.street, state.city, state.state, state.zipCode, state.country, state.phoneNumber, state.faxNumber, state.emailAddress, state.website, state.whatsApp, state.linkedIn, state.facebook, state.instagram, state.twitterX, state.tikTok, StorageManager.getUserId());
+                            : await services.updateMainData(state.id, state.name, state.vendorGroupId, state.vendorCategoryId, state.description, state.street, state.city, state.state, state.zipCode, state.country, state.phoneNumber, state.whatsApp, state.linkedIn, state.facebook, state.instagram, state.twitterX, state.tikTok, StorageManager.getUserId());
 
                     if (response.data.code === 200) {
                         await methods.populateMainData();
@@ -654,9 +590,6 @@
                             state.zipCode = response?.data?.content?.data.zipCode ?? '';
                             state.country = response?.data?.content?.data.country ?? '';
                             state.phoneNumber = response?.data?.content?.data.phoneNumber ?? '';
-                            state.faxNumber = response?.data?.content?.data.faxNumber ?? '';
-                            state.emailAddress = response?.data?.content?.data.emailAddress ?? '';
-                            state.website = response?.data?.content?.data.website ?? '';
                             state.whatsApp = response?.data?.content?.data.whatsApp ?? '';
                             state.linkedIn = response?.data?.content?.data.linkedIn ?? '';
                             state.facebook = response?.data?.content?.data.facebook ?? '';
@@ -724,9 +657,6 @@
             state.zipCode = '';
             state.country = '';
             state.phoneNumber = '';
-            state.faxNumber = '';
-            state.emailAddress = '';
-            state.website = '';
             state.whatsApp = '';
             state.linkedIn = '';
             state.facebook = '';
@@ -743,7 +673,6 @@
                 zipCode: '',
                 country: '',
                 phoneNumber: '',
-                emailAddress: '',
             };
         };
 
@@ -780,7 +709,6 @@
                         { field: 'vendorCategoryName', headerText: 'Category', width: 200, minWidth: 200 },
                         { field: 'street', headerText: 'Street', width: 200, minWidth: 200 },
                         { field: 'phoneNumber', headerText: 'Phone', width: 200, minWidth: 200 },
-                        { field: 'emailAddress', headerText: 'Email', width: 200, minWidth: 200 },
                         { field: 'createdAtUtc', headerText: 'Created At UTC', width: 150, format: 'yyyy-MM-dd HH:mm' }
                     ],
                     toolbar: [
@@ -795,7 +723,7 @@
                     beforeDataBound: () => { },
                     dataBound: function () {
                         mainGrid.obj.toolbarModule.enableItems(['EditCustom', 'DeleteCustom', 'ManageContactCustom'], false);
-                        mainGrid.obj.autoFitColumns(['name', 'vendorGroupName', 'vendorCategoryName', 'street', 'phoneNumber', 'emailAddress', 'createdAtUtc']);
+                        mainGrid.obj.autoFitColumns(['name', 'vendorGroupName', 'vendorCategoryName', 'street', 'phoneNumber', 'createdAtUtc']);
                     },
                     excelExportComplete: () => { },
                     rowSelected: () => {
@@ -846,9 +774,6 @@
                                 state.zipCode = selectedRecord.zipCode ?? '';
                                 state.country = selectedRecord.country ?? '';
                                 state.phoneNumber = selectedRecord.phoneNumber ?? '';
-                                state.faxNumber = selectedRecord.faxNumber ?? '';
-                                state.emailAddress = selectedRecord.emailAddress ?? '';
-                                state.website = selectedRecord.website ?? '';
                                 state.whatsApp = selectedRecord.whatsApp ?? '';
                                 state.linkedIn = selectedRecord.linkedIn ?? '';
                                 state.facebook = selectedRecord.facebook ?? '';
@@ -1038,9 +963,6 @@
                 zipCodeText.create();
                 countryText.create();
                 phoneNumberText.create();
-                faxNumberText.create();
-                emailAddressText.create();
-                websiteText.create();
                 whatsAppText.create();
                 linkedInText.create();
                 facebookText.create();
@@ -1070,9 +992,6 @@
             zipCodeRef,
             countryRef,
             phoneNumberRef,
-            faxNumberRef,
-            emailAddressRef,
-            websiteRef,
             whatsAppRef,
             linkedInRef,
             facebookRef,

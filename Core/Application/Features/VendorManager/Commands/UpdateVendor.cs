@@ -21,9 +21,6 @@ public class UpdateVendorRequest : IRequest<UpdateVendorResult>
     public string? ZipCode { get; set; }
     public string? Country { get; set; }
     public string? PhoneNumber { get; set; }
-    public string? FaxNumber { get; set; }
-    public string? EmailAddress { get; set; }
-    public string? Website { get; set; }
     public string? WhatsApp { get; set; }
     public string? LinkedIn { get; set; }
     public string? Facebook { get; set; }
@@ -47,7 +44,6 @@ public class UpdateVendorValidator : AbstractValidator<UpdateVendorRequest>
         RuleFor(x => x.State).NotEmpty();
         RuleFor(x => x.ZipCode).NotEmpty();
         RuleFor(x => x.PhoneNumber).NotEmpty();
-        RuleFor(x => x.EmailAddress).NotEmpty();
         RuleFor(x => x.VendorGroupId).NotEmpty();
         RuleFor(x => x.VendorCategoryId).NotEmpty();
     }
@@ -87,9 +83,6 @@ public class UpdateVendorHandler : IRequestHandler<UpdateVendorRequest, UpdateVe
         entity.ZipCode = request.ZipCode;
         entity.Country = request.Country;
         entity.PhoneNumber = request.PhoneNumber;
-        entity.FaxNumber = request.FaxNumber;
-        entity.EmailAddress = request.EmailAddress;
-        entity.Website = request.Website;
         entity.WhatsApp = request.WhatsApp;
         entity.LinkedIn = request.LinkedIn;
         entity.Facebook = request.Facebook;

@@ -9,11 +9,9 @@ public class Customer : BaseEntity
     public string? Name { get; set; }
     public string? Number { get; set; }
     public string? Description { get; set; }
-    public string? FaxNumber { get; set; }
 
     public string? EmailAddress { get; set; }
 
-    public string? Website { get; set; }
     public string? WhatsApp { get; set; }
     public string? LinkedIn { get; set; }
     public string? Facebook { get; set; }

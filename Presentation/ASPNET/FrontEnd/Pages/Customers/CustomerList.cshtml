@@ -36,16 +36,10 @@
                                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-adozas" type="button">Adózás</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-email" type="button">E-mail</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
                                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-cim" type="button">Cím</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-penzugy" type="button">Pénzügy</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-egyeb" type="button">Egyéb</button>
                             </li>
                         </ul>
 
@@ -140,17 +134,6 @@
                                 </div>
                             </div>
 
-                            <!-- EMAIL -->
-                            <div class="tab-pane fade" id="tab-email">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-mail (általános) <span class="text-danger">*</span></label>
-                                        <input v-model="state.emailAddress" class="form-control" type="email" />
-                                        <div class="form-text text-danger" v-text="state.errors.emailAddress"></div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- CÍM -->
                             <div class="tab-pane fade" id="tab-cim">
                                 <div class="table-responsive mb-2">
@@ -237,20 +220,6 @@
                                             <option :value="2">EUR</option>
                                             <option :value="3">USD</option>
                                         </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- EGYÉB -->
-                            <div class="tab-pane fade" id="tab-egyeb">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Weboldal</label>
-                                        <input v-model="state.website" class="form-control" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Faxszám</label>
-                                        <input v-model="state.faxNumber" class="form-control" />
                                     </div>
                                 </div>
                             </div>

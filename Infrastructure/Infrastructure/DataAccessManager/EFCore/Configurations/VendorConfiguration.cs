@@ -20,9 +20,6 @@ public class VendorConfiguration : BaseEntityConfiguration<Vendor>
         builder.Property(x => x.ZipCode).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.Country).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.PhoneNumber).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
-        builder.Property(x => x.FaxNumber).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
-        builder.Property(x => x.EmailAddress).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
-        builder.Property(x => x.Website).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.WhatsApp).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.LinkedIn).HasMaxLength(NameConsts.MaxLength).IsRequired(false);
         builder.Property(x => x.Facebook).HasMaxLength(NameConsts.MaxLength).IsRequired(false);

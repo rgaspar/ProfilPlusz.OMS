@@ -37,8 +37,6 @@ public class VendorSeeder
         var states = new string[] { "NY", "CA", "IL", "TX" };
         var zipCodes = new string[] { "10001", "90001", "60601", "73301" };
         var phoneNumbers = new string[] { "123-456-7890", "987-654-3210", "555-123-4567", "111-222-3333" };
-        var emails = new string[] { "vendor1@example.com", "vendor2@example.com", "vendor3@example.com", "vendor4@example.com" };
-
         var random = new Random();
 
         var vendors = new List<Vendor>
@@ -75,7 +73,6 @@ public class VendorSeeder
             vendor.State = GetRandomString(states, random);
             vendor.ZipCode = GetRandomString(zipCodes, random);
             vendor.PhoneNumber = GetRandomString(phoneNumbers, random);
-            vendor.EmailAddress = GetRandomString(emails, random);
 
             await _vendorRepository.CreateAsync(vendor);
         }
