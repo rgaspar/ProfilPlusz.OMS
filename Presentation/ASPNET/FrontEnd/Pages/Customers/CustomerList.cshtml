@@ -91,6 +91,7 @@
                                                 <th>Név <span class="text-danger">*</span></th>
                                                 <th style="width:140px">Beosztás</th>
                                                 <th style="width:130px">Telefon</th>
+                                                <th style="width:170px">E-mail</th>
                                                 <th style="width:170px">E-mail visszaigazolás</th>
                                                 <th style="width:170px">E-mail számlázás</th>
                                                 <th style="width:170px">E-mail beszerzés</th>
@@ -103,6 +104,7 @@
                                                 <td><input v-model="contact.name" class="form-control form-control-sm" placeholder="Kötelező" /></td>
                                                 <td><input v-model="contact.jobTitle" class="form-control form-control-sm" /></td>
                                                 <td><input v-model="contact.phoneNumber" class="form-control form-control-sm" /></td>
+                                                <td><input v-model="contact.emailAddress" class="form-control form-control-sm" type="email" /></td>
                                                 <td><input v-model="contact.emailAddressOrderConfirmation" class="form-control form-control-sm" type="email" /></td>
                                                 <td><input v-model="contact.emailAddressInvoice" class="form-control form-control-sm" type="email" /></td>
                                                 <td><input v-model="contact.emailAddressPurchaseOrder" class="form-control form-control-sm" type="email" /></td>
@@ -114,7 +116,7 @@
                                                 </td>
                                             </tr>
                                             <tr v-if="state.contacts.length === 0">
-                                                <td colspan="8" class="text-center text-muted py-2" style="font-size:0.85rem">Nincs rögzített kapcsolattartó</td>
+                                                <td colspan="9" class="text-center text-muted py-2" style="font-size:0.85rem">Nincs rögzített kapcsolattartó</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -332,37 +334,6 @@
         </div>
     </div>
 
-    <div class="modal fade" ref="manageContactModalRef" id="ManageContactModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" v-text="state.manageContactTitle"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header"><h5>Ügyfél kapcsolattartó</h5></div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="grid-container">
-                                                <div ref="secondaryGridRef"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bezárás</button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 @section scripts {

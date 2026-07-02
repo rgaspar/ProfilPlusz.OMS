@@ -55,7 +55,7 @@ public class ProductExcelRowMapperTests
         Assert.Equal("Teszt termék", result.Name);
         Assert.Equal("Gyár neve", result.FactoryName);
         Assert.Equal("Leírás szöveg", result.Description);
-        Assert.Equal(1500d, result.UnitPrice);
+        Assert.Equal(1500m, result.UnitPrice);
         Assert.Equal("Gyártó Kft", result.Manufacturer);
         Assert.Equal("GM-001", result.ManufacturerNumber);
         Assert.Equal("1234567890123", result.Ean);

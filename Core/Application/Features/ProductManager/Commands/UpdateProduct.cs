@@ -20,7 +20,7 @@ public class UpdateProductRequest : IRequest<UpdateProductResult>
     public string? FactoryName { get; init; }
     public string? Description { get; init; }
 
-    public double? UnitPrice { get; init; }
+    public decimal? UnitPrice { get; init; }
     public bool? Physical { get; init; }
 
     public string? UnitMeasureId { get; init; }
@@ -90,6 +90,10 @@ public class UpdateProductValidator : AbstractValidator<UpdateProductRequest>
 
         RuleFor(x => x.Status)
             .IsInEnum();
+
+        RuleFor(x => x.UnitPrice)
+            .GreaterThan(0)
+            .WithMessage("Az egységárnak nullánál nagyobbnak kell lennie.");
 
         RuleFor(x => x.Weight)
             .GreaterThanOrEqualTo(0);

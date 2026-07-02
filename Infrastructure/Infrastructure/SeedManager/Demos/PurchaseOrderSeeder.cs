@@ -75,9 +75,9 @@ public class PurchaseOrderSeeder
                         PurchaseOrderId = purchaseOrder.Id,
                         ProductId = product.Id,
                         Summary = product.Number,
-                        UnitPrice = product.UnitPrice,
+                        UnitPrice = (double?)product.UnitPrice,
                         Quantity = quantity,
-                        Total = product.UnitPrice * quantity
+                        Total = (double?)product.UnitPrice * quantity
                     };
                     await _purchaseOrderItemRepository.CreateAsync(purchaseOrderItem);
                 }

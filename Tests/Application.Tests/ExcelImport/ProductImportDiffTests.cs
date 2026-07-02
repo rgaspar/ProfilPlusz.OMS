@@ -40,8 +40,8 @@ public class ProductImportDiffTests
     [Fact]
     public void BuildDiff_UnitPriceChanged_IncludesPriceChange()
     {
-        var existing = new Product { UnitPrice = 100.0 };
-        var req = new CreateProductRequest { UnitPrice = 200.0 };
+        var existing = new Product { UnitPrice = 100.0m };
+        var req = new CreateProductRequest { UnitPrice = 200.0m };
         var row = Row(("Mértékegység", ""), ("Termékcsoport", ""));
 
         var diff = ImportProductsFromExcelHandler.BuildDiff(existing, req, row, EmptyNames(), EmptyNames());
@@ -54,8 +54,8 @@ public class ProductImportDiffTests
     [Fact]
     public void BuildDiff_SamePriceFloatingPoint_NotIncluded()
     {
-        var existing = new Product { UnitPrice = 100.0 };
-        var req = new CreateProductRequest { UnitPrice = 100.0 };
+        var existing = new Product { UnitPrice = 100.0m };
+        var req = new CreateProductRequest { UnitPrice = 100.0m };
         var row = Row(("Mértékegység", ""), ("Termékcsoport", ""));
 
         var diff = ImportProductsFromExcelHandler.BuildDiff(existing, req, row, EmptyNames(), EmptyNames());

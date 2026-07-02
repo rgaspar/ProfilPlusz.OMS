@@ -67,18 +67,18 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Név <span class="text-danger">*</span></label>
-                                        <input ref="nameRef" v-model="state.name" class="form-control" />
+                                        <input v-model="state.name" class="form-control" />
                                         <div class="form-text text-danger" v-text="state.errors.name"></div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Kód</label>
-                                        <input ref="numberRef" v-model="state.number" class="form-control" />
+                                        <input v-model="state.number" class="form-control" />
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Egységár <span class="text-danger">*</span></label>
-                                        <input ref="unitPriceRef" v-model="state.unitPrice" class="form-control" />
+                                        <input v-model="state.unitPrice" class="form-control" />
                                         <div class="form-text text-danger" v-text="state.errors.unitPrice"></div>
                                     </div>
                                     <div class="col-md-6">

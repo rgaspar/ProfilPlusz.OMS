@@ -1233,8 +1233,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UnitMeasureId")
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<double?>("UnitPrice")
-                        .HasColumnType("float");
+                    b.Property<decimal?>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedAtUtc")
                         .HasColumnType("datetime2");
