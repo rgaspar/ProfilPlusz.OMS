@@ -2,10 +2,8 @@ const App = {
     setup() {
         const state = Vue.reactive({
             mainData: [],
-            secondaryData: [],
             deleteMode: false,
             mainTitle: null,
-            manageContactTitle: 'Kapcsolattartó kezelése',
             isSubmitting: false,
 
             id: '',
@@ -45,9 +43,7 @@ const App = {
 
         const mainGridRef = Vue.ref(null);
         const mainModalRef = Vue.ref(null);
-        const manageContactModalRef = Vue.ref(null);
         const importResultModalRef = Vue.ref(null);
-        const secondaryGridRef = Vue.ref(null);
         const customerGroupIdRef = Vue.ref(null);
         const customerCategoryIdRef = Vue.ref(null);
 
@@ -58,8 +54,6 @@ const App = {
             deleteMainData: (id, deletedById) => AxiosManager.post('/Customer/DeleteCustomer', { id, deletedById }),
             getCustomerGroupListLookupData: () => AxiosManager.get('/CustomerGroup/GetCustomerGroupList', {}),
             getCustomerCategoryListLookupData: () => AxiosManager.get('/CustomerCategory/GetCustomerCategoryList', {}),
-            getSecondaryData: customerId =>
-                AxiosManager.get(`/CustomerContact/GetCustomerContactByCustomerIdList?customerId=${customerId}`, {}),
         };
 
         const methods = {
@@ -77,13 +71,6 @@ const App = {
             populateCustomerCategoryListLookupData: async () => {
                 const response = await services.getCustomerCategoryListLookupData();
                 state.customerCategoryListLookupData = response?.data?.content?.data ?? [];
-            },
-            populateSecondaryData: async (customerId) => {
-                const response = await services.getSecondaryData(customerId);
-                state.secondaryData = (response?.data?.content?.data ?? []).map(item => ({
-                    ...item,
-                    createdAtUtc: new Date(item.createdAtUtc)
-                }));
             },
         };
 
@@ -120,7 +107,7 @@ const App = {
                 paymentDeadlineDays: r.paymentDeadlineDays ?? null,
                 currency: r.currency ?? null,
                 addresses: (r.addresses ?? []).map(a => ({ type: a.type ?? 1, street: a.street ?? '', city: a.city ?? '', zipCode: a.zipCode ?? '', country: a.country ?? '' })),
-                contacts: (r.contacts ?? []).map(c => ({ name: c.name ?? '', jobTitle: c.jobTitle ?? '', phoneNumber: c.phoneNumber ?? '', emailAddressOrderConfirmation: c.emailAddressOrderConfirmation ?? '', emailAddressInvoice: c.emailAddressInvoice ?? '', emailAddressPurchaseOrder: c.emailAddressPurchaseOrder ?? '', description: c.description ?? '' })),
+                contacts: (r.contacts ?? []).map(c => ({ name: c.name ?? '', jobTitle: c.jobTitle ?? '', phoneNumber: c.phoneNumber ?? '', emailAddress: c.emailAddress ?? '', emailAddressOrderConfirmation: c.emailAddressOrderConfirmation ?? '', emailAddressInvoice: c.emailAddressInvoice ?? '', emailAddressPurchaseOrder: c.emailAddressPurchaseOrder ?? '', description: c.description ?? '' })),
                 customerGroupId: r.customerGroupId ?? null,
                 customerCategoryId: r.customerCategoryId ?? null,
             });
@@ -139,7 +126,7 @@ const App = {
                 state.addresses.splice(index, 1);
             },
             addContact: () => {
-                state.contacts.push({ name: '', jobTitle: '', phoneNumber: '', emailAddressOrderConfirmation: '', emailAddressInvoice: '', emailAddressPurchaseOrder: '', description: '' });
+                state.contacts.push({ name: '', jobTitle: '', phoneNumber: '', emailAddress: '', emailAddressOrderConfirmation: '', emailAddressInvoice: '', emailAddressPurchaseOrder: '', description: '' });
             },
             removeContact: (index) => {
                 state.contacts.splice(index, 1);
@@ -171,7 +158,6 @@ const App = {
                         bankAccountNumber: state.bankAccountNumber,
                         invoiceType: state.invoiceType,
                         paymentMethod: state.paymentMethod,
-                        paymentDeadline: state.paymentDeadlineDays,
                         paymentDeadlineDays: state.paymentDeadlineDays,
                         currency: state.currency,
                         customerGroupId: state.customerGroupId,
@@ -187,6 +173,7 @@ const App = {
                             name: c.name,
                             jobTitle: c.jobTitle,
                             phoneNumber: c.phoneNumber,
+                            emailAddress: c.emailAddress,
                             emailAddressOrderConfirmation: c.emailAddressOrderConfirmation,
                             emailAddressInvoice: c.emailAddressInvoice,
                             emailAddressPurchaseOrder: c.emailAddressPurchaseOrder,
@@ -338,47 +325,12 @@ const App = {
             }
         };
 
-        const manageContactModal = {
-            obj: null,
-            create: () => {
-                manageContactModal.obj = new bootstrap.Modal(manageContactModalRef.value, { backdrop: 'static', keyboard: false });
-            }
-        };
-
         const importResultModal = {
             obj: null,
             create: () => {
                 importResultModal.obj = new bootstrap.Modal(importResultModalRef.value, { backdrop: 'static', keyboard: false });
             },
             show: () => importResultModal.obj.show()
-        };
-
-        const secondaryGrid = {
-            obj: null,
-            create: async (dataSource) => {
-                secondaryGrid.obj = new ej.grids.Grid({
-                    height: '240px',
-                    dataSource: dataSource,
-                    allowFiltering: true,
-                    allowSorting: true,
-                    allowPaging: true,
-                    allowResizing: true,
-                    filterSettings: { type: 'CheckBox' },
-                    pageSettings: { currentPage: 1, pageSize: 20 },
-                    gridLines: 'Horizontal',
-                    columns: [
-                        { field: 'id', isPrimaryKey: true, headerText: 'Id', visible: false },
-                        { field: 'name', headerText: 'Név', width: 180 },
-                        { field: 'jobTitle', headerText: 'Beosztás', width: 150 },
-                        { field: 'phoneNumber', headerText: 'Telefon', width: 130 },
-                        { field: 'emailAddress', headerText: 'E-mail', width: 200 },
-                        { field: 'emailAddressOrderConfirmation', headerText: 'E-mail visszaigazolás', width: 200 },
-                        { field: 'emailAddressInvoice', headerText: 'E-mail számlázás', width: 200 },
-                        { field: 'emailAddressPurchaseOrder', headerText: 'E-mail beszerzés', width: 200 },
-                    ],
-                });
-                secondaryGrid.obj.appendTo(secondaryGridRef.value);
-            }
         };
 
         Vue.onMounted(async () => {
@@ -394,9 +346,7 @@ const App = {
 
                 await mainGrid.create(state.mainData);
                 mainModal.create();
-                manageContactModal.create();
                 importResultModal.create();
-                await secondaryGrid.create([]);
 
                 customerGroupDropdown = new ej.dropdowns.DropDownList({
                     dataSource: state.customerGroupListLookupData,
@@ -441,7 +391,12 @@ const App = {
                             mainGrid.refresh();
                         }
                     } catch (err) {
-                        alert('Import hiba: ' + (err?.response?.data?.message ?? err.message));
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Import hiba',
+                            text: err?.response?.data?.message ?? err.message,
+                            confirmButtonText: 'OK'
+                        });
                     }
                 });
 
@@ -451,8 +406,8 @@ const App = {
         });
 
         return {
-            mainGridRef, mainModalRef, manageContactModalRef,
-            importResultModalRef, secondaryGridRef,
+            mainGridRef, mainModalRef,
+            importResultModalRef,
             customerGroupIdRef, customerCategoryIdRef,
             state, handler,
         };

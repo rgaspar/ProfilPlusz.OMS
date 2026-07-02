@@ -75,9 +75,9 @@ public class SalesOrderSeeder
                         SalesOrderId = salesOrder.Id,
                         ProductId = product.Id,
                         Summary = product.Number,
-                        UnitPrice = product.UnitPrice,
+                        UnitPrice = (double?)product.UnitPrice,
                         Quantity = qty,
-                        Total = product.UnitPrice * qty
+                        Total = (double?)product.UnitPrice * qty
                     };
                     await _salesOrderItemRepository.CreateAsync(salesOrderItem);
                 }

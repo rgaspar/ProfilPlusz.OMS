@@ -59,18 +59,6 @@
             brandListLookupData: [],
             colorListLookupData: [],
 
-            currencyListLookupData: [
-                { value: 'HUF', text: 'HUF' },
-                { value: 'EUR', text: 'EUR' },
-                { value: 'USD', text: 'USD' }
-            ],
-
-            statusListLookupData: [
-                { value: 'Active', text: 'Active' },
-                { value: 'Inactive', text: 'Inactive' },
-                { value: 'Blocked', text: 'Blocked' }
-            ],
-
             errors: {
 
                 name: '',
@@ -124,12 +112,6 @@
 
         const productGroupIdRef = Vue.ref(null);
         const unitMeasureIdRef = Vue.ref(null);
-
-        const nameRef = Vue.ref(null);
-        const numberRef = Vue.ref(null);
-        const unitPriceRef = Vue.ref(null);
-
-
 
         const validateForm = () => {
 
@@ -259,6 +241,9 @@
             getPriceListByProduct: productId =>
                 AxiosManager.get(`/PriceList/GetPriceList?productId=${encodeURIComponent(productId)}`),
 
+            createPriceList: data =>
+                AxiosManager.post('/PriceList/CreatePriceList', data),
+
             updatePriceList: data =>
                 AxiosManager.post('/PriceList/UpdatePriceList', data),
 
@@ -366,15 +351,40 @@
 
 
                     const payload = {
-
-                        ...state,
-
-                        createdById:
-                            StorageManager.getUserId(),
-
-                        updatedById:
-                            StorageManager.getUserId()
-
+                        id: state.id || undefined,
+                        number: state.number,
+                        name: state.name,
+                        factoryName: state.factoryName,
+                        description: state.description,
+                        unitPrice: state.unitPrice,
+                        physical: state.physical,
+                        productGroupId: state.productGroupId,
+                        unitMeasureId: state.unitMeasureId,
+                        manufacturer: state.manufacturer,
+                        manufacturerNumber: state.manufacturerNumber,
+                        ean: state.ean,
+                        brandId: state.brandId,
+                        colorId: state.colorId,
+                        salesUnitQuantity: state.salesUnitQuantity,
+                        minimumSalesQuantity: state.minimumSalesQuantity,
+                        orderQuantityStep: state.orderQuantityStep,
+                        packageQuantity: state.packageQuantity,
+                        weight: state.weight,
+                        length: state.length,
+                        isStockProduct: state.isStockProduct,
+                        warningStock: state.warningStock,
+                        minimumStock: state.minimumStock,
+                        hasSerialNumber: state.hasSerialNumber,
+                        image1Url: state.image1Url,
+                        image2Url: state.image2Url,
+                        image3Url: state.image3Url,
+                        videoUrl: state.videoUrl,
+                        pdfUrl: state.pdfUrl,
+                        purchaseCurrency: state.purchaseCurrency,
+                        salesCurrency: state.salesCurrency,
+                        status: state.status,
+                        createdById: StorageManager.getUserId(),
+                        updatedById: StorageManager.getUserId(),
                     };
 
 
@@ -451,6 +461,18 @@
 
                     if (state.plDeleteMode) {
                         await services.deletePriceList(state.plId, userId);
+                    } else if (state.plId === '') {
+                        await services.createPriceList({
+                            productId: state.plProductId,
+                            customerId: state.plCustomerId,
+                            taxId: state.plTaxId,
+                            netPrice: parseFloat(state.plNetPrice) || 0,
+                            grossPrice: state.plGrossPrice ? parseFloat(state.plGrossPrice) : null,
+                            quantityDiscount: state.plQuantityDiscount ? parseFloat(state.plQuantityDiscount) : null,
+                            discountFrom: state.plDiscountFrom || null,
+                            discountTo: state.plDiscountTo || null,
+                            createdById: userId
+                        });
                     } else {
                         await services.updatePriceList({
                             id: state.plId,
@@ -716,6 +738,9 @@
 
                                 Object.assign(state, r);
 
+                                if (productGroupDropdown) productGroupDropdown.value = r.productGroupId ?? null;
+                                if (unitMeasureDropdown) unitMeasureDropdown.value = r.unitMeasureId ?? null;
+
                                 mainModal.obj.show();
 
                             }
@@ -825,6 +850,8 @@
             }
         };
 
+        let productGroupDropdown = null;
+        let unitMeasureDropdown = null;
         let plCustomerDropdown = null;
         let plTaxDropdown = null;
 
@@ -917,7 +944,7 @@
 
 
 
-            createDropdown(
+            productGroupDropdown = createDropdown(
                 productGroupIdRef,
                 state.productGroupListLookupData,
                 'id',
@@ -925,8 +952,7 @@
                 v => state.productGroupId = v
             );
 
-
-            createDropdown(
+            unitMeasureDropdown = createDropdown(
                 unitMeasureIdRef,
                 state.unitMeasureListLookupData,
                 'id',
@@ -992,7 +1018,12 @@
                     await methods.populateMainData();
                     mainGrid.refresh();
                 } catch (err) {
-                    alert('Import hiba: ' + (err?.response?.data?.message ?? err.message));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Import hiba',
+                        text: err?.response?.data?.message ?? err.message,
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
 
@@ -1013,10 +1044,6 @@
 
             productGroupIdRef,
             unitMeasureIdRef,
-
-            nameRef,
-            numberRef,
-            unitPriceRef,
 
             state,
             handler

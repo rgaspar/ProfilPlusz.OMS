@@ -137,10 +137,10 @@ public class ImportProductsFromExcelHandler : IRequestHandler<ImportProductsFrom
 
         void Compare(string label, object? oldVal, object? newVal)
         {
-            if (oldVal is double oldD && newVal is double newD)
+            if (oldVal is decimal oldM && newVal is decimal newM)
             {
-                if (Math.Abs(oldD - newD) > 1e-10)
-                    changes.Add($"{label}: '{oldD}' → '{newD}'");
+                if (Math.Abs(oldM - newM) > 0.0000001m)
+                    changes.Add($"{label}: '{oldM}' → '{newM}'");
                 return;
             }
             var oldStr = oldVal?.ToString() ?? "";
@@ -264,7 +264,7 @@ internal sealed class ProductExcelRowMapper : IExcelRowMapper<CreateProductReque
             Name = Get(row, "Név"),
             FactoryName = GetOrNull(row, "GyárNeve"),
             Description = GetOrNull(row, "Leírás"),
-            UnitPrice = GetDouble(row, "Egységár"),
+            UnitPrice = GetDecimal(row, "Egységár"),
             UnitMeasureId = unitMeasureId,
             ProductGroupId = productGroupId,
             Physical = GetBool(row, "Fizikai") ?? true,
@@ -285,8 +285,8 @@ internal sealed class ProductExcelRowMapper : IExcelRowMapper<CreateProductReque
     private static string? GetOrNull(IDictionary<string, object> row, string key) =>
         row.TryGetValue(key, out var val) ? val?.ToString() : null;
 
-    private static double? GetDouble(IDictionary<string, object> row, string key) =>
-        row.TryGetValue(key, out var val) && double.TryParse(val?.ToString(), out var d) ? d : null;
+    private static decimal? GetDecimal(IDictionary<string, object> row, string key) =>
+        row.TryGetValue(key, out var val) && decimal.TryParse(val?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var d) ? d : null;
 
     private static bool? GetBool(IDictionary<string, object> row, string key)
     {

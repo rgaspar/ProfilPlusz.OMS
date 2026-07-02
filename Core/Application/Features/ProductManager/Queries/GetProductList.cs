@@ -18,7 +18,7 @@ public record GetProductListDto
 
     public string? Description { get; init; }
 
-    public double? UnitPrice { get; init; }
+    public decimal? UnitPrice { get; init; }
     public bool? Physical { get; init; }
 
     // kategorizálás
@@ -50,6 +50,7 @@ public record GetProductListDto
 
     // fizikai adatok
     public decimal? Weight { get; init; }
+    public decimal? Length { get; init; }
 
     // média
     public string? Image1Url { get; init; }

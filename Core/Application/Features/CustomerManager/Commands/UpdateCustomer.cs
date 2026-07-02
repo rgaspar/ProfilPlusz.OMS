@@ -60,7 +60,7 @@ public class UpdateCustomerRequest : IRequest<UpdateCustomerResult>
 
     public InvoiceType? InvoiceType { get; set; }
     public PaymentMethod? PaymentMethod { get; set; }
-    public int? PaymentDeadline { get; set; }
+    public int? PaymentDeadlineDays { get; set; }
     public Currency? Currency { get; set; }
 
     public string? CustomerGroupId { get; set; }
@@ -160,7 +160,7 @@ public class UpdateCustomerHandler : IRequestHandler<UpdateCustomerRequest, Upda
 
         entity.InvoiceType = request.InvoiceType;
         entity.PaymentMethod = request.PaymentMethod;
-        entity.PaymentDeadlineDays = request.PaymentDeadline;
+        entity.PaymentDeadlineDays = request.PaymentDeadlineDays;
         entity.Currency = request.Currency;
 
         entity.CustomerGroupId = request.CustomerGroupId;

@@ -19,7 +19,7 @@ public class CreateProductRequest : IRequest<CreateProductResult>
     public string? FactoryName { get; init; }
     public string? Description { get; init; }
 
-    public double? UnitPrice { get; init; }
+    public decimal? UnitPrice { get; init; }
     public bool? Physical { get; init; } = true;
 
     public string? UnitMeasureId { get; init; }
@@ -93,6 +93,10 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
 
         RuleFor(x => x.Manufacturer)
             .MaximumLength(200);
+
+        RuleFor(x => x.UnitPrice)
+            .GreaterThan(0)
+            .WithMessage("Az egységárnak nullánál nagyobbnak kell lennie.");
 
         RuleFor(x => x.Weight)
             .GreaterThanOrEqualTo(0);

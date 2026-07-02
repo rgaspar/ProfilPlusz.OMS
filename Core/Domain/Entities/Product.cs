@@ -56,7 +56,7 @@ public class Product : BaseEntity
     public ProductStatus Status { get; set; } = ProductStatus.Active;           // Termékstátusz
 
     // meglévő mezők
-    public double? UnitPrice { get; set; }
+    public decimal? UnitPrice { get; set; }
     public bool Physical { get; set; } = true;
     public string? UnitMeasureId { get; set; }                                  // Eladási mennyiségi egység (ha külön törzs)
     public UnitMeasure? UnitMeasure { get; set; }
