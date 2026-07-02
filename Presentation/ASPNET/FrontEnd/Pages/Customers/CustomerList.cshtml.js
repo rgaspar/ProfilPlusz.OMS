@@ -372,6 +372,9 @@ const App = {
                         { field: 'jobTitle', headerText: 'Beosztás', width: 150 },
                         { field: 'phoneNumber', headerText: 'Telefon', width: 130 },
                         { field: 'emailAddress', headerText: 'E-mail', width: 200 },
+                        { field: 'emailAddressOrderConfirmation', headerText: 'E-mail visszaigazolás', width: 200 },
+                        { field: 'emailAddressInvoice', headerText: 'E-mail számlázás', width: 200 },
+                        { field: 'emailAddressPurchaseOrder', headerText: 'E-mail beszerzés', width: 200 },
                     ],
                 });
                 secondaryGrid.obj.appendTo(secondaryGridRef.value);
